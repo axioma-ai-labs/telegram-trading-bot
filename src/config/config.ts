@@ -5,12 +5,9 @@ import { AppConfig, Environment, GasPriority } from './types';
 // Load environment variables from .env file
 dotenv.config();
 
-/**
- * Zod schema for environment variables validation
- */
 const envSchema = z.object({
   // Project settings
-  PROJECT_NAME: z.string().default('Neurotrading Bot'),
+  PROJECT_NAME: z.string().default('Neurodex Bot'),
   ENVIRONMENT: z.enum(['development', 'production'] as const).default('production'),
 
   // Telegram
@@ -19,7 +16,7 @@ const envSchema = z.object({
   // Node RPCs
   ETHEREUM_MAINNET_RPC: z.string().url('ETHEREUM_MAINNET_RPC must be a valid URL'),
   BASE_MAINNET_RPC: z.string().url('BASE_MAINNET_RPC must be a valid URL'),
-  BASE_SEPOLIA_RPC: z.string().url('BASE_SEPOLIA_RPC must be a valid URL'), 
+  BASE_SEPOLIA_RPC: z.string().url('BASE_SEPOLIA_RPC must be a valid URL'),
   BNC_RPC: z.string().url('BNC_RPC must be a valid URL'),
   OPEN_OCEAN_ADDON_ID: z.string().min(1, 'OPEN_OCEAN_ADDON_ID is required'),
 

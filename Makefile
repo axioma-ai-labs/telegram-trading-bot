@@ -1,4 +1,5 @@
-# Neurotrading Bot Makefile
+# Neurodex Bot
+
 # Variables
 NODE_BIN = ./node_modules/.bin
 NPM = npm

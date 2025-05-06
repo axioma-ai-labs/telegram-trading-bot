@@ -1,4 +1,4 @@
-# Neurotrading Bot
+# Neurodex Bot
 
 A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integration for cryptocurrency trading, functional programming approach, and robust error handling.
 
@@ -25,8 +25,8 @@ A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integ
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/neurotrading-bot.git
-cd neurotrading-bot
+git clone https://github.com/axioma-ai-labs/neurodex-bot
+cd neurodex-bot
 ```
 
 2. Install dependencies:

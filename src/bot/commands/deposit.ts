@@ -1,51 +1,48 @@
 import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
+import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
+import { createWalletKeyboard } from './wallet';
 
-const depositHandler: CommandHandler = {
+// Generate random balance between $0 and $10000, formatted to 2 decimal places
+const randomBalance = (Math.random() * 10000).toFixed(2);
+
+export const depositMessage = `📥 *Deposit ETH or Tokens*
+
+Your balance: $${randomBalance}
+
+Send ETH or any ERC-20 token to your wallet: \`0x343E3c9be02e5ceCa6CA4461F94D242967870949\`
+
+*Important*:
+- Only send assets on the Base Network
+- ETH deposits usually confirm within minutes
+- Never share your private key with anyone`;
+
+export const depositKeyboard = new InlineKeyboard()
+  .text('Refresh', 'refresh')
+  .row()
+  .text('← Back', 'back_start');
+
+export const depositCommandHandler: CommandHandler = {
   command: 'deposit',
   description: 'Display your wallet address for deposits',
-  handler: async (ctx: BotContext) => {
-    try {
-      const userId = ctx.session.userId;
-
-      if (!userId) {
-        await ctx.reply('❌ Please start the bot first with /start command.');
-        return;
-      }
-
-      // TODO: Implement wallet checking mechanism
-      const wallet = 'false';
-
-      if (!wallet) {
-        const keyboard = new InlineKeyboard().text('Create Wallet', 'create_wallet');
-
-        await ctx.reply(
-          "⚠️ You don't have a wallet yet.\n\n" + 'You need to create a new wallet first:',
-          { reply_markup: keyboard }
-        );
-        return;
-      }
-
-      // Send deposit information
-      await ctx.reply(
-        `📥 *Deposit ETH or Tokens*\n\n` +
-          `Send ETH or any ERC-20 token to your wallet address on Base Network:\n\n` +
-          `\`0x343E3c9be02e5ceCa6CA4461F94D242967870949\`\n\n` +
-          `*Important*:\n` +
-          `- Only send assets on the Base Network\n` +
-          `- ETH deposits usually confirm within minutes\n` +
-          `- Use /balance to check when funds arrive\n` +
-          `- Never share your private key with anyone`,
-        {
-          parse_mode: 'Markdown',
-        }
-      );
-    } catch (error) {
-      console.error('Error in deposit command:', error);
-      await ctx.reply('❌ An error occurred. Please try again later.');
+  handler: async (ctx: BotContext): Promise<void> => {
+    if (IS_NEW_USER || !USER_HAS_WALLET) {
+      await ctx.reply("⚠️ You don't have a wallet yet.\n\nYou need to create a new wallet first:", {
+        parse_mode: 'Markdown',
+        reply_markup: createWalletKeyboard,
+      });
+      return;
     }
+
+    await ctx.reply(depositMessage, {
+      parse_mode: 'Markdown',
+      reply_markup: depositKeyboard,
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   },
 };
 
-export default depositHandler;
+export default depositCommandHandler;

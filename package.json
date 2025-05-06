@@ -1,12 +1,12 @@
 {
-  "name": "neurotrading-bot",
+  "name": "neurodex-bot",
   "version": "1.0.0",
   "description": "A scalable Telegram trading bot built with TypeScript",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/bot.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest",

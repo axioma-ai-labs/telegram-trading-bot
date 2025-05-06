@@ -1,11 +1,15 @@
 import { Core } from '@quicknode/sdk';
 import config from '@/config/config';
 import axios from 'axios';
-import { QuoteResponse, GasResponse, GasData } from '@/config/types';
+import { GasResponse, GasData } from '@/config/types';
 import { parseUnits } from 'ethers';
 
 // STEP 1: Test connection to QuickNode RPC endpoint | ✅ WORKS!
-export async function testQuickNodeConnection(): Promise<{success: boolean; result?: string; error?: string;}> {
+export async function testQuickNodeConnection(): Promise<{
+  success: boolean;
+  result?: string;
+  error?: string;
+}> {
   try {
     const core = new Core({
       endpointUrl: config.node.baseSepoliaRpc,
@@ -31,9 +35,9 @@ export async function testQuickNodeConnection(): Promise<{success: boolean; resu
 export async function getGasEstimates(): Promise<GasResponse> {
   try {
     const gasUrl = `${config.node.baseMainnetRpc}/addon/${config.node.openOceanAddonId}/v4/eth/gasPrice`;
-    
+
     const response = await axios.get(gasUrl, {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
     const data = response.data;
@@ -52,26 +56,26 @@ export async function getGasEstimates(): Promise<GasResponse> {
         legacyGasPrice: parseInt(data.data?.gasPrice || '0'),
         maxFeePerGas: parseInt(data.data?.gasPrice || '0'),
         maxPriorityFeePerGas: parseInt(data.data?.priorityFee || '0'),
-        waitTimeEstimate: 15 // Default estimate in seconds
+        waitTimeEstimate: 15, // Default estimate in seconds
       },
       fast: {
         legacyGasPrice: parseInt(data.data?.gasPrice || '0') * 1.1,
         maxFeePerGas: parseInt(data.data?.gasPrice || '0') * 1.1,
         maxPriorityFeePerGas: parseInt(data.data?.priorityFee || '0') * 1.1,
-        waitTimeEstimate: 30
+        waitTimeEstimate: 30,
       },
       instant: {
         legacyGasPrice: parseInt(data.data?.gasPrice || '0') * 1.2,
         maxFeePerGas: parseInt(data.data?.gasPrice || '0') * 1.2,
         maxPriorityFeePerGas: parseInt(data.data?.priorityFee || '0') * 1.2,
-        waitTimeEstimate: 60
+        waitTimeEstimate: 60,
       },
       low: {
         legacyGasPrice: parseInt(data.data?.gasPrice || '0') * 0.9,
         maxFeePerGas: parseInt(data.data?.gasPrice || '0') * 0.9,
         maxPriorityFeePerGas: parseInt(data.data?.priorityFee || '0') * 0.9,
-        waitTimeEstimate: 180
-      }
+        waitTimeEstimate: 180,
+      },
     };
 
     return {
@@ -81,41 +85,44 @@ export async function getGasEstimates(): Promise<GasResponse> {
         base: Math.floor(gasData.base),
         standard: {
           ...gasData.standard,
-          legacyGasPrice: Math.floor(gasData.standard.legacyGasPrice)
+          legacyGasPrice: Math.floor(gasData.standard.legacyGasPrice),
         },
         fast: {
           ...gasData.fast,
-          legacyGasPrice: Math.floor(gasData.fast.legacyGasPrice)
+          legacyGasPrice: Math.floor(gasData.fast.legacyGasPrice),
         },
         instant: {
           ...gasData.instant,
-          legacyGasPrice: Math.floor(gasData.instant.legacyGasPrice)
+          legacyGasPrice: Math.floor(gasData.instant.legacyGasPrice),
         },
         low: {
           ...gasData.low,
-          legacyGasPrice: Math.floor(gasData.low.legacyGasPrice)
-        }
-      }
+          legacyGasPrice: Math.floor(gasData.low.legacyGasPrice),
+        },
+      },
     };
-
   } catch (error) {
-    console.error('Error fetching gas price:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'Error fetching gas price:',
+      error instanceof Error ? error.message : String(error)
+    );
     throw error;
   }
 }
 
 // STEP 3: Test MEV protection endpoint | ✅ WORKS!
-export async function testMevProtection(): Promise<{success: boolean; result?: string; error?: string;}> {
+export async function testMevProtection(): Promise<{
+  success: boolean;
+  result?: string;
+  error?: string;
+}> {
   try {
-    const response = await axios.post(
-      config.node.baseMainnetRpc,
-      {
-        jsonrpc: '2.0',
-        method: 'eth_sendRawTransaction',
-        params: ['0x0'], // Example transaction data
-        id: 1,
-      },
-    );
+    const response = await axios.post(config.node.baseMainnetRpc, {
+      jsonrpc: '2.0',
+      method: 'eth_sendRawTransaction',
+      params: ['0x0'], // Example transaction data
+      id: 1,
+    });
 
     // Check if response contains expected fields
     if (response.data && (response.data.result || response.data.error)) {
@@ -152,10 +159,10 @@ export async function testMevProtection(): Promise<{success: boolean; result?: s
 export async function getQuote(
   inTokenAddress: string,
   outTokenAddress: string
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
   try {
-    const amountWei = parseUnits('5', 18).toString();  // 5 tokens
-    const gasWei = parseUnits('1', 9).toString();      // 1 gwei
+    const amountWei = parseUnits('5', 18).toString(); // 5 tokens
+    const gasWei = parseUnits('1', 9).toString(); // 1 gwei
 
     const endpoint = `${config.node.baseMainnetRpc}/addon/${config.node.openOceanAddonId}/v4/bsc/quote`;
 
@@ -164,19 +171,19 @@ export async function getQuote(
         inTokenAddress,
         outTokenAddress,
         amount: amountWei,
-        gasPrice: gasWei
-      }
+        gasPrice: gasWei,
+      },
     });
 
     return {
       success: true,
-      data
+      data,
     };
   } catch (error) {
     console.error('Failed to get quote:', error instanceof Error ? error.message : String(error));
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -187,7 +194,7 @@ export async function getWalletTokenBalance(
   perPage: number = 20,
   page: number = 1,
   contracts?: string[]
-): Promise<{ success: boolean; result?: any; error?: string }> {
+): Promise<{ success: boolean; result?: Record<string, unknown>; error?: string }> {
   try {
     // Initialize the QuickNode SDK Core with Token API v2 add-on enabled
     const core = new Core({
@@ -199,30 +206,33 @@ export async function getWalletTokenBalance(
       },
     });
 
-    // Build the request parameters
-    const params: any = {
+    // Build the request parameters with correct typing
+    const params: {
+      wallet: string;
+      perPage?: number;
+      page?: number;
+      contracts?: string[];
+    } = {
       wallet: walletAddress,
       perPage: Math.min(perPage, 10), // API limits to 100 per page
-      page: page
+      page: page,
     };
 
-    // Add contracts parameter if specified
     if (contracts && contracts.length > 0) {
       params.contracts = contracts;
     }
 
-    // Call the QuickNode SDK's token balance API
     const data = await core.client.qn_getWalletTokenBalance(params);
 
     return {
       success: true,
-      result: data
+      result: data,
     };
   } catch (error) {
-    console.error("Error fetching wallet token balances:", error);
+    console.error('Error fetching wallet token balances:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -230,14 +240,14 @@ export async function getWalletTokenBalance(
 // STEP 6: Get token list | ✅ WORKS!
 export async function getTokenList(
   chain: string = 'bsc'
-): Promise<{success: boolean; data?: any; error?: string}> {
+): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
   try {
     // Construct URL using config
     const url = `${config.node.baseMainnetRpc}/addon/${config.node.openOceanAddonId}/v4/${chain}/tokenList`;
-    
+
     // Make the request
     const { data } = await axios.get(url, {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
     // Validate response
@@ -247,13 +257,16 @@ export async function getTokenList(
 
     return {
       success: true,
-      data
+      data,
     };
   } catch (error) {
-    console.error('Failed to get token list:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'Failed to get token list:',
+      error instanceof Error ? error.message : String(error)
+    );
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -262,25 +275,28 @@ export async function getTokenList(
 export async function getTransaction(
   hash: string,
   chain: string = 'bsc'
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
   try {
     // Construct URL
     const url = `${config.node.baseMainnetRpc}/addon/${config.node.openOceanAddonId}/v4/${chain}/getTransaction`;
-    
+
     const { data } = await axios.get(url, {
       params: { hash },
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
 
     return {
       success: true,
-      data
+      data,
     };
   } catch (error) {
-    console.error('Failed to get transaction details:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'Failed to get transaction details:',
+      error instanceof Error ? error.message : String(error)
+    );
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -295,44 +311,47 @@ export async function getSwap(
   account: string,
   referrer?: string,
   chain: string = 'bsc'
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
   try {
     // Construct URL
     const url = `${config.node.baseMainnetRpc}/addon/${config.node.openOceanAddonId}/v4/${chain}/swap`;
-    
+
     // Build params object
-    const params: Record<string, any> = {
+    const params: Record<string, string | number> = {
       inTokenAddress,
       outTokenAddress,
       amount,
       gasPrice,
       slippage,
-      account
+      account,
     };
-    
+
     // Add optional referrer if provided
     if (referrer) {
       params.referrer = referrer;
     }
-    
+
     // Make request
     const { data } = await axios.get(url, {
       params,
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
-        'x-qn-api-chain': chain 
-      }
+        'x-qn-api-chain': chain,
+      },
     });
-    
+
     return {
       success: true,
-      data
+      data,
     };
   } catch (error) {
-    console.error('Failed to get swap transaction:', error instanceof Error ? error.message : String(error));
+    console.error(
+      'Failed to get swap transaction:',
+      error instanceof Error ? error.message : String(error)
+    );
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -402,7 +421,7 @@ if (require.main === module) {
     // Default to BSC chain for token list
     const chain = process.argv[3] || 'bsc';
     console.log(`Getting token list for chain: ${chain}`);
-    
+
     getTokenList(chain)
       .then((result) => {
         if (result.success) {
@@ -417,7 +436,7 @@ if (require.main === module) {
   if (testFunction === 'transaction' || !testFunction) {
     // Example transaction hash from BSC
     const txHash = '0x756b98a89714be5c640ea9922aba12e0c94bc30e5a17e111d1aa40373cc24782';
-    
+
     getTransaction(txHash)
       .then((result) => {
         if (result.success) {
@@ -438,7 +457,7 @@ if (require.main === module) {
     const slippage = '1';
     const account = '0x2FF855378Cd29f120CDF9d675E959cb5422ec5f2'; // Example wallet
     const referrer = '0xD4eb4cbB1ECbf96a1F0C67D958Ff6fBbB7B037BB'; // Optional referrer
-    
+
     console.log('Getting swap transaction data...');
     getSwap(inToken, outToken, amount, gasPrice, slippage, account, referrer)
       .then((result) => {
@@ -451,7 +470,19 @@ if (require.main === module) {
       .catch((error) => console.error('Error during swap transaction test:', error));
   }
 
-  if (!['connection', 'gas', 'quote', 'mev', 'balance', 'tokenList', 'transaction', 'swap', undefined].includes(testFunction)) {
+  if (
+    ![
+      'connection',
+      'gas',
+      'quote',
+      'mev',
+      'balance',
+      'tokenList',
+      'transaction',
+      'swap',
+      undefined,
+    ].includes(testFunction)
+  ) {
     console.log(
       'Unknown test function. Use "connection" or "gas" or "quote" or "mev" or "balance" or "tokenList" or "transaction" or "swap"'
     );
