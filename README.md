@@ -82,7 +82,7 @@ DEFAULT_FEE_WALLET=
 DEFAULT_GAS_PRIORITY=medium
 ```
 
-## Using the Makefile
+## Makefile
 
 The project includes a Makefile with common commands for development:
 
@@ -130,7 +130,10 @@ src/
 └── index.ts       # Application entry point
 ```
 
-## Testing OpenOcean Integration
+## Testing separate methods (OpenOcean, Wallet Generation, etc.)
+
+
+### OpenOcean + QuickNode
 
 You can test the OpenOcean integration directly using:
 
@@ -150,6 +153,15 @@ Available test commands:
 
 If not specified - all methods will be executed and run.
 
+### Wallet Creation
+
+**IMPORTANT**: Before running, uncomment code at the bottom.
+
+```bash
+ts-node -r tsconfig-paths/register src/create_test_wallet.ts
+```
+
+
 ## Development
 
 Start the development server with hot reloading:
@@ -163,3 +175,38 @@ make dev
 # Start the production server
 npm run start
 ```
+
+------
+
+
+# Learnings
+
+Summary of learnings for Neurodex trading bot. Kinda super important!
+
+---
+
+### 🔐 Security Learnings
+
+* **Use AES-256-GCM instead of AES-256-CBC**
+  GCM provides both confidentiality and integrity (auth tag) and is resistant to padding oracle attacks.
+
+* **Always use a random Initialization Vector (IV)**
+  For GCM mode, a 12-byte IV (`crypto.randomBytes(12)`) is recommended and must be unique per encryption.
+
+* **Derive encryption key using SHA-256**
+  Use `crypto.createHash('sha256').update(secret).digest()` to produce a fixed-length 256-bit key from your secret.
+
+* **Store IV and Auth Tag with encrypted data**
+  Concatenate them in a predictable format (e.g., `iv:authTag:encrypted`) so they can be reused during decryption.
+
+* **Keep private keys encrypted at all times**
+  Never store or log raw private keys. Decrypt them only when absolutely needed and clear from memory after use.
+
+* **Use strong, unpredictable secrets**
+  Your `encryptionKey` should be at least 32 characters long, random, and not reused across environments.
+
+* **Implement proper key rotation (for the future)**
+  Design your system to support periodic key changes without data loss. Use versioned encryption keys if needed.
+
+* **Limit exposure window**
+  Auto-delete private keys within a short time (e.g., 5 minutes).
