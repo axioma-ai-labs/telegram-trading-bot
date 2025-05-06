@@ -27,12 +27,18 @@ export const walletCreationFailMessage = `❌ *Wallet Creation Failed*
 
 Something went wrong. Please try again or go to /help.`;
 
+// TODO: Here must be the logic to get the total net worth from the database
+const randomTotalNetWorth = (Math.random() * 100000).toFixed(2);
+
 export const walletMessage = `*💰 Wallet:* \`0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B\`
 
 *Balance:*
-- ETH: 1,50
+- ETH: 1.50
 - SOL: 2,054
 - BRO: 190,000,000
+
+*Total Net Worth:*
+- $${randomTotalNetWorth}
 
 To deposit funds, please send your coins to the wallet address above.`;
 
@@ -42,7 +48,8 @@ export const walletKeyboard = new InlineKeyboard()
   .row()
   .text('📈 Transactions', 'view_transactions')
   .row()
-  .text('← Back', 'back_start');
+  .text('← Back', 'back_start')
+  .text('↺ Refresh', 'refresh_wallet');
 
 export const createWalletKeyboard = new InlineKeyboard()
   .text('Create', 'create_wallet')

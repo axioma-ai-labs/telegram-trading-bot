@@ -4,7 +4,7 @@ import { BotContext } from '@/types/config';
 import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
 import { createWalletKeyboard } from './wallet';
 
-// Generate random balance between $0 and $10000, formatted to 2 decimal places
+// TODO: Here must be the logic to get the balance from the DB or blockchain
 const randomBalance = (Math.random() * 10000).toFixed(2);
 
 export const depositMessage = `📥 *Deposit ETH or Tokens*
@@ -19,9 +19,8 @@ Send ETH or any ERC-20 token to your wallet: \`0x343E3c9be02e5ceCa6CA4461F94D242
 - Never share your private key with anyone`;
 
 export const depositKeyboard = new InlineKeyboard()
-  .text('Refresh', 'refresh')
-  .row()
-  .text('← Back', 'back_start');
+  .text('← Back', 'back_start')
+  .text('↺ Refresh', 'refresh_deposit');
 
 export const depositCommandHandler: CommandHandler = {
   command: 'deposit',

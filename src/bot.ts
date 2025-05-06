@@ -7,27 +7,25 @@ import { helpCommandHandler } from '@/bot/commands/help';
 import { walletCommandHandler } from '@/bot/commands/wallet';
 import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
 import { handleGetHelp } from '@/bot/callbacks/getHelp';
-import { returnBack } from '@/bot/callbacks/returnBack';
+import { handleBackNavigation } from '@/bot/callbacks/returnBack';
 import { buyToken } from './bot/callbacks/buyToken';
 import { sellToken } from './bot/callbacks/sellToken';
-import { refreshMessage } from './bot/callbacks/refresh';
+import { handleRefresh } from './bot/callbacks/refresh';
 import {
   handleConfigureSettings,
   handleSetSlippage,
   handleSetLanguage,
   handleSetGas,
 } from '@/bot/callbacks/configureSettings';
-import { startMessage, startKeyboard } from '@/bot/commands/start';
-import { settingsMessage, settingsKeyboard, settingsCommandHandler } from '@/bot/commands/settings';
-import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
-import {
-  transactionsMessage,
-  transactionsKeyboard,
-  transactionsCommandHandler,
-} from '@/bot/commands/transactions';
+import { settingsCommandHandler } from '@/bot/commands/settings';
+import { transactionsCommandHandler } from '@/bot/commands/transactions';
 import { viewAllTransactions, viewTransactions } from './bot/callbacks/getTransactions';
 import depositCommandHandler from './bot/commands/deposit';
 import { depositFunds } from './bot/callbacks/depositFunds';
+import { buyCommandHandler } from './bot/commands/buy';
+import { sellCommandHandler } from './bot/commands/sell';
+import { withdrawCommandHandler } from './bot/commands/withdraw';
+import { withdrawFunds } from './bot/callbacks/withdrawFunds';
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -40,116 +38,62 @@ bot.use(
   })
 );
 
+// Mapping of callback handlers
+const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
+  create_wallet: handleCreateWallet,
+  refresh_deposit: handleRefresh,
+  refresh_wallet: handleRefresh,
+  refresh_transactions: handleRefresh,
+  withdraw: withdrawFunds,
+  buy: buyToken,
+  sell: sellToken,
+  deposit: depositFunds,
+  get_help: handleGetHelp,
+  view_transactions: viewTransactions,
+  view_all_transactions: viewAllTransactions,
+  open_settings: handleConfigureSettings,
+  set_slippage: handleSetSlippage,
+  set_language: handleSetLanguage,
+  set_gas: handleSetGas,
+};
+
+// Parameterized handlers
+const PARAMETERIZED_HANDLERS: Record<string, (ctx: BotContext, param: string) => Promise<void>> = {
+  slippage: async (ctx, param) => {
+    await ctx.answerCallbackQuery(`Slippage set to ${param}%`);
+    await handleConfigureSettings(ctx);
+  },
+  lang: async (ctx, param) => {
+    await ctx.answerCallbackQuery(`Language set to ${param}`);
+    await handleConfigureSettings(ctx);
+  },
+  gas: async (ctx, param) => {
+    await ctx.answerCallbackQuery(`Gas priority set to ${param}`);
+    await handleConfigureSettings(ctx);
+  },
+};
+
 // Callback handlers
 bot.on('callback_query', async (ctx) => {
   const callbackData = ctx.callbackQuery.data;
   if (!callbackData) return;
 
-  if (callbackData === 'create_wallet') {
-    await handleCreateWallet(ctx);
+  // 1) Navigation (back buttons)
+  if (await handleBackNavigation(ctx, callbackData)) {
     return;
   }
 
-  if (callbackData === 'refresh') {
-    await refreshMessage(ctx);
+  // 2) Parameterized callbacks
+  const [prefix, param] = callbackData.split('_');
+  if (PARAMETERIZED_HANDLERS[prefix]) {
+    await PARAMETERIZED_HANDLERS[prefix](ctx, param);
     return;
   }
 
-  if (callbackData === 'buy') {
-    await buyToken(ctx);
-    return;
-  }
-
-  if (callbackData === 'sell') {
-    await sellToken(ctx);
-    return;
-  }
-
-  if (callbackData === 'deposit') {
-    await depositFunds(ctx);
-    return;
-  }
-
-  if (callbackData === 'get_help') {
-    await handleGetHelp(ctx);
-    return;
-  }
-
-  if (callbackData === 'back_start') {
-    await returnBack(ctx, startMessage, startKeyboard);
-    return;
-  }
-
-  if (callbackData === 'back_settings') {
-    await returnBack(ctx, settingsMessage, settingsKeyboard);
-    return;
-  }
-
-  if (callbackData === 'back_wallet') {
-    await returnBack(ctx, walletMessage, walletKeyboard);
-    return;
-  }
-
-  if (callbackData === 'back_transactions') {
-    await returnBack(ctx, transactionsMessage, transactionsKeyboard);
-    return;
-  }
-
-  if (callbackData === 'view_transactions') {
-    await viewTransactions(ctx);
-    return;
-  }
-
-  if (callbackData === 'view_all_transactions') {
-    await viewAllTransactions(ctx);
-    return;
-  }
-
-  // Settings handlers
-  if (callbackData === 'open_settings') {
-    await handleConfigureSettings(ctx);
-    return;
-  }
-
-  if (callbackData === 'set_slippage') {
-    await handleSetSlippage(ctx);
-    return;
-  }
-
-  if (callbackData === 'set_language') {
-    await handleSetLanguage(ctx);
-    return;
-  }
-
-  if (callbackData === 'set_gas') {
-    await handleSetGas(ctx);
-    return;
-  }
-
-  // Handle slippage selection
-  if (callbackData.startsWith('slippage_')) {
-    const slippage = callbackData.split('_')[1];
-    // TODO: Save slippage setting
-    await ctx.answerCallbackQuery(`Slippage set to ${slippage}%`);
-    await handleConfigureSettings(ctx);
-    return;
-  }
-
-  // Handle language selection
-  if (callbackData.startsWith('lang_')) {
-    const lang = callbackData.split('_')[1];
-    // TODO: Save language setting
-    await ctx.answerCallbackQuery(`Language set to ${lang}`);
-    await handleConfigureSettings(ctx);
-    return;
-  }
-
-  // Handle gas priority selection
-  if (callbackData.startsWith('gas_')) {
-    const priority = callbackData.split('_')[1];
-    // TODO: Save gas priority setting
-    await ctx.answerCallbackQuery(`Gas priority set to ${priority}`);
-    await handleConfigureSettings(ctx);
+  // 3) Regular callbacks
+  const handler = CALLBACK_HANDLERS[callbackData];
+  if (handler) {
+    await handler(ctx);
     return;
   }
 });
@@ -161,6 +105,10 @@ bot.command(walletCommandHandler.command, walletCommandHandler.handler); // /wal
 bot.command(settingsCommandHandler.command, settingsCommandHandler.handler); // /settings
 bot.command(transactionsCommandHandler.command, transactionsCommandHandler.handler); // /transactions
 bot.command(depositCommandHandler.command, depositCommandHandler.handler); // /deposit
+bot.command(buyCommandHandler.command, buyCommandHandler.handler); // /buy
+bot.command(sellCommandHandler.command, sellCommandHandler.handler); // /sell
+bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // /withdraw
+
 // Set commands (quick access)
 bot.api.setMyCommands([
   { command: startCommandHandler.command, description: startCommandHandler.description },
@@ -168,6 +116,9 @@ bot.api.setMyCommands([
   { command: walletCommandHandler.command, description: walletCommandHandler.description },
   { command: settingsCommandHandler.command, description: settingsCommandHandler.description },
   { command: depositCommandHandler.command, description: depositCommandHandler.description },
+  { command: buyCommandHandler.command, description: buyCommandHandler.description },
+  { command: sellCommandHandler.command, description: sellCommandHandler.description },
+  { command: withdrawCommandHandler.command, description: withdrawCommandHandler.description },
   {
     command: transactionsCommandHandler.command,
     description: transactionsCommandHandler.description,
