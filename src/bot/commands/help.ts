@@ -1,32 +1,50 @@
 import { BotContext } from '../../types/config';
 import { CommandHandler } from '../../types/commands';
+import { InlineKeyboard } from 'grammy';
 
-const helpMessage = `
-*Neurotrading Bot Help*
+export const helpMessage = `
+*Help & Support*
 
-Welcome to Neurotrading Bot - your lightning fast trading bot for crypto!
-
-*📋 Available Commands:*
+*Quick Start:*
 • /start - Start the bot
-• /help - Show this help message
-• /trade - Start trading (coming soon)
-• /settings - Configure your preferences (coming soon)
-• /wallet - Manage your wallets (coming soon)
-• /status - Check your account status (coming soon)
+• /wallet - Manage your wallet
+• /buy - Buy crypto tokens
+• /sell - Sell crypto tokens
+• /settings - Configure bot settings
 
-*🚀 How to Use:*
-1. Start by connecting your wallet
-2. Set your trading preferences
-3. Choose your trading pairs
-4. Set risk parameters
-5. Begin trading with /trade
+*How do I use Neurodex?*
+Check out our [documentation](https://docs.neurodex.xyz) where we explain everything in detail. Join our support chat for additional resources.
 
-*📞 Support:*
-For assistance, contact @iamspacecreated on Telegram.
+*💰 Where can I find my referral code?*
+Open the /referrals menu to view your unique referral code. Share it with friends to earn rewards!
 
-*🔐 Security:*
-All wallet data is encrypted with military-grade encryption. We never store your private keys - they are stored on your device.
+*What are the fees?*
+• Trading fee: 1% per successful transaction
+• No subscription fees
+• No hidden charges
+• All features are free to use
+
+*🔒 Security Tips:*
+• NEVER share your private keys or seed phrases
+• Admins will NEVER DM you first
+• Use only official links from our website
+• We never store your private keys or seed phrases. When generating a new wallet - store your private key somewhere safe.
+
+*💡 Trading Tips:*
+Common issues and solutions:
+• Slippage Exceeded: Increase slippage or trade in smaller amounts
+• Insufficient balance: Add more funds or reduce transaction amount
+• Transaction timeout: Increase gas tip during high network load
+
+*Need more help?*
+Contact our support team by clicking the button below.
+
 `;
+
+export const helpKeyboard = new InlineKeyboard()
+  .url('📞 Contact us', 'https://t.me/neurodex_support')
+  .row()
+  .text('← Back', 'back_start');
 
 export const helpCommandHandler: CommandHandler = {
   command: 'help',
@@ -36,6 +54,7 @@ export const helpCommandHandler: CommandHandler = {
 
     await ctx.reply(helpMessage, {
       parse_mode: 'Markdown',
+      reply_markup: helpKeyboard,
     });
   },
 };

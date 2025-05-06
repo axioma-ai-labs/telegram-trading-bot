@@ -1,45 +1,32 @@
-import { Context } from 'grammy';
+import { BotContext } from '@/types/config';
 
 /**
- * Deletes a message from a chat.
- * 
- * @param ctx - The context containing the message to delete
- * @returns Promise resolving to true if deletion was successful, false otherwise
+ * Deletes a bot message after an optional delay.
+ *
+ * @param ctx The bot context
+ * @param messageId ID of the message to delete
+ * @param delayMs Delay in milliseconds before deletion (default: 10000ms)
+ * @returns Promise that resolves when the deletion is complete or fails
  */
-export const deleteMessage = async (ctx: Context): Promise<boolean> => {
-  try {
-    // Make sure we have chat_id and message_id
-    if (!ctx.chat?.id || !ctx.message?.message_id) {
-      return false;
-    }
-    
-    // Delete the message
-    await ctx.api.deleteMessage(ctx.chat.id, ctx.message.message_id);
-    return true;
-  } catch (error) {
-    console.error('Error deleting message:', error);
-    return false;
-  }
-};
-
-/**
- * Deletes a specific message by chat ID and message ID.
- * 
- * @param ctx - The context with API access
- * @param chatId - The chat ID where the message is located
- * @param messageId - The ID of the message to delete
- * @returns Promise resolving to true if deletion was successful, false otherwise
- */
-export const deleteMessageById = async (
-  ctx: Context,
-  chatId: number,
-  messageId: number
+export const deleteBotMessage = async (
+  ctx: BotContext,
+  messageId: number,
+  delayMs = 10000
 ): Promise<boolean> => {
-  try {
-    await ctx.api.deleteMessage(chatId, messageId);
-    return true;
-  } catch (error) {
-    console.error('Error deleting message by ID:', error);
+  if (!ctx.chat?.id) {
+    console.error('Cannot delete message: chat ID not available');
     return false;
   }
+
+  return new Promise((resolve) => {
+    setTimeout(async () => {
+      try {
+        await ctx.api.deleteMessage(ctx.chat!.id, messageId);
+        resolve(true);
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        resolve(false);
+      }
+    }, delayMs);
+  });
 };

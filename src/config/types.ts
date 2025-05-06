@@ -52,7 +52,7 @@ export interface GasPriceInfo {
 
 export interface GasEstimate {
   legacyGasPrice: number;
-  maxPriorityFeePerGas: number; 
+  maxPriorityFeePerGas: number;
   maxFeePerGas: number;
   waitTimeEstimate: number;
 }
