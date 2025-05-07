@@ -20,6 +20,6 @@
       "@tests/*": ["tests/*"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist", "generated"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "generated", "scripts", "tests"]
 } 
