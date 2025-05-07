@@ -20,6 +20,7 @@ A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integ
 - A Telegram bot token (get it from [@BotFather](https://t.me/BotFather))
 - QuickNode account with OpenOcean addon
 - Make (for using the Makefile)
+- Prisma (PostgreSQL) Database
 
 ## Setup
 
@@ -80,6 +81,9 @@ DEFAULT_FEE_WALLET=
 
 # Default Gas Priority (low, medium, high)
 DEFAULT_GAS_PRIORITY=medium
+
+# Database URL
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key="
 ```
 
 ## Makefile
@@ -89,30 +93,12 @@ The project includes a Makefile with common commands for development:
 ```bash
 # Show available commands
 make help
-
-# Install dependencies
-make install
-
-# Run development server with hot reloading
-make dev
-
-# Lint code
-make lint
-
-# Fix linting errors automatically
-make lint-fix
-
-# Format code and fix imports
-make format
-
-# Run tests
-make test
-
-# Run all checks (lint + type check)
-make check
 ```
 
 ## Project Structure
+
+> [!IMPORTANT]
+> This is outdated!
 
 ```
 src/
@@ -175,6 +161,18 @@ make dev
 # Start the production server
 pnpm run start
 ```
+
+## Database
+
+We use Prisma with PostgreSQL. 
+
+Usage is very simple:
+1. All the database operations are in `src/services/db/`. Here we isolate logic of interacting with the database.
+2. Definition of models is in `prisma/schema.prisma`. There you'll find migrations as well.
+3. Database instance is in `src/services/db/prisma.ts`. Very minimalistic, so don't touch it.
+4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database.
+5. Important: we currently have only development database. Production one comes soon.
+
 
 ------
 

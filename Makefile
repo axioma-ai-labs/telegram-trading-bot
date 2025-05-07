@@ -56,3 +56,7 @@ typecheck:
 # Run all checks
 check: lint typecheck
 	@echo "🟢 All checks passed!"
+
+# Generate Prisma migrations
+prisma-migrate-dev:
+	$(PNPM) prisma migrate dev
