@@ -2,7 +2,7 @@ import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
-import { createWalletKeyboard } from './wallet';
+import { createWalletKeyboard } from '@/bot/commands/wallet';
 
 // TODO: Here must be the logic to get the balance from the DB or blockchain
 const randomBalance = (Math.random() * 10000).toFixed(2);

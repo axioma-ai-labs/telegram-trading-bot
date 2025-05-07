@@ -12,7 +12,7 @@
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "project": "./tsconfig.json"
+    "project": ["./tsconfig.json", "./tsconfig.dev.json"]
   },
   "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
@@ -20,5 +20,6 @@
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
     "prettier/prettier": "error"
-  }
+  },
+  "ignorePatterns": ["src/generated/**/*", "dist/**/*"]
 } 

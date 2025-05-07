@@ -16,10 +16,11 @@ A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integ
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- npm or yarn
+- pnpm
 - A Telegram bot token (get it from [@BotFather](https://t.me/BotFather))
 - QuickNode account with OpenOcean addon
 - Make (for using the Makefile)
+- Prisma (PostgreSQL) Database
 
 ## Setup
 
@@ -80,6 +81,9 @@ DEFAULT_FEE_WALLET=
 
 # Default Gas Priority (low, medium, high)
 DEFAULT_GAS_PRIORITY=medium
+
+# Database URL
+DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key="
 ```
 
 ## Makefile
@@ -89,30 +93,12 @@ The project includes a Makefile with common commands for development:
 ```bash
 # Show available commands
 make help
-
-# Install dependencies
-make install
-
-# Run development server with hot reloading
-make dev
-
-# Lint code
-make lint
-
-# Fix linting errors automatically
-make lint-fix
-
-# Format code and fix imports
-make format
-
-# Run tests
-make test
-
-# Run all checks (lint + type check)
-make check
 ```
 
 ## Project Structure
+
+> [!IMPORTANT]
+> This is outdated!
 
 ```
 src/
@@ -138,7 +124,7 @@ src/
 You can test the OpenOcean integration directly using:
 
 ```bash
-ts-node -r tsconfig-paths/register src/openocean.ts swap
+make run CMD="src/services/openocean/index.ts swap"
 ```
 
 Available test commands:
@@ -158,7 +144,7 @@ If not specified - all methods will be executed and run.
 **IMPORTANT**: Before running, uncomment code at the bottom.
 
 ```bash
-ts-node -r tsconfig-paths/register src/create_test_wallet.ts
+make run CMD="scripts/create_test_wallet.ts"
 ```
 
 
@@ -173,7 +159,24 @@ make dev
 
 ```bash
 # Start the production server
-npm run start
+pnpm run start
+```
+
+## Database
+
+We use Prisma with PostgreSQL. 
+
+Usage is very simple:
+1. All the database operations are in `src/services/db/`. Here we isolate logic of interacting with the database.
+2. Definition of models is in `prisma/schema.prisma`. There you'll find migrations as well.
+3. Database instance is in `src/services/db/prisma.ts`. Very minimalistic, so don't touch it.
+4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database.
+5. Important: we currently have only development database. Production one comes soon.
+
+Example usage (script for testing db ops):
+
+```bash
+make run CMD="scripts/db-connection.ts"
 ```
 
 ------

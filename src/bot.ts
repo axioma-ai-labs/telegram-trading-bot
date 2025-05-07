@@ -8,9 +8,9 @@ import { walletCommandHandler } from '@/bot/commands/wallet';
 import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
 import { handleGetHelp } from '@/bot/callbacks/getHelp';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
-import { buyToken } from './bot/callbacks/buyToken';
-import { sellToken } from './bot/callbacks/sellToken';
-import { handleRefresh } from './bot/callbacks/refresh';
+import { buyToken } from '@/bot/callbacks/buyToken';
+import { sellToken } from '@/bot/callbacks/sellToken';
+import { handleRefresh } from '@/bot/callbacks/refresh';
 import {
   handleConfigureSettings,
   handleSetSlippage,
@@ -19,13 +19,13 @@ import {
 } from '@/bot/callbacks/configureSettings';
 import { settingsCommandHandler } from '@/bot/commands/settings';
 import { transactionsCommandHandler } from '@/bot/commands/transactions';
-import { viewAllTransactions, viewTransactions } from './bot/callbacks/getTransactions';
-import depositCommandHandler from './bot/commands/deposit';
-import { depositFunds } from './bot/callbacks/depositFunds';
-import { buyCommandHandler } from './bot/commands/buy';
-import { sellCommandHandler } from './bot/commands/sell';
-import { withdrawCommandHandler } from './bot/commands/withdraw';
-import { withdrawFunds } from './bot/callbacks/withdrawFunds';
+import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
+import depositCommandHandler from '@/bot/commands/deposit';
+import { depositFunds } from '@/bot/callbacks/depositFunds';
+import { buyCommandHandler } from '@/bot/commands/buy';
+import { sellCommandHandler } from '@/bot/commands/sell';
+import { withdrawCommandHandler } from '@/bot/commands/withdraw';
+import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing

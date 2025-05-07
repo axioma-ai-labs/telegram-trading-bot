@@ -1,5 +1,5 @@
-import { BotContext } from '../../types/config';
-import { CommandHandler } from '../../types/commands';
+import { BotContext } from '@/types/config';
+import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
 
 export const helpMessage = `

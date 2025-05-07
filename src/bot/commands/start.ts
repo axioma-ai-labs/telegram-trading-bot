@@ -1,7 +1,7 @@
-import { BotContext } from '../../types/config';
-import { CommandHandler } from '../../types/commands';
+import { BotContext } from '@/types/config';
+import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
-import { IS_NEW_USER } from '../../config/mock';
+import { IS_NEW_USER } from '@/config/mock';
 
 export const startMessage = `
 *💸 Neurodex*

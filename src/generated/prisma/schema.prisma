@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  telegramId String    @unique
+  username   String?
+  firstName  String?
+  lastName   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  wallets    Wallet[]
+  trades     Trade[]
+  settings   Settings?
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  address   String   @unique
+  chain     String // e.g., "ethereum", "bsc"
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  trades    Trade[]
+}
+
+model Trade {
+  id           String   @id @default(uuid())
+  type         String // "buy" or "sell"
+  tokenAddress String
+  tokenSymbol  String
+  amount       Float
+  price        Float
+  totalValue   Float
+  status       String // "pending", "completed", "failed"
+  txHash       String?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  walletId     String
+  wallet       Wallet   @relation(fields: [walletId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Settings {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  notifications  Boolean  @default(true)
+  autoTrade      Boolean  @default(false)
+  maxTradeAmount Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
