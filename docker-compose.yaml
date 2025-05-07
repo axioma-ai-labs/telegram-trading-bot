@@ -1,0 +1,9 @@
+---
+
+services:
+  neurodex-bot:
+    image: axiomai/neurodex-bot:latest
+    container_name: neurodex-bot
+    hostname: neurodex-bot
+    env_file:
+      - .env
