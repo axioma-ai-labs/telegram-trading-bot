@@ -7,6 +7,7 @@ TS_NODE = $(NODE_BIN)/ts-node
 TSC = $(NODE_BIN)/tsc
 ESLINT = $(NODE_BIN)/eslint
 PRETTIER = $(NODE_BIN)/prettier
+PRISMA = $(PNPM) prisma
 
 .PHONY: help install dev build start lint format clean test check setup docker-build docker-run lint-fix
 
@@ -40,6 +41,7 @@ lint-fix:
 # Fix imports and format code
 format:
 	$(PRETTIER) --write "src/**/*.ts"
+	$(PRISMA) format
 
 # Run tests
 test:
@@ -59,4 +61,4 @@ check: lint typecheck
 
 # Generate Prisma migrations
 prisma-migrate-dev:
-	$(PNPM) prisma migrate dev
+	$(PRISMA) migrate dev
