@@ -124,7 +124,7 @@ src/
 You can test the OpenOcean integration directly using:
 
 ```bash
-ts-node -r tsconfig-paths/register src/openocean.ts swap
+make run CMD="src/services/openocean/index.ts swap"
 ```
 
 Available test commands:
@@ -144,7 +144,7 @@ If not specified - all methods will be executed and run.
 **IMPORTANT**: Before running, uncomment code at the bottom.
 
 ```bash
-ts-node -r tsconfig-paths/register src/create_test_wallet.ts
+make run CMD="scripts/create_test_wallet.ts"
 ```
 
 
@@ -173,6 +173,11 @@ Usage is very simple:
 4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database.
 5. Important: we currently have only development database. Production one comes soon.
 
+Example usage (script for testing db ops):
+
+```bash
+make run CMD="scripts/db-connection.ts"
+```
 
 ------
 

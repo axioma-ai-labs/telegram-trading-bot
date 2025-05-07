@@ -16,19 +16,26 @@ help:
 	@echo "Available commands:"
 	@echo "  make install     - Install dependencies"
 	@echo "  make dev         - Run development server with hot reload"
+	@echo "  make build       - Build the project"
 	@echo "  make lint        - Run eslint"
 	@echo "  make lint-fix    - Fix linting errors automatically"
 	@echo "  make format      - Format code with prettier"
+	@echo "  make run <cmd>   - Run some command with ts-node"
 	@echo "  make test        - Run tests"
-	@echo "  make test-db-conn - Run test db connection"
 	@echo "  make check       - Run all checks (lint + type check)"
+	@echo "  make migrate     - Run Prisma migrations"
 
+# Install dependencies
 install:
 	$(PNPM) install
 
 # Development mode with hot reload
 dev:
 	$(PNPM) run dev
+
+# Build the project
+build:
+	$(PNPM) run build
 
 # Run ESLint
 lint:
@@ -43,13 +50,13 @@ format:
 	$(PRETTIER) --write "src/**/*.ts"
 	$(PRISMA) format
 
+# Run some command with ts-node
+run:
+	$(TS_NODE) -r tsconfig-paths/register $(CMD)
+
 # Run tests
 test:
 	$(PNPM) test
-
-# Run test db connection
-test-db-conn:
-	$(PNPM) run test:db-conn
 
 # Run type checking
 typecheck:
@@ -60,5 +67,5 @@ check: lint typecheck
 	@echo "🟢 All checks passed!"
 
 # Generate Prisma migrations
-prisma-migrate-dev:
+migrate:
 	$(PRISMA) migrate dev
