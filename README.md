@@ -16,7 +16,7 @@ A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integ
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- npm or yarn
+- pnpm
 - A Telegram bot token (get it from [@BotFather](https://t.me/BotFather))
 - QuickNode account with OpenOcean addon
 - Make (for using the Makefile)
@@ -173,7 +173,7 @@ make dev
 
 ```bash
 # Start the production server
-npm run start
+pnpm run start
 ```
 
 ------

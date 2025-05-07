@@ -2,7 +2,7 @@
 
 # Variables
 NODE_BIN = ./node_modules/.bin
-NPM = npm
+PNPM = pnpm
 TS_NODE = $(NODE_BIN)/ts-node
 TSC = $(NODE_BIN)/tsc
 ESLINT = $(NODE_BIN)/eslint
@@ -22,11 +22,11 @@ help:
 	@echo "  make check       - Run all checks (lint + type check)"
 
 install:
-	$(NPM) install
+	$(PNPM) install
 
 # Development mode with hot reload
 dev:
-	$(NPM) run dev
+	$(PNPM) run dev
 
 # Run ESLint
 lint:
@@ -34,7 +34,7 @@ lint:
 
 # Fix linting errors automatically
 lint-fix:
-	$(NPM) run lint:fix
+	$(PNPM) run lint:fix
 
 # Fix imports and format code
 format:
@@ -42,7 +42,7 @@ format:
 
 # Run tests
 test:
-	$(NPM) test
+	$(PNPM) test
 
 # Run type checking
 typecheck:
