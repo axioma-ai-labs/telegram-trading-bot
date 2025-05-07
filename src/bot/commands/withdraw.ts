@@ -2,7 +2,7 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { InlineKeyboard } from 'grammy';
 import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
-import { createWalletKeyboard } from './wallet';
+import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 
 export const withdrawMessage = `📤 *Withdraw ETH or Tokens*

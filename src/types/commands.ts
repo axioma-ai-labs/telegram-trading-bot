@@ -1,4 +1,4 @@
-import { BotContext } from './config';
+import { BotContext } from '@/types/config';
 
 // Command handler type
 export interface CommandHandler {

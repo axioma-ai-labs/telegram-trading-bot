@@ -2,5 +2,6 @@
 .git
 .env.*
 node_modules
+generated
 dist
 README.md

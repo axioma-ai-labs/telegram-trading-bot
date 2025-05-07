@@ -1,8 +1,8 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { InlineKeyboard } from 'grammy';
-import { IS_NEW_USER, USER_HAS_WALLET } from '../../config/mock';
-import { deleteBotMessage } from '../../utils/deleteMessage';
+import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
+import { deleteBotMessage } from '@/utils/deleteMessage';
 
 ////////////////////////////////////////////////////////////
 // Wallet creation successful

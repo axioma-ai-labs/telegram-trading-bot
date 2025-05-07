@@ -19,6 +19,7 @@ help:
 	@echo "  make lint-fix    - Fix linting errors automatically"
 	@echo "  make format      - Format code with prettier"
 	@echo "  make test        - Run tests"
+	@echo "  make test-db-conn - Run test db connection"
 	@echo "  make check       - Run all checks (lint + type check)"
 
 install:
@@ -43,6 +44,10 @@ format:
 # Run tests
 test:
 	$(PNPM) test
+
+# Run test db connection
+test-db-conn:
+	$(PNPM) run test:db-conn
 
 # Run type checking
 typecheck:
