@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
-import { AppConfig, Environment, GasPriority } from '@/config/types';
+import { AppConfig, Environment, GasPriority } from '@/types/config';
 
 // Load environment variables from .env file
 dotenv.config();

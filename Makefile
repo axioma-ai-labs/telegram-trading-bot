@@ -14,7 +14,7 @@ PRISMA = $(PNPM) prisma
 # Default target
 help:
 	@echo "Available commands:"
-	@echo "  make install     - Install dependencies"
+	@echo "  make deps        - Install dependencies"
 	@echo "  make dev         - Run development server with hot reload"
 	@echo "  make build       - Build the project"
 	@echo "  make lint        - Run eslint"
@@ -26,7 +26,7 @@ help:
 	@echo "  make migrate     - Run Prisma migrations"
 
 # Install dependencies
-install:
+deps:
 	$(PNPM) install
 
 # Development mode with hot reload

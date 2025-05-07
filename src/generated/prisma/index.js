@@ -189,7 +189,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
@@ -199,12 +199,11 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiOTVkMTg4YTEtZmNlZi00OWQ2LTgzODItZGYwNzFhMTJiYjExIiwidGVuYW50X2lkIjoiNTg5OGU2ZmYyMWE2NzBjOTU2ZThhMmNiNDgwN2Q3MTgyNzEwZjUyNGQ0NjY3NDA1M2VlMjBmNGRmNmFhZTJmOSIsImludGVybmFsX3NlY3JldCI6IjhhYmJlYmM1LTA2YTktNGI3NS1hMDc1LWJjMzkxMjAxMTYyMyJ9.zyfEBKe8MRJlZlcISQgP9EXXZMiXV95Bb8R7mcy24GA"
       }
     }
   },
