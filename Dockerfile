@@ -1,7 +1,7 @@
 FROM node:18-alpine AS builder
 
 # Create app directory
-WORKDIR /app
+WORKDIR /neurodex-bot
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -25,7 +25,7 @@ FROM node:18-alpine AS production
 ENV NODE_ENV=production
 
 # Create app directory
-WORKDIR /app
+WORKDIR /neurodex-bot
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -37,7 +37,7 @@ COPY package*.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built files from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /neurodex-bot/dist ./dist
 
 # Command to run the app
 CMD ["node", "dist/index.js"] 
