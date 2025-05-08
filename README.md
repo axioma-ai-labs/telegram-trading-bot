@@ -32,7 +32,7 @@ cd neurodex-bot
 
 2. Install dependencies:
 ```bash
-make install
+make deps
 ```
 
 3. Copy the example environment file and update it with your values:
@@ -85,6 +85,8 @@ DEFAULT_GAS_PRIORITY=medium
 # Database URL
 DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key="
 ```
+
+Note, for database we need the API key from the Prisma Console!
 
 ## Makefile
 
@@ -164,14 +166,16 @@ pnpm run start
 
 ## Database
 
-We use Prisma with PostgreSQL. 
+We use Prisma with PostgreSQL and Accelerate.
 
-Usage is very simple:
+Basic usage is very simple:
 1. All the database operations are in `src/services/db/`. Here we isolate logic of interacting with the database.
 2. Definition of models is in `prisma/schema.prisma`. There you'll find migrations as well.
 3. Database instance is in `src/services/db/prisma.ts`. Very minimalistic, so don't touch it.
-4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database.
-5. Important: we currently have only development database. Production one comes soon.
+4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database. [More details below]
+
+> [!IMPORTANT]
+> We currently have only development database. Production one comes soon.
 
 Example usage (script for testing db ops):
 
@@ -179,14 +183,49 @@ Example usage (script for testing db ops):
 make run CMD="scripts/db-connection.ts"
 ```
 
-------
+### Migrations
 
+Migrations are handled by Prisma, so we don't have to write them manually. Just change the models in `prisma/schema.prisma` and run:
+
+```bash
+make migrate
+```
+
+This will create a new migration file in `prisma/migrations` and apply it to the database.
+
+### Backups
+
+We don't have Pro plan atm, so we need to manually backup the database. This is very simple:
+
+1. Run the tunnel:
+
+```bash
+pnpm ppg-tunnel --host 127.0.0.1  --port 5432
+```
+
+2. Run the backup:
+
+```bash
+PGSSLMODE=disable \
+pg_dump \
+  -h 127.0.0.1 \
+  -p 5432 \
+  -Fc \
+  -v \
+  -d postgres \
+  -f ./mydatabase.bak \
+&& echo "-complete-"
+```
+
+Note, that you need to have `pg_dump` (comes with PostgreSQL) installed.
+
+> TODO: Add simple postgres docker container to run the backup.
+
+---
 
 # Learnings
 
 Summary of learnings for Neurodex trading bot. Kinda super important!
-
----
 
 ### 🔐 Security Learnings
 
@@ -213,3 +252,8 @@ Summary of learnings for Neurodex trading bot. Kinda super important!
 
 * **Limit exposure window**
   Auto-delete private keys within a short time (e.g., 5 minutes).
+
+* **Upscale the database**
+  In the beginning we can use any db, but in the future we might face scaling issues. E.g. 20 active users and each user makes some settings request. This converts to 20 requests per second. 
+  The solution is to upscale the database, and most importantly, allow concurrent connections. This is not so easy as it sounds, so using 3-rd party service like Accelerate is a good idea. 
+  We already activated it in Development environment, so this should be a good example to follow.

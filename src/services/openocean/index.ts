@@ -1,7 +1,7 @@
 import { Core } from '@quicknode/sdk';
 import config from '@/config/config';
 import axios from 'axios';
-import { GasResponse, GasData } from '@/config/types';
+import { GasResponse, GasData } from '@/types/config';
 import { parseUnits } from 'ethers';
 
 // STEP 1: Test connection to QuickNode RPC endpoint | ✅ WORKS!
