@@ -11,7 +11,7 @@ export const settingsMessage = `
 • Gas Priority: Medium
 
 *Available Options:*
-Supported languages: English, German, French, Russian
+Supported languages: 🇺🇸 English, 🇩🇪 German, 🇫🇷 French, 🇷🇺 Russian, 🇻🇳 Vietnamese, 🇮🇩 Indonesian
 Slippage: 0.5%, 1%, 2%, 3%
 Gas: Low, Medium, High
 
@@ -42,6 +42,9 @@ export const languageKeyboard = new InlineKeyboard()
   .row()
   .text('🇷🇺 Russian', 'lang_ru')
   .text('🇨🇳 Chinese', 'lang_zh')
+  .row()
+  .text('🇻🇳 Vietnamese', 'lang_vi')
+  .text('🇮🇩 Indonesian', 'lang_id')
   .row()
   .text('← Back', 'back_settings');
 

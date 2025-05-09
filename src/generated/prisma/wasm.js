@@ -134,10 +134,11 @@ exports.Prisma.WalletScalarFieldEnum = {
   id: 'id',
   address: 'address',
   chain: 'chain',
-  userId: 'userId',
   type: 'type',
+  encryptedPrivateKey: 'encryptedPrivateKey',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  userId: 'userId'
 };
 
 exports.Prisma.TradeScalarFieldEnum = {
@@ -159,11 +160,13 @@ exports.Prisma.TradeScalarFieldEnum = {
 exports.Prisma.SettingsScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  notifications: 'notifications',
+  language: 'language',
   autoTrade: 'autoTrade',
-  maxTradeAmount: 'maxTradeAmount',
+  proMode: 'proMode',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  gasPriority: 'gasPriority',
+  slippage: 'slippage'
 };
 
 exports.Prisma.SortOrder = {

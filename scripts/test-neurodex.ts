@@ -7,14 +7,19 @@ async function main(): Promise<void> {
 
   console.log('Testing NeuroDex API...\n');
 
+  // Test getTokenBalances
+  console.log('1. Testing getTokenBalances...');
+  const balances = await api.getEthBalance(testAddress);
+  console.log('Token Balances:', JSON.stringify(balances, null, 2), '\n');
+
   // Test getTokenInfo
-  console.log('1. Testing getTokenInfo...');
+  console.log('2. Testing getTokenInfo...');
   const tokenAddress = '0x4200000000000000000000000000000000000006'; // WETH on Base
   const tokenInfo = await api.getTokenInfo(tokenAddress);
   console.log('Token Info:', JSON.stringify(tokenInfo, null, 2), '\n');
 
   // Test buy
-  console.log('2. Testing buy...');
+  console.log('3. Testing buy...');
   const buyResult = await api.buy({
     tokenAddress,
     amount: parseUnits('1', 18).toString(), // 1 token
@@ -25,7 +30,7 @@ async function main(): Promise<void> {
   console.log('Buy Result:', JSON.stringify(buyResult, null, 2), '\n');
 
   // Test sell
-  console.log('3. Testing sell...');
+  console.log('4. Testing sell...');
   const sellResult = await api.sell({
     tokenAddress,
     amount: parseUnits('1', 18).toString(), // 1 token
@@ -36,7 +41,7 @@ async function main(): Promise<void> {
   console.log('Sell Result:', JSON.stringify(sellResult, null, 2), '\n');
 
   // Test createDca
-  console.log('4. Testing createDca...');
+  console.log('5. Testing createDca...');
   const dcaResult = await api.createDca({
     tokenAddress,
     amount: parseUnits('1', 18).toString(), // 1 token per interval
@@ -49,7 +54,7 @@ async function main(): Promise<void> {
   console.log('DCA Result:', JSON.stringify(dcaResult, null, 2), '\n');
 
   // Test createLimitOrder
-  console.log('5. Testing createLimitOrder...');
+  console.log('6. Testing createLimitOrder...');
   const limitOrderResult = await api.createLimitOrder({
     tokenAddress,
     amount: parseUnits('1', 18).toString(), // 1 token
@@ -60,24 +65,24 @@ async function main(): Promise<void> {
   console.log('Limit Order Result:', JSON.stringify(limitOrderResult, null, 2), '\n');
 
   // Test getDcaOrders
-  console.log('6. Testing getDcaOrders...');
+  console.log('7. Testing getDcaOrders...');
   const dcaOrders = await api.getDcaOrders(testAddress);
   console.log('DCA Orders:', JSON.stringify(dcaOrders, null, 2), '\n');
 
   // Test getLimitOrders
-  console.log('7. Testing getLimitOrders...');
+  console.log('8. Testing getLimitOrders...');
   const limitOrders = await api.getLimitOrders(testAddress);
   console.log('Limit Orders:', JSON.stringify(limitOrders, null, 2), '\n');
 
   // If we have any orders, test cancellation
   if (dcaOrders.success && dcaOrders.data && dcaOrders.data.length > 0) {
-    console.log('8. Testing cancelDca...');
+    console.log('9. Testing cancelDca...');
     const cancelDcaResult = await api.cancelDca(dcaOrders.data[0].id);
     console.log('Cancel DCA Result:', JSON.stringify(cancelDcaResult, null, 2), '\n');
   }
 
   if (limitOrders.success && limitOrders.data && limitOrders.data.length > 0) {
-    console.log('9. Testing cancelLimitOrder...');
+    console.log('10. Testing cancelLimitOrder...');
     const cancelLimitOrderResult = await api.cancelLimitOrder(limitOrders.data[0].id);
     console.log(
       'Cancel Limit Order Result:',

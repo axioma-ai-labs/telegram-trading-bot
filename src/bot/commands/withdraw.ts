@@ -4,13 +4,12 @@ import { InlineKeyboard } from 'grammy';
 import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { deleteBotMessage } from '@/utils/deleteMessage';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
-export const withdrawMessage = `📤 *Withdraw ETH or Tokens*
+export let withdrawMessage = `📤 *Withdraw ETH or other tokens*
 
 Your balance: 
-- ETH: 1.50
-- SOL: 2,054
-- BRO: 190,000,000
+- ETH: {ethBalance}
 
 *Important*:
 - Double check the receiving address
@@ -30,6 +29,10 @@ export const withdrawCommandHandler: CommandHandler = {
       });
       return;
     }
+
+    const api = new NeuroDexApi();
+    const ethBalance = await api.getEthBalance(ctx.from?.id.toString() || '');
+    withdrawMessage = withdrawMessage.replace('{ethBalance}', ethBalance.data || '0');
 
     const message = await ctx.reply(withdrawMessage, {
       parse_mode: 'Markdown',
