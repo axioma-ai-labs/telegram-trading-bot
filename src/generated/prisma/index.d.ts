@@ -2374,6 +2374,7 @@ export namespace Prisma {
     address: string | null
     chain: string | null
     userId: string | null
+    type: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2383,6 +2384,7 @@ export namespace Prisma {
     address: string | null
     chain: string | null
     userId: string | null
+    type: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2392,6 +2394,7 @@ export namespace Prisma {
     address: number
     chain: number
     userId: number
+    type: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2403,6 +2406,7 @@ export namespace Prisma {
     address?: true
     chain?: true
     userId?: true
+    type?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2412,6 +2416,7 @@ export namespace Prisma {
     address?: true
     chain?: true
     userId?: true
+    type?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2421,6 +2426,7 @@ export namespace Prisma {
     address?: true
     chain?: true
     userId?: true
+    type?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2503,6 +2509,7 @@ export namespace Prisma {
     address: string
     chain: string
     userId: string
+    type: string
     createdAt: Date
     updatedAt: Date
     _count: WalletCountAggregateOutputType | null
@@ -2529,6 +2536,7 @@ export namespace Prisma {
     address?: boolean
     chain?: boolean
     userId?: boolean
+    type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -2541,6 +2549,7 @@ export namespace Prisma {
     address?: boolean
     chain?: boolean
     userId?: boolean
+    type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -2551,6 +2560,7 @@ export namespace Prisma {
     address?: boolean
     chain?: boolean
     userId?: boolean
+    type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -2561,11 +2571,12 @@ export namespace Prisma {
     address?: boolean
     chain?: boolean
     userId?: boolean
+    type?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "address" | "chain" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["wallet"]>
+  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "address" | "chain" | "userId" | "type" | "createdAt" | "updatedAt", ExtArgs["result"]["wallet"]>
   export type WalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     trades?: boolean | Wallet$tradesArgs<ExtArgs>
@@ -2589,6 +2600,7 @@ export namespace Prisma {
       address: string
       chain: string
       userId: string
+      type: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["wallet"]>
@@ -3020,6 +3032,7 @@ export namespace Prisma {
     readonly address: FieldRef<"Wallet", 'String'>
     readonly chain: FieldRef<"Wallet", 'String'>
     readonly userId: FieldRef<"Wallet", 'String'>
+    readonly type: FieldRef<"Wallet", 'String'>
     readonly createdAt: FieldRef<"Wallet", 'DateTime'>
     readonly updatedAt: FieldRef<"Wallet", 'DateTime'>
   }
@@ -5822,6 +5835,7 @@ export namespace Prisma {
     address: 'address',
     chain: 'chain',
     userId: 'userId',
+    type: 'type',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -6035,6 +6049,7 @@ export namespace Prisma {
     address?: StringFilter<"Wallet"> | string
     chain?: StringFilter<"Wallet"> | string
     userId?: StringFilter<"Wallet"> | string
+    type?: StringFilter<"Wallet"> | string
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -6046,6 +6061,7 @@ export namespace Prisma {
     address?: SortOrder
     chain?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -6060,6 +6076,7 @@ export namespace Prisma {
     NOT?: WalletWhereInput | WalletWhereInput[]
     chain?: StringFilter<"Wallet"> | string
     userId?: StringFilter<"Wallet"> | string
+    type?: StringFilter<"Wallet"> | string
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -6071,6 +6088,7 @@ export namespace Prisma {
     address?: SortOrder
     chain?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: WalletCountOrderByAggregateInput
@@ -6086,6 +6104,7 @@ export namespace Prisma {
     address?: StringWithAggregatesFilter<"Wallet"> | string
     chain?: StringWithAggregatesFilter<"Wallet"> | string
     userId?: StringWithAggregatesFilter<"Wallet"> | string
+    type?: StringWithAggregatesFilter<"Wallet"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
   }
@@ -6343,6 +6362,7 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
@@ -6354,6 +6374,7 @@ export namespace Prisma {
     address: string
     chain: string
     userId: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     trades?: TradeUncheckedCreateNestedManyWithoutWalletInput
@@ -6363,6 +6384,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
@@ -6374,6 +6396,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     trades?: TradeUncheckedUpdateManyWithoutWalletNestedInput
@@ -6384,6 +6407,7 @@ export namespace Prisma {
     address: string
     chain: string
     userId: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6392,6 +6416,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6401,6 +6426,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6745,6 +6771,7 @@ export namespace Prisma {
     address?: SortOrder
     chain?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6754,6 +6781,7 @@ export namespace Prisma {
     address?: SortOrder
     chain?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6763,6 +6791,7 @@ export namespace Prisma {
     address?: SortOrder
     chain?: SortOrder
     userId?: SortOrder
+    type?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7363,6 +7392,7 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     trades?: TradeCreateNestedManyWithoutWalletInput
@@ -7372,6 +7402,7 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     trades?: TradeUncheckedCreateNestedManyWithoutWalletInput
@@ -7474,6 +7505,7 @@ export namespace Prisma {
     address?: StringFilter<"Wallet"> | string
     chain?: StringFilter<"Wallet"> | string
     userId?: StringFilter<"Wallet"> | string
+    type?: StringFilter<"Wallet"> | string
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
   }
@@ -7695,6 +7727,7 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
@@ -7705,6 +7738,7 @@ export namespace Prisma {
     address: string
     chain: string
     userId: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7764,6 +7798,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
@@ -7774,6 +7809,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7846,6 +7882,7 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
+    type?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7869,6 +7906,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     trades?: TradeUpdateManyWithoutWalletNestedInput
@@ -7878,6 +7916,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     trades?: TradeUncheckedUpdateManyWithoutWalletNestedInput
@@ -7887,6 +7926,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

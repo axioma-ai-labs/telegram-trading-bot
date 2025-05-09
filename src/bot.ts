@@ -26,6 +26,8 @@ import { buyCommandHandler } from '@/bot/commands/buy';
 import { sellCommandHandler } from '@/bot/commands/sell';
 import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
+import { userCommandHandler } from '@/bot/commands/user';
+
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -108,6 +110,7 @@ bot.command(depositCommandHandler.command, depositCommandHandler.handler); // /d
 bot.command(buyCommandHandler.command, buyCommandHandler.handler); // /buy
 bot.command(sellCommandHandler.command, sellCommandHandler.handler); // /sell
 bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // /withdraw
+bot.command(userCommandHandler.command, userCommandHandler.handler); // /user
 
 // Set commands (quick access)
 bot.api.setMyCommands([
@@ -123,6 +126,7 @@ bot.api.setMyCommands([
     command: transactionsCommandHandler.command,
     description: transactionsCommandHandler.description,
   },
+  { command: userCommandHandler.command, description: userCommandHandler.description },
 ]);
 
 // Error handling

@@ -1,7 +1,8 @@
 import { BotContext } from '@/types/config';
 import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
-import { IS_NEW_USER } from '@/config/mock';
+import { isUserRegistered, hasWallet } from '@/utils/checkUser';
+import { UserService } from '@/services/db/user.service';
 
 export const startMessage = `
 *💸 Neurodex*
@@ -10,8 +11,8 @@ Neurodex is your lightning fast crypto trading bot
 
 Buy and sell crypto with ease using Neurodex.
 
-/buy - Buy any crypto token on Base, Binance Smart Chain & Ethereum
-/sell - Sell any crypto token on Base, Binance Smart Chain & Ethereum
+/buy - Buy any crypto token on Base, BSC & Ethereum
+/sell - Sell any crypto token on Base, BSC & Ethereum
 /wallet - Manage your wallet
 /settings - Configure your bot settings
 /help - Get help and support
@@ -34,44 +35,54 @@ export const startKeyboard = new InlineKeyboard()
 // New User
 ////////////////////////////////////////////////////////////
 
-const newUserStartMessage = `
+export const newUserStartMessage = `
 *💸 Neurodex*
 
 Neurodex is your lightning fast crypto trading bot
 
-To get started, you have to create a new wallet. Please create one now by clicking the button below.
+To be able to /buy, /sell or do any other actions, you have to create a wallet first. Create one now by clicking the button below.
 
 For any help setting up please refer to [this guide](https://docs.neurodex.xyz/getting-started/setup) or get /help.
 `;
 
-const newUserStartKeyboard = new InlineKeyboard()
-  .text('💵 Create Wallet', 'create_wallet')
-  .row()
-  .text('⬅ Back', 'back_start');
+export const newUserStartKeyboard = new InlineKeyboard().text('💵 Create Wallet', 'create_wallet');
 
 export const startCommandHandler: CommandHandler = {
   command: 'start',
   description: 'Start the bot',
   handler: async (ctx: BotContext): Promise<void> => {
-    // Update session data
-    ctx.session.userId = ctx.from?.id;
-    ctx.session.username = ctx.from?.username;
-    ctx.session.lastInteractionTime = Date.now();
+    if (!ctx.from?.id) {
+      return;
+    }
+    const telegramId = ctx.from.id.toString();
+    const IS_REGISTERED = await isUserRegistered(telegramId);
+    const USER_HAS_WALLET = await hasWallet(telegramId);
 
-    // TODO: Add user check if user exists in database
-    if (IS_NEW_USER) {
+    if (!IS_REGISTERED || !USER_HAS_WALLET) {
+      // New user without wallet
+      await UserService.upsertUser(telegramId, {
+        username: ctx.from.username,
+        firstName: ctx.from.first_name,
+        lastName: ctx.from.last_name,
+      });
+      console.log('New user created:', telegramId);
+      console.log('New user has wallet:', USER_HAS_WALLET);
+
       await ctx.reply(newUserStartMessage, {
         parse_mode: 'Markdown',
         reply_markup: newUserStartKeyboard,
       });
-    } else {
-      await ctx.reply(startMessage, {
-        parse_mode: 'Markdown',
-        reply_markup: startKeyboard,
-        link_preview_options: {
-          is_disabled: true,
-        },
-      });
+      return;
     }
+
+    // Existing user with wallet
+    console.log('Existing user:', telegramId);
+    await ctx.reply(startMessage, {
+      parse_mode: 'Markdown',
+      reply_markup: startKeyboard,
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   },
 };

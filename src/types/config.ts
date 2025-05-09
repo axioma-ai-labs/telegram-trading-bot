@@ -59,6 +59,7 @@ export interface AppConfig {
   wallet: WalletConfig;
   database: DatabaseConfig;
   node: NodeConfig;
+  covalenthq_api_key: string;
 }
 
 export interface GasPriceInfo {

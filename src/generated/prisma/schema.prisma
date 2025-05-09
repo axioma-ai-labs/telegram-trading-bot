@@ -32,6 +32,7 @@ model Wallet {
   address   String   @unique
   chain     String // e.g., "ethereum", "bsc"
   userId    String
+  type      String   @default("generated") // "generated", "imported" | Now by default is generated only
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
