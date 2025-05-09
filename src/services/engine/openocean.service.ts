@@ -326,14 +326,11 @@ export class OpenOceanClient {
     chain: OpenOceanChain = this.config.defaultChain
   ): Promise<OpenOceanResponse<any>> {
     try {
-      const { data } = await this.axiosInstance.get(
-        this.buildEndpoint(chain, 'dca/all', 'v1'),
-        {
-          headers: {
-            'x-qn-api-chain': chain,
-          },
-        }
-      );
+      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'dca/all', 'v1'), {
+        headers: {
+          'x-qn-api-chain': chain,
+        },
+      });
       return { success: true, data };
     } catch (error) {
       return {
