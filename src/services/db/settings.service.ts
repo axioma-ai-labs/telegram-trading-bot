@@ -5,7 +5,7 @@ export class SettingsService {
   /**
    * Get settings for a user
    */
-  static async getUserSettings(userId: string): Promise<Settings | null> {
+  static async getUserSettingsByUserId(userId: string): Promise<Settings | null> {
     return prisma.settings.findUnique({
       where: { userId },
     });
@@ -17,9 +17,11 @@ export class SettingsService {
   static async upsertSettings(
     userId: string,
     data: {
-      notifications?: boolean;
+      language?: string;
       autoTrade?: boolean;
-      maxTradeAmount?: number;
+      proMode?: boolean;
+      gasPriority?: string;
+      slippage?: string;
     }
   ): Promise<Settings> {
     return prisma.settings.upsert({
@@ -33,17 +35,17 @@ export class SettingsService {
   }
 
   /**
-   * Update notification settings
+   * Update language setting
    */
-  static async updateNotifications(userId: string, notifications: boolean): Promise<Settings> {
+  static async updateLanguage(userId: string, language: string): Promise<Settings> {
     return prisma.settings.update({
       where: { userId },
-      data: { notifications },
+      data: { language },
     });
   }
 
   /**
-   * Update auto trade settings
+   * Update auto trade setting
    */
   static async updateAutoTrade(userId: string, autoTrade: boolean): Promise<Settings> {
     return prisma.settings.update({
@@ -53,12 +55,32 @@ export class SettingsService {
   }
 
   /**
-   * Update max trade amount
+   * Update pro mode setting
    */
-  static async updateMaxTradeAmount(userId: string, maxTradeAmount: number): Promise<Settings> {
+  static async updateProMode(userId: string, proMode: boolean): Promise<Settings> {
     return prisma.settings.update({
       where: { userId },
-      data: { maxTradeAmount },
+      data: { proMode },
+    });
+  }
+
+  /**
+   * Update gas priority setting
+   */
+  static async updateGasPriority(userId: string, gasPriority: string): Promise<Settings> {
+    return prisma.settings.update({
+      where: { userId },
+      data: { gasPriority },
+    });
+  }
+
+  /**
+   * Update slippage setting
+   */
+  static async updateSlippage(userId: string, slippage: string): Promise<Settings> {
+    return prisma.settings.update({
+      where: { userId },
+      data: { slippage },
     });
   }
 }

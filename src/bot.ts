@@ -16,6 +16,9 @@ import {
   handleSetSlippage,
   handleSetLanguage,
   handleSetGas,
+  updateSlippage,
+  updateGasPriority,
+  updateLanguage,
 } from '@/bot/callbacks/configureSettings';
 import { settingsCommandHandler } from '@/bot/commands/settings';
 import { transactionsCommandHandler } from '@/bot/commands/transactions';
@@ -61,16 +64,13 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
 // Parameterized handlers
 const PARAMETERIZED_HANDLERS: Record<string, (ctx: BotContext, param: string) => Promise<void>> = {
   slippage: async (ctx, param) => {
-    await ctx.answerCallbackQuery(`Slippage set to ${param}%`);
-    await handleConfigureSettings(ctx);
+    await updateSlippage(ctx, param);
   },
   lang: async (ctx, param) => {
-    await ctx.answerCallbackQuery(`Language set to ${param}`);
-    await handleConfigureSettings(ctx);
+    await updateLanguage(ctx, param);
   },
   gas: async (ctx, param) => {
-    await ctx.answerCallbackQuery(`Gas priority set to ${param}`);
-    await handleConfigureSettings(ctx);
+    await updateGasPriority(ctx, param);
   },
 };
 
@@ -93,6 +93,7 @@ bot.on('callback_query', async (ctx) => {
 
   // 3) Regular callbacks
   const handler = CALLBACK_HANDLERS[callbackData];
+  console.log('callbackData: ', callbackData);
   if (handler) {
     await handler(ctx);
     return;

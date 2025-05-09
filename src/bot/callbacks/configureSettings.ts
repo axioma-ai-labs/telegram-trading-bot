@@ -1,23 +1,43 @@
 import { BotContext } from '@/types/config';
-
+import { SettingsService } from '@/services/db/settings.service';
+import { UserService } from '@/services/db/user.service';
 import {
   settingsMessage,
   settingsKeyboard,
   slippageKeyboard,
   languageKeyboard,
   gasKeyboard,
-} from '../commands/settings';
+} from '@/bot/commands/settings';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
-  // TODO: Add logic to save settings CRUD operations
-  await ctx.editMessageText(settingsMessage, {
+  const telegramId = ctx.from?.id?.toString();
+  if (!telegramId) return;
+
+  const user = await UserService.getUserByTelegramId(telegramId);
+
+  if (!user) {
+    await ctx.editMessageText('User not found. Please try again later.', {
+      parse_mode: 'Markdown',
+    });
+    return;
+  }
+
+  const settings = await SettingsService.getUserSettingsByUserId(user.id);
+
+  const message = settingsMessage
+    .replace('{slippage}', getSlippageName(settings?.slippage || '1'))
+    .replace('{language}', getLanguageName(settings?.language || 'en'))
+    .replace('{gasPriority}', getGasPriorityName(settings?.gasPriority || 'medium'));
+
+  await ctx.editMessageText(message, {
     parse_mode: 'Markdown',
     reply_markup: settingsKeyboard,
   });
 }
 
+// Update slippage
 export async function handleSetSlippage(ctx: BotContext): Promise<void> {
-  // TODO: Add logic to save slippage setting
   await ctx.editMessageText(
     '*📊 Set Slippage Tolerance*\n\nSelect your preferred slippage tolerance:',
     {
@@ -27,18 +47,56 @@ export async function handleSetSlippage(ctx: BotContext): Promise<void> {
   );
 }
 
+// Show language configuration options
 export async function handleSetLanguage(ctx: BotContext): Promise<void> {
-  // TODO: Add logic to save language setting
   await ctx.editMessageText('*🌎 Select Language*\n\nChoose your preferred language:', {
     parse_mode: 'Markdown',
     reply_markup: languageKeyboard,
   });
 }
 
+// Show gas priority configuration options
 export async function handleSetGas(ctx: BotContext): Promise<void> {
-  // TODO: Add logic to save gas priority setting
   await ctx.editMessageText('*⛽ Set Gas Priority*\n\nSelect your preferred gas priority:', {
     parse_mode: 'Markdown',
     reply_markup: gasKeyboard,
   });
 }
+
+// Parameterized handlers to actually update settings
+
+// Update slippage
+export const updateSlippage = async (ctx: BotContext, slippage: string): Promise<void> => {
+  const telegramId = ctx.from?.id?.toString();
+  if (!telegramId) return;
+
+  const user = await UserService.getUserByTelegramId(telegramId);
+  if (!user) return;
+
+  await SettingsService.updateSlippage(user.id, slippage);
+  await ctx.answerCallbackQuery(`Slippage set to ${getSlippageName(slippage)}`);
+};
+
+// Update gas priority
+export const updateGasPriority = async (ctx: BotContext, gasPriority: string): Promise<void> => {
+  const telegramId = ctx.from?.id?.toString();
+  if (!telegramId) return;
+
+  const user = await UserService.getUserByTelegramId(telegramId);
+  if (!user) return;
+
+  await SettingsService.updateGasPriority(user.id, gasPriority);
+  await ctx.answerCallbackQuery(`Gas priority set to ${getGasPriorityName(gasPriority)}`);
+};
+
+// Update language
+export const updateLanguage = async (ctx: BotContext, language: string): Promise<void> => {
+  const telegramId = ctx.from?.id?.toString();
+  if (!telegramId) return;
+
+  const user = await UserService.getUserByTelegramId(telegramId);
+  if (!user) return;
+
+  await SettingsService.updateLanguage(user.id, language);
+  await ctx.answerCallbackQuery(`Language set to ${getLanguageName(language)}`);
+};
