@@ -86,7 +86,17 @@ DEFAULT_GAS_PRIORITY=medium
 DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key="
 ```
 
-Note, for database we need the API key from the Prisma Console!
+------
+
+
+# Default settings
+- **Slippage**: 1%
+- **Gas**: medium
+- **Language**: english
+
+
+------
+
 
 ## Makefile
 

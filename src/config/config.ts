@@ -37,6 +37,9 @@ const envSchema = z.object({
   DEFAULT_FEE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE_WALLET: z.string().optional().default(''),
   DEFAULT_GAS_PRIORITY: z.enum(['low', 'medium', 'high'] as const).default('medium'),
+
+  // Covalent API Key
+  COVALENTHQ_API_KEY: z.string().min(1, 'COVALENTHQ_API_KEY is required'),
 });
 
 /**
@@ -91,13 +94,8 @@ const createConfig = (): AppConfig => {
       bncRpc: env.BNC_RPC,
       openOceanAddonId: env.OPEN_OCEAN_ADDON_ID,
     },
+    covalenthq_api_key: env.COVALENTHQ_API_KEY,
   };
 };
 
-/**
- * Create and export the config instance
- * This ensures the config is only parsed once during import
- */
-const config = createConfig();
-
-export default config;
+export default createConfig();

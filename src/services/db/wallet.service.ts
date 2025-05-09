@@ -3,6 +3,25 @@ import { Wallet } from '@/generated/prisma';
 
 export class WalletService {
   /**
+   * Create a new wallet
+   */
+  static async createWallet(data: {
+    address: string;
+    chain: string;
+    userId: string;
+    type?: string;
+  }): Promise<Wallet> {
+    return prisma.wallet.create({
+      data: {
+        address: data.address,
+        chain: data.chain,
+        userId: data.userId,
+        type: data.type,
+      },
+    });
+  }
+
+  /**
    * Get wallet by address
    */
   static async getWalletByAddress(address: string): Promise<Wallet | null> {
@@ -18,7 +37,7 @@ export class WalletService {
   /**
    * Get all wallets for a user
    */
-  static async getUserWallets(userId: string): Promise<Wallet[]> {
+  static async getWalletsByUserId(userId: string): Promise<Wallet[]> {
     return prisma.wallet.findMany({
       where: { userId },
       include: {
@@ -28,55 +47,26 @@ export class WalletService {
   }
 
   /**
-   * Create a new wallet
+   * Get wallets by chain for a user
    */
-  static async createWallet(
-    userId: string,
-    data: {
-      address: string;
-      chain: string;
-    }
-  ): Promise<Wallet> {
-    return prisma.wallet.create({
-      data: {
-        ...data,
+  static async getWalletsByChain(userId: string, chain: string): Promise<Wallet[]> {
+    return prisma.wallet.findMany({
+      where: {
         userId,
+        chain,
       },
-    });
-  }
-
-  /**
-   * Delete a wallet
-   */
-  static async deleteWallet(walletId: string): Promise<Wallet> {
-    return prisma.wallet.delete({
-      where: { id: walletId },
-    });
-  }
-
-  /**
-   * Update wallet chain
-   */
-  static async updateWalletChain(walletId: string, chain: string): Promise<Wallet> {
-    return prisma.wallet.update({
-      where: { id: walletId },
-      data: { chain },
-    });
-  }
-
-  /**
-   * Get wallet with its trades
-   */
-  static async getWalletWithTrades(walletId: string): Promise<Wallet | null> {
-    return prisma.wallet.findUnique({
-      where: { id: walletId },
       include: {
-        trades: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
+        trades: true,
       },
+    });
+  }
+
+  /**
+   * Delete wallet
+   */
+  static async deleteWallet(address: string): Promise<Wallet> {
+    return prisma.wallet.delete({
+      where: { address },
     });
   }
 }
