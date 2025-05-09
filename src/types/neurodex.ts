@@ -126,3 +126,13 @@ export interface OrderInfo {
   /** Transaction hash if executed */
   txHash?: string;
 }
+
+/**
+ * Wallet information
+ */
+export interface WalletInfo {
+  /** Wallet address */
+  address: string;
+
+  privateKey: string;
+}

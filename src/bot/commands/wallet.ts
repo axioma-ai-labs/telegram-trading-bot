@@ -5,15 +5,19 @@ import { hasWallet } from '@/utils/checkUser';
 import { newUserStartMessage, newUserStartKeyboard } from './start';
 import { WalletService } from '@/services/db/wallet.service';
 import { UserService } from '@/services/db/user.service';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export const walletCreationOKMessage = `
-✅ *Wallet Created Successfully*
+✅ *Your wallet has been created successfully*
 
-*Your Wallet Address:*
+*Wallet Address:*
 \`{walletAddress}\`
 
-*Your Private Key:*
+*Private Key:*
 \`{privateKey}\`
+
+*Balance:*
+- ETH: {ethBalance}
 
 ⚠️ *IMPORTANT:* Keep your private key safe and secure
 • Do not share it with anyone
@@ -22,26 +26,17 @@ export const walletCreationOKMessage = `
 
 ⏰ This message will be deleted in 5 minutes for security`;
 
-export const depositKeyboard = new InlineKeyboard().text('Deposit', 'deposit_funds');
-
 export const walletCreationFailMessage = `❌ *Wallet Creation Failed*
 
 Something went wrong. Please try again or go to /help.`;
 
-export const walletMessage = '💰 Wallet message';
+export const walletMessage = `*💰 Wallet:* \`{walletAddress}\`
 
-// export const walletMessage = `*💰 Wallet:* \`{walletAddress}\`
+*Balance:*
 
-// *Balance:*
+ETH: {ethBalance}
 
-// {coin1}: {coin1Balance} | $${coin1UsdValue}
-// {coin2}: {coin2Balance} | $${coin2UsdValue}
-// {coin3}: {coin3Balance} | $${coin3UsdValue}
-
-// *Total Net Worth:*
-// - $${randomTotalNetWorth}
-
-// To deposit funds, please send your coins to the wallet address above.`;
+To deposit funds, please send your coins to the wallet address above.`;
 
 export const walletKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
@@ -78,9 +73,14 @@ export const walletCommandHandler: CommandHandler = {
       const wallets = await WalletService.getWalletsByUserId(user.id);
       console.log('Wallets:', wallets);
 
-      const wallet_message = walletMessage.replace('{walletAddress}', wallets[0].address);
+      // fetch data
+      const api = new NeuroDexApi();
+      const ethBalance = await api.getEthBalance(wallets[0].address);
+      const existingWalletMessage = walletMessage
+        .replace('{ethBalance}', ethBalance.data || '0')
+        .replace('{walletAddress}', wallets[0].address);
 
-      await ctx.reply(wallet_message, {
+      await ctx.reply(existingWalletMessage, {
         parse_mode: 'Markdown',
         reply_markup: walletKeyboard,
       });

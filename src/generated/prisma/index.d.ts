@@ -2373,30 +2373,33 @@ export namespace Prisma {
     id: string | null
     address: string | null
     chain: string | null
-    userId: string | null
     type: string | null
+    encryptedPrivateKey: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    userId: string | null
   }
 
   export type WalletMaxAggregateOutputType = {
     id: string | null
     address: string | null
     chain: string | null
-    userId: string | null
     type: string | null
+    encryptedPrivateKey: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    userId: string | null
   }
 
   export type WalletCountAggregateOutputType = {
     id: number
     address: number
     chain: number
-    userId: number
     type: number
+    encryptedPrivateKey: number
     createdAt: number
     updatedAt: number
+    userId: number
     _all: number
   }
 
@@ -2405,30 +2408,33 @@ export namespace Prisma {
     id?: true
     address?: true
     chain?: true
-    userId?: true
     type?: true
+    encryptedPrivateKey?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
   }
 
   export type WalletMaxAggregateInputType = {
     id?: true
     address?: true
     chain?: true
-    userId?: true
     type?: true
+    encryptedPrivateKey?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
   }
 
   export type WalletCountAggregateInputType = {
     id?: true
     address?: true
     chain?: true
-    userId?: true
     type?: true
+    encryptedPrivateKey?: true
     createdAt?: true
     updatedAt?: true
+    userId?: true
     _all?: true
   }
 
@@ -2508,10 +2514,11 @@ export namespace Prisma {
     id: string
     address: string
     chain: string
-    userId: string
     type: string
+    encryptedPrivateKey: string | null
     createdAt: Date
     updatedAt: Date
+    userId: string
     _count: WalletCountAggregateOutputType | null
     _min: WalletMinAggregateOutputType | null
     _max: WalletMaxAggregateOutputType | null
@@ -2535,10 +2542,11 @@ export namespace Prisma {
     id?: boolean
     address?: boolean
     chain?: boolean
-    userId?: boolean
     type?: boolean
+    encryptedPrivateKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     trades?: boolean | Wallet$tradesArgs<ExtArgs>
     _count?: boolean | WalletCountOutputTypeDefaultArgs<ExtArgs>
@@ -2548,10 +2556,11 @@ export namespace Prisma {
     id?: boolean
     address?: boolean
     chain?: boolean
-    userId?: boolean
     type?: boolean
+    encryptedPrivateKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
 
@@ -2559,10 +2568,11 @@ export namespace Prisma {
     id?: boolean
     address?: boolean
     chain?: boolean
-    userId?: boolean
     type?: boolean
+    encryptedPrivateKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["wallet"]>
 
@@ -2570,13 +2580,14 @@ export namespace Prisma {
     id?: boolean
     address?: boolean
     chain?: boolean
-    userId?: boolean
     type?: boolean
+    encryptedPrivateKey?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    userId?: boolean
   }
 
-  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "address" | "chain" | "userId" | "type" | "createdAt" | "updatedAt", ExtArgs["result"]["wallet"]>
+  export type WalletOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "address" | "chain" | "type" | "encryptedPrivateKey" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["wallet"]>
   export type WalletInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     trades?: boolean | Wallet$tradesArgs<ExtArgs>
@@ -2599,10 +2610,11 @@ export namespace Prisma {
       id: string
       address: string
       chain: string
-      userId: string
       type: string
+      encryptedPrivateKey: string | null
       createdAt: Date
       updatedAt: Date
+      userId: string
     }, ExtArgs["result"]["wallet"]>
     composites: {}
   }
@@ -3031,10 +3043,11 @@ export namespace Prisma {
     readonly id: FieldRef<"Wallet", 'String'>
     readonly address: FieldRef<"Wallet", 'String'>
     readonly chain: FieldRef<"Wallet", 'String'>
-    readonly userId: FieldRef<"Wallet", 'String'>
     readonly type: FieldRef<"Wallet", 'String'>
+    readonly encryptedPrivateKey: FieldRef<"Wallet", 'String'>
     readonly createdAt: FieldRef<"Wallet", 'DateTime'>
     readonly updatedAt: FieldRef<"Wallet", 'DateTime'>
+    readonly userId: FieldRef<"Wallet", 'String'>
   }
     
 
@@ -4691,88 +4704,82 @@ export namespace Prisma {
 
   export type AggregateSettings = {
     _count: SettingsCountAggregateOutputType | null
-    _avg: SettingsAvgAggregateOutputType | null
-    _sum: SettingsSumAggregateOutputType | null
     _min: SettingsMinAggregateOutputType | null
     _max: SettingsMaxAggregateOutputType | null
-  }
-
-  export type SettingsAvgAggregateOutputType = {
-    maxTradeAmount: number | null
-  }
-
-  export type SettingsSumAggregateOutputType = {
-    maxTradeAmount: number | null
   }
 
   export type SettingsMinAggregateOutputType = {
     id: string | null
     userId: string | null
-    notifications: boolean | null
+    language: string | null
     autoTrade: boolean | null
-    maxTradeAmount: number | null
+    proMode: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    gasPriority: string | null
+    slippage: string | null
   }
 
   export type SettingsMaxAggregateOutputType = {
     id: string | null
     userId: string | null
-    notifications: boolean | null
+    language: string | null
     autoTrade: boolean | null
-    maxTradeAmount: number | null
+    proMode: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
+    gasPriority: string | null
+    slippage: string | null
   }
 
   export type SettingsCountAggregateOutputType = {
     id: number
     userId: number
-    notifications: number
+    language: number
     autoTrade: number
-    maxTradeAmount: number
+    proMode: number
     createdAt: number
     updatedAt: number
+    gasPriority: number
+    slippage: number
     _all: number
   }
 
 
-  export type SettingsAvgAggregateInputType = {
-    maxTradeAmount?: true
-  }
-
-  export type SettingsSumAggregateInputType = {
-    maxTradeAmount?: true
-  }
-
   export type SettingsMinAggregateInputType = {
     id?: true
     userId?: true
-    notifications?: true
+    language?: true
     autoTrade?: true
-    maxTradeAmount?: true
+    proMode?: true
     createdAt?: true
     updatedAt?: true
+    gasPriority?: true
+    slippage?: true
   }
 
   export type SettingsMaxAggregateInputType = {
     id?: true
     userId?: true
-    notifications?: true
+    language?: true
     autoTrade?: true
-    maxTradeAmount?: true
+    proMode?: true
     createdAt?: true
     updatedAt?: true
+    gasPriority?: true
+    slippage?: true
   }
 
   export type SettingsCountAggregateInputType = {
     id?: true
     userId?: true
-    notifications?: true
+    language?: true
     autoTrade?: true
-    maxTradeAmount?: true
+    proMode?: true
     createdAt?: true
     updatedAt?: true
+    gasPriority?: true
+    slippage?: true
     _all?: true
   }
 
@@ -4814,18 +4821,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: SettingsAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: SettingsSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: SettingsMinAggregateInputType
@@ -4856,8 +4851,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: SettingsCountAggregateInputType | true
-    _avg?: SettingsAvgAggregateInputType
-    _sum?: SettingsSumAggregateInputType
     _min?: SettingsMinAggregateInputType
     _max?: SettingsMaxAggregateInputType
   }
@@ -4865,14 +4858,14 @@ export namespace Prisma {
   export type SettingsGroupByOutputType = {
     id: string
     userId: string
-    notifications: boolean
+    language: string
     autoTrade: boolean
-    maxTradeAmount: number | null
+    proMode: boolean
     createdAt: Date
     updatedAt: Date
+    gasPriority: string
+    slippage: string
     _count: SettingsCountAggregateOutputType | null
-    _avg: SettingsAvgAggregateOutputType | null
-    _sum: SettingsSumAggregateOutputType | null
     _min: SettingsMinAggregateOutputType | null
     _max: SettingsMaxAggregateOutputType | null
   }
@@ -4894,47 +4887,55 @@ export namespace Prisma {
   export type SettingsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    notifications?: boolean
+    language?: boolean
     autoTrade?: boolean
-    maxTradeAmount?: boolean
+    proMode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    gasPriority?: boolean
+    slippage?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["settings"]>
 
   export type SettingsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    notifications?: boolean
+    language?: boolean
     autoTrade?: boolean
-    maxTradeAmount?: boolean
+    proMode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    gasPriority?: boolean
+    slippage?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["settings"]>
 
   export type SettingsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     userId?: boolean
-    notifications?: boolean
+    language?: boolean
     autoTrade?: boolean
-    maxTradeAmount?: boolean
+    proMode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    gasPriority?: boolean
+    slippage?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["settings"]>
 
   export type SettingsSelectScalar = {
     id?: boolean
     userId?: boolean
-    notifications?: boolean
+    language?: boolean
     autoTrade?: boolean
-    maxTradeAmount?: boolean
+    proMode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    gasPriority?: boolean
+    slippage?: boolean
   }
 
-  export type SettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "notifications" | "autoTrade" | "maxTradeAmount" | "createdAt" | "updatedAt", ExtArgs["result"]["settings"]>
+  export type SettingsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "language" | "autoTrade" | "proMode" | "createdAt" | "updatedAt" | "gasPriority" | "slippage", ExtArgs["result"]["settings"]>
   export type SettingsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -4953,11 +4954,13 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      notifications: boolean
+      language: string
       autoTrade: boolean
-      maxTradeAmount: number | null
+      proMode: boolean
       createdAt: Date
       updatedAt: Date
+      gasPriority: string
+      slippage: string
     }, ExtArgs["result"]["settings"]>
     composites: {}
   }
@@ -5384,11 +5387,13 @@ export namespace Prisma {
   interface SettingsFieldRefs {
     readonly id: FieldRef<"Settings", 'String'>
     readonly userId: FieldRef<"Settings", 'String'>
-    readonly notifications: FieldRef<"Settings", 'Boolean'>
+    readonly language: FieldRef<"Settings", 'String'>
     readonly autoTrade: FieldRef<"Settings", 'Boolean'>
-    readonly maxTradeAmount: FieldRef<"Settings", 'Float'>
+    readonly proMode: FieldRef<"Settings", 'Boolean'>
     readonly createdAt: FieldRef<"Settings", 'DateTime'>
     readonly updatedAt: FieldRef<"Settings", 'DateTime'>
+    readonly gasPriority: FieldRef<"Settings", 'String'>
+    readonly slippage: FieldRef<"Settings", 'String'>
   }
     
 
@@ -5834,10 +5839,11 @@ export namespace Prisma {
     id: 'id',
     address: 'address',
     chain: 'chain',
-    userId: 'userId',
     type: 'type',
+    encryptedPrivateKey: 'encryptedPrivateKey',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    userId: 'userId'
   };
 
   export type WalletScalarFieldEnum = (typeof WalletScalarFieldEnum)[keyof typeof WalletScalarFieldEnum]
@@ -5865,11 +5871,13 @@ export namespace Prisma {
   export const SettingsScalarFieldEnum: {
     id: 'id',
     userId: 'userId',
-    notifications: 'notifications',
+    language: 'language',
     autoTrade: 'autoTrade',
-    maxTradeAmount: 'maxTradeAmount',
+    proMode: 'proMode',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    gasPriority: 'gasPriority',
+    slippage: 'slippage'
   };
 
   export type SettingsScalarFieldEnum = (typeof SettingsScalarFieldEnum)[keyof typeof SettingsScalarFieldEnum]
@@ -6048,10 +6056,11 @@ export namespace Prisma {
     id?: StringFilter<"Wallet"> | string
     address?: StringFilter<"Wallet"> | string
     chain?: StringFilter<"Wallet"> | string
-    userId?: StringFilter<"Wallet"> | string
     type?: StringFilter<"Wallet"> | string
+    encryptedPrivateKey?: StringNullableFilter<"Wallet"> | string | null
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
+    userId?: StringFilter<"Wallet"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     trades?: TradeListRelationFilter
   }
@@ -6060,10 +6069,11 @@ export namespace Prisma {
     id?: SortOrder
     address?: SortOrder
     chain?: SortOrder
-    userId?: SortOrder
     type?: SortOrder
+    encryptedPrivateKey?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
     user?: UserOrderByWithRelationInput
     trades?: TradeOrderByRelationAggregateInput
   }
@@ -6075,10 +6085,11 @@ export namespace Prisma {
     OR?: WalletWhereInput[]
     NOT?: WalletWhereInput | WalletWhereInput[]
     chain?: StringFilter<"Wallet"> | string
-    userId?: StringFilter<"Wallet"> | string
     type?: StringFilter<"Wallet"> | string
+    encryptedPrivateKey?: StringNullableFilter<"Wallet"> | string | null
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
+    userId?: StringFilter<"Wallet"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     trades?: TradeListRelationFilter
   }, "id" | "address">
@@ -6087,10 +6098,11 @@ export namespace Prisma {
     id?: SortOrder
     address?: SortOrder
     chain?: SortOrder
-    userId?: SortOrder
     type?: SortOrder
+    encryptedPrivateKey?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
     _count?: WalletCountOrderByAggregateInput
     _max?: WalletMaxOrderByAggregateInput
     _min?: WalletMinOrderByAggregateInput
@@ -6103,10 +6115,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Wallet"> | string
     address?: StringWithAggregatesFilter<"Wallet"> | string
     chain?: StringWithAggregatesFilter<"Wallet"> | string
-    userId?: StringWithAggregatesFilter<"Wallet"> | string
     type?: StringWithAggregatesFilter<"Wallet"> | string
+    encryptedPrivateKey?: StringNullableWithAggregatesFilter<"Wallet"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Wallet"> | Date | string
+    userId?: StringWithAggregatesFilter<"Wallet"> | string
   }
 
   export type TradeWhereInput = {
@@ -6215,22 +6228,26 @@ export namespace Prisma {
     NOT?: SettingsWhereInput | SettingsWhereInput[]
     id?: StringFilter<"Settings"> | string
     userId?: StringFilter<"Settings"> | string
-    notifications?: BoolFilter<"Settings"> | boolean
+    language?: StringFilter<"Settings"> | string
     autoTrade?: BoolFilter<"Settings"> | boolean
-    maxTradeAmount?: FloatNullableFilter<"Settings"> | number | null
+    proMode?: BoolFilter<"Settings"> | boolean
     createdAt?: DateTimeFilter<"Settings"> | Date | string
     updatedAt?: DateTimeFilter<"Settings"> | Date | string
+    gasPriority?: StringFilter<"Settings"> | string
+    slippage?: StringFilter<"Settings"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type SettingsOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
-    notifications?: SortOrder
+    language?: SortOrder
     autoTrade?: SortOrder
-    maxTradeAmount?: SortOrderInput | SortOrder
+    proMode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    gasPriority?: SortOrder
+    slippage?: SortOrder
     user?: UserOrderByWithRelationInput
   }
 
@@ -6240,27 +6257,29 @@ export namespace Prisma {
     AND?: SettingsWhereInput | SettingsWhereInput[]
     OR?: SettingsWhereInput[]
     NOT?: SettingsWhereInput | SettingsWhereInput[]
-    notifications?: BoolFilter<"Settings"> | boolean
+    language?: StringFilter<"Settings"> | string
     autoTrade?: BoolFilter<"Settings"> | boolean
-    maxTradeAmount?: FloatNullableFilter<"Settings"> | number | null
+    proMode?: BoolFilter<"Settings"> | boolean
     createdAt?: DateTimeFilter<"Settings"> | Date | string
     updatedAt?: DateTimeFilter<"Settings"> | Date | string
+    gasPriority?: StringFilter<"Settings"> | string
+    slippage?: StringFilter<"Settings"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "userId">
 
   export type SettingsOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
-    notifications?: SortOrder
+    language?: SortOrder
     autoTrade?: SortOrder
-    maxTradeAmount?: SortOrderInput | SortOrder
+    proMode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    gasPriority?: SortOrder
+    slippage?: SortOrder
     _count?: SettingsCountOrderByAggregateInput
-    _avg?: SettingsAvgOrderByAggregateInput
     _max?: SettingsMaxOrderByAggregateInput
     _min?: SettingsMinOrderByAggregateInput
-    _sum?: SettingsSumOrderByAggregateInput
   }
 
   export type SettingsScalarWhereWithAggregatesInput = {
@@ -6269,11 +6288,13 @@ export namespace Prisma {
     NOT?: SettingsScalarWhereWithAggregatesInput | SettingsScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Settings"> | string
     userId?: StringWithAggregatesFilter<"Settings"> | string
-    notifications?: BoolWithAggregatesFilter<"Settings"> | boolean
+    language?: StringWithAggregatesFilter<"Settings"> | string
     autoTrade?: BoolWithAggregatesFilter<"Settings"> | boolean
-    maxTradeAmount?: FloatNullableWithAggregatesFilter<"Settings"> | number | null
+    proMode?: BoolWithAggregatesFilter<"Settings"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Settings"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Settings"> | Date | string
+    gasPriority?: StringWithAggregatesFilter<"Settings"> | string
+    slippage?: StringWithAggregatesFilter<"Settings"> | string
   }
 
   export type UserCreateInput = {
@@ -6363,6 +6384,7 @@ export namespace Prisma {
     address: string
     chain: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
@@ -6373,10 +6395,11 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
-    userId: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
     trades?: TradeUncheckedCreateNestedManyWithoutWalletInput
   }
 
@@ -6385,6 +6408,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
@@ -6395,10 +6419,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
     trades?: TradeUncheckedUpdateManyWithoutWalletNestedInput
   }
 
@@ -6406,10 +6431,11 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
-    userId: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
   }
 
   export type WalletUpdateManyMutationInput = {
@@ -6417,6 +6443,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6425,10 +6452,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TradeCreateInput = {
@@ -6543,71 +6571,85 @@ export namespace Prisma {
 
   export type SettingsCreateInput = {
     id?: string
-    notifications?: boolean
+    language?: string
     autoTrade?: boolean
-    maxTradeAmount?: number | null
+    proMode?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    gasPriority?: string
+    slippage?: string
     user: UserCreateNestedOneWithoutSettingsInput
   }
 
   export type SettingsUncheckedCreateInput = {
     id?: string
     userId: string
-    notifications?: boolean
+    language?: string
     autoTrade?: boolean
-    maxTradeAmount?: number | null
+    proMode?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    gasPriority?: string
+    slippage?: string
   }
 
   export type SettingsUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutSettingsNestedInput
   }
 
   export type SettingsUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
   }
 
   export type SettingsCreateManyInput = {
     id?: string
     userId: string
-    notifications?: boolean
+    language?: string
     autoTrade?: boolean
-    maxTradeAmount?: number | null
+    proMode?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    gasPriority?: string
+    slippage?: string
   }
 
   export type SettingsUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
   }
 
   export type SettingsUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -6770,30 +6812,33 @@ export namespace Prisma {
     id?: SortOrder
     address?: SortOrder
     chain?: SortOrder
-    userId?: SortOrder
     type?: SortOrder
+    encryptedPrivateKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type WalletMaxOrderByAggregateInput = {
     id?: SortOrder
     address?: SortOrder
     chain?: SortOrder
-    userId?: SortOrder
     type?: SortOrder
+    encryptedPrivateKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type WalletMinOrderByAggregateInput = {
     id?: SortOrder
     address?: SortOrder
     chain?: SortOrder
-    userId?: SortOrder
     type?: SortOrder
+    encryptedPrivateKey?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    userId?: SortOrder
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -6893,53 +6938,40 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type SettingsCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    notifications?: SortOrder
+    language?: SortOrder
     autoTrade?: SortOrder
-    maxTradeAmount?: SortOrder
+    proMode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type SettingsAvgOrderByAggregateInput = {
-    maxTradeAmount?: SortOrder
+    gasPriority?: SortOrder
+    slippage?: SortOrder
   }
 
   export type SettingsMaxOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    notifications?: SortOrder
+    language?: SortOrder
     autoTrade?: SortOrder
-    maxTradeAmount?: SortOrder
+    proMode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    gasPriority?: SortOrder
+    slippage?: SortOrder
   }
 
   export type SettingsMinOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
-    notifications?: SortOrder
+    language?: SortOrder
     autoTrade?: SortOrder
-    maxTradeAmount?: SortOrder
+    proMode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type SettingsSumOrderByAggregateInput = {
-    maxTradeAmount?: SortOrder
+    gasPriority?: SortOrder
+    slippage?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -6948,22 +6980,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
   export type WalletCreateNestedManyWithoutUserInput = {
@@ -7196,14 +7212,6 @@ export namespace Prisma {
     set?: boolean
   }
 
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type UserUpdateOneRequiredWithoutSettingsNestedInput = {
     create?: XOR<UserCreateWithoutSettingsInput, UserUncheckedCreateWithoutSettingsInput>
     connectOrCreate?: UserCreateOrConnectWithoutSettingsInput
@@ -7353,17 +7361,6 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type NestedFloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -7372,27 +7369,12 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type WalletCreateWithoutUserInput = {
     id?: string
     address: string
     chain: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     trades?: TradeCreateNestedManyWithoutWalletInput
@@ -7403,6 +7385,7 @@ export namespace Prisma {
     address: string
     chain: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     trades?: TradeUncheckedCreateNestedManyWithoutWalletInput
@@ -7460,20 +7443,24 @@ export namespace Prisma {
 
   export type SettingsCreateWithoutUserInput = {
     id?: string
-    notifications?: boolean
+    language?: string
     autoTrade?: boolean
-    maxTradeAmount?: number | null
+    proMode?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    gasPriority?: string
+    slippage?: string
   }
 
   export type SettingsUncheckedCreateWithoutUserInput = {
     id?: string
-    notifications?: boolean
+    language?: string
     autoTrade?: boolean
-    maxTradeAmount?: number | null
+    proMode?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    gasPriority?: string
+    slippage?: string
   }
 
   export type SettingsCreateOrConnectWithoutUserInput = {
@@ -7504,10 +7491,11 @@ export namespace Prisma {
     id?: StringFilter<"Wallet"> | string
     address?: StringFilter<"Wallet"> | string
     chain?: StringFilter<"Wallet"> | string
-    userId?: StringFilter<"Wallet"> | string
     type?: StringFilter<"Wallet"> | string
+    encryptedPrivateKey?: StringNullableFilter<"Wallet"> | string | null
     createdAt?: DateTimeFilter<"Wallet"> | Date | string
     updatedAt?: DateTimeFilter<"Wallet"> | Date | string
+    userId?: StringFilter<"Wallet"> | string
   }
 
   export type TradeUpsertWithWhereUniqueWithoutUserInput = {
@@ -7558,20 +7546,24 @@ export namespace Prisma {
 
   export type SettingsUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
   }
 
   export type SettingsUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    notifications?: BoolFieldUpdateOperationsInput | boolean
+    language?: StringFieldUpdateOperationsInput | string
     autoTrade?: BoolFieldUpdateOperationsInput | boolean
-    maxTradeAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    proMode?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    gasPriority?: StringFieldUpdateOperationsInput | string
+    slippage?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserCreateWithoutWalletsInput = {
@@ -7728,6 +7720,7 @@ export namespace Prisma {
     address: string
     chain: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutWalletsInput
@@ -7737,10 +7730,11 @@ export namespace Prisma {
     id?: string
     address: string
     chain: string
-    userId: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    userId: string
   }
 
   export type WalletCreateOrConnectWithoutTradesInput = {
@@ -7799,6 +7793,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutWalletsNestedInput
@@ -7808,10 +7803,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserCreateWithoutSettingsInput = {
@@ -7883,6 +7879,7 @@ export namespace Prisma {
     address: string
     chain: string
     type?: string
+    encryptedPrivateKey?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7907,6 +7904,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     trades?: TradeUpdateManyWithoutWalletNestedInput
@@ -7917,6 +7915,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     trades?: TradeUncheckedUpdateManyWithoutWalletNestedInput
@@ -7927,6 +7926,7 @@ export namespace Prisma {
     address?: StringFieldUpdateOperationsInput | string
     chain?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
+    encryptedPrivateKey?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
