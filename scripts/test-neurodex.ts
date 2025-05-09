@@ -1,4 +1,4 @@
-import { NeuroDexApi } from '../src/services/engine/neurodex.service';
+import { NeuroDexApi } from '../src/services/engine/neurodex';
 import { parseUnits } from 'ethers';
 
 async function main(): Promise<void> {
