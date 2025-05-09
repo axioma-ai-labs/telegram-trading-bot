@@ -42,14 +42,14 @@ export function decryptPrivateKey(encrypted: string): string {
   return decrypted.toString('utf8');
 }
 
-// --- Test ---
-// Uncomment to test the wallet creation and encryption/decryption:
-const wallet = createWallet();
-console.log('Address:', wallet.address);
-console.log('Private Key:', wallet.privateKey);
+// // --- Test ---
+// // Uncomment to test the wallet creation and encryption/decryption:
+// const wallet = createWallet();
+// console.log('Address:', wallet.address);
+// console.log('Private Key:', wallet.privateKey);
 
-const encrypted = encryptPrivateKey(wallet.privateKey);
-console.log('Encrypted Private Key:', encrypted);
+// const encrypted = encryptPrivateKey(wallet.privateKey);
+// console.log('Encrypted Private Key:', encrypted);
 
-const decrypted = decryptPrivateKey(encrypted);
-console.log('Decrypted:', decrypted);
+// const decrypted = decryptPrivateKey(encrypted);
+// console.log('Decrypted:', decrypted);

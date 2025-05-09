@@ -1,25 +1,26 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { InlineKeyboard } from 'grammy';
-import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
-import { deleteBotMessage } from '@/utils/deleteMessage';
+import { hasWallet } from '@/utils/checkUser';
+import { newUserStartMessage, newUserStartKeyboard } from './start';
+import { WalletService } from '@/services/db/wallet.service';
+import { UserService } from '@/services/db/user.service';
 
-////////////////////////////////////////////////////////////
-// Wallet creation successful
-////////////////////////////////////////////////////////////
-export const walletCreationOKMessage = `✅ *Wallet Created*
+export const walletCreationOKMessage = `
+✅ *Wallet Created Successfully*
 
-*Wallet address:*
-\`0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B\`
+*Your Wallet Address:*
+\`{walletAddress}\`
 
-*Private key:*
-\`eeca075f8cdf75586252f630ebb043d3591a47e2ddb36a76ab3c6d9589ccdb63\`
+*Your Private Key:*
+\`{privateKey}\`
 
-Keep your private key safe. Do not store it anywhere digitally or online.
+⚠️ *IMPORTANT:* Keep your private key safe and secure
+• Do not share it with anyone
+• Do not store it digitally or online
+• Write it down and store it safely
 
-*Save your private key. This message will be deleted in 5 minutes.*
-
-To start trading, add funds to your wallet:`;
+⏰ This message will be deleted in 5 minutes for security`;
 
 export const depositKeyboard = new InlineKeyboard().text('Deposit', 'deposit_funds');
 
@@ -27,20 +28,20 @@ export const walletCreationFailMessage = `❌ *Wallet Creation Failed*
 
 Something went wrong. Please try again or go to /help.`;
 
-// TODO: Here must be the logic to get the total net worth from the database
-const randomTotalNetWorth = (Math.random() * 100000).toFixed(2);
+export const walletMessage = '💰 Wallet message';
 
-export const walletMessage = `*💰 Wallet:* \`0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B\`
+// export const walletMessage = `*💰 Wallet:* \`{walletAddress}\`
 
-*Balance:*
-- ETH: 1.50
-- SOL: 2,054
-- BRO: 190,000,000
+// *Balance:*
 
-*Total Net Worth:*
-- $${randomTotalNetWorth}
+// {coin1}: {coin1Balance} | $${coin1UsdValue}
+// {coin2}: {coin2Balance} | $${coin2UsdValue}
+// {coin3}: {coin3Balance} | $${coin3UsdValue}
 
-To deposit funds, please send your coins to the wallet address above.`;
+// *Total Net Worth:*
+// - $${randomTotalNetWorth}
+
+// To deposit funds, please send your coins to the wallet address above.`;
 
 export const walletKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
@@ -58,21 +59,37 @@ export const createWalletKeyboard = new InlineKeyboard()
 
 export const walletCommandHandler: CommandHandler = {
   command: 'wallet',
-  description: 'Create or view the wallet',
+  description: 'Manage your wallet',
   handler: async (ctx: BotContext): Promise<void> => {
-    // TODO: add database check if user has a wallet | For now dummy check
+    if (!ctx.from?.id) {
+      return;
+    }
 
-    if (!IS_NEW_USER && USER_HAS_WALLET) {
-      await ctx.reply(walletMessage, {
+    const telegramId = ctx.from.id.toString();
+    const USER_HAS_WALLET = await hasWallet(telegramId);
+    console.log('User has wallet:', USER_HAS_WALLET);
+
+    // If user has wallet, show wallet message
+    if (USER_HAS_WALLET) {
+      const user = await UserService.getUserByTelegramId(telegramId);
+      if (!user) {
+        return;
+      }
+      const wallets = await WalletService.getWalletsByUserId(user.id);
+      console.log('Wallets:', wallets);
+
+      const wallet_message = walletMessage.replace('{walletAddress}', wallets[0].address);
+
+      await ctx.reply(wallet_message, {
         parse_mode: 'Markdown',
         reply_markup: walletKeyboard,
       });
     } else {
-      const message = await ctx.reply(walletCreationOKMessage, {
+      // If user doesn't have wallet, show create wallet message
+      await ctx.reply(newUserStartMessage, {
         parse_mode: 'Markdown',
-        reply_markup: createWalletKeyboard,
+        reply_markup: newUserStartKeyboard,
       });
-      await deleteBotMessage(ctx, message.message_id, 10000);
     }
   },
 };
