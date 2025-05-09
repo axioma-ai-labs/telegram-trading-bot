@@ -1,6 +1,6 @@
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import crypto from 'crypto';
-import config from '../src/config/config';
+import config from '../config/config';
 
 // --- Wallet creation ---
 export function createWallet(): { address: string; privateKey: string } {

@@ -2,10 +2,10 @@
   "name": "neurodex-bot",
   "version": "1.0.0",
   "description": "A scalable Telegram trading bot built with TypeScript",
-  "main": "dist/index.js",
+  "main": "dist/bot.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/bot.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/bot.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -18,7 +18,7 @@
     "bot",
     "typescript"
   ],
-  "author": "NeuroFoundation",
+  "author": "NeuroFoundation, LLC",
   "license": "MIT",
   "dependencies": {
     "@covalenthq/client-sdk": "^2.2.6",
