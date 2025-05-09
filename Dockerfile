@@ -40,4 +40,4 @@ RUN pnpm install --prod --frozen-lockfile
 COPY --from=builder /neurodex-bot/dist ./dist
 
 # Command to run the app
-CMD ["node", "dist/index.js"] 
+CMD ["node", "dist/bot.js"] 

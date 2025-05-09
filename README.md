@@ -86,14 +86,6 @@ DEFAULT_GAS_PRIORITY=medium
 DATABASE_URL="prisma+postgres://accelerate.prisma-data.net/?api_key="
 ```
 
-------
-
-
-# Default settings
-- **Slippage**: 1%
-- **Gas**: medium
-- **Language**: english
-
 
 ------
 
