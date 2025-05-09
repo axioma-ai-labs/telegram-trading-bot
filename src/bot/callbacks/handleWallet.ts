@@ -8,9 +8,7 @@ import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
   try {
-    if (!ctx.from?.id) {
-      return;
-    }
+    if (!ctx.from?.id) return;
 
     const telegramId = ctx.from.id.toString();
     const USER_HAS_WALLET = await hasWallet(telegramId);
@@ -18,13 +16,11 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
 
     if (USER_HAS_WALLET) {
       const user = await UserService.getUserByTelegramId(telegramId);
-      if (!user?.id) {
-        return;
-      }
+      if (!user?.id) return;
       const balance = await neurodex.getEthBalance(telegramId);
       const wallets = await WalletService.getWalletsByUserId(user.id);
       const existingWalletMessage = walletMessage
-        .replace('{ethBalance}', balance.data || '0')
+        .replace('{ethBalance}', balance.data || '0.000')
         .replace('{walletAddress}', wallets[0].address);
 
       await ctx.editMessageText(existingWalletMessage, {
@@ -36,11 +32,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
 
     // Get user from database
     const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user?.id) {
-      console.error(`User not found for telegram ID: ${telegramId}`);
-      await ctx.reply('❌ Error: User not found. Please try again later.');
-      return;
-    }
+    if (!user?.id) return;
 
     // Create wallet
     const wallet = await neurodex.createWallet();

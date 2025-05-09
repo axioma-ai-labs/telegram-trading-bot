@@ -1,0 +1,32 @@
+export function getLanguageName(code: string): string {
+  const languages: Record<string, string> = {
+    en: '🇺🇸 English',
+    es: '🇪🇸 Spanish',
+    ru: '🇷🇺 Russian',
+    zh: '🇨🇳 Chinese',
+    vi: '🇻🇳 Vietnamese',
+    id: '🇮🇩 Indonesian',
+  };
+
+  return languages[code] || code;
+}
+
+export function getGasPriorityName(priority: string): string {
+  const priorities: Record<string, string> = {
+    low: '🐢 Low',
+    medium: '⚡ Medium',
+    high: '🚀 High',
+  };
+
+  return priorities[priority] || priority;
+}
+
+export function getSlippageName(slippage: string): string {
+  const slippages: Record<string, string> = {
+    '0.5': '0.5%',
+    '1': '1%',
+    '2': '2%',
+    '3': '3%',
+  };
+  return slippages[slippage] || slippage;
+}

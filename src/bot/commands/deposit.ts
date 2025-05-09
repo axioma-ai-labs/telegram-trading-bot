@@ -3,15 +3,15 @@ import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
-
-// TODO: Here must be the logic to get the balance from the DB or blockchain
-const randomBalance = (Math.random() * 10000).toFixed(2);
+import { UserService } from '@/services/db/user.service';
+import { WalletService } from '@/services/db/wallet.service';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export const depositMessage = `📥 *Deposit ETH or Tokens*
 
-Your balance: $${randomBalance}
+ETH: {ethBalance}    
 
-Send ETH or any ERC-20 token to your wallet: \`0x343E3c9be02e5ceCa6CA4461F94D242967870949\`
+Send ETH or any ERC-20 token to your wallet: \`{walletAddress}\`
 
 *Important*:
 - Only send assets on the Base Network
@@ -34,13 +34,29 @@ export const depositCommandHandler: CommandHandler = {
       return;
     }
 
-    await ctx.reply(depositMessage, {
-      parse_mode: 'Markdown',
-      reply_markup: depositKeyboard,
-      link_preview_options: {
-        is_disabled: true,
-      },
-    });
+    if (USER_HAS_WALLET) {
+      const telegramId = ctx.from?.id.toString();
+      const neurodex = new NeuroDexApi();
+      if (!telegramId) return;
+
+      const user = await UserService.getUserByTelegramId(telegramId);
+      if (!user?.id) return;
+
+      const wallets = await WalletService.getWalletsByUserId(user.id);
+      const balance = await neurodex.getEthBalance(telegramId);
+
+      const message = depositMessage
+        .replace('{ethBalance}', balance.data || '0.000')
+        .replace('{walletAddress}', wallets[0].address);
+
+      await ctx.reply(message, {
+        parse_mode: 'Markdown',
+        reply_markup: depositKeyboard,
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
+    }
   },
 };
 

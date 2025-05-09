@@ -3,6 +3,7 @@ import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
 import { isUserRegistered, hasWallet } from '@/utils/checkUser';
 import { UserService } from '@/services/db/user.service';
+import { SettingsService } from '@/services/db/settings.service';
 
 export const startMessage = `
 *💸 Neurodex*
@@ -65,8 +66,14 @@ export const startCommandHandler: CommandHandler = {
         firstName: ctx.from.first_name,
         lastName: ctx.from.last_name,
       });
+      await SettingsService.upsertSettings(telegramId, {
+        language: 'en',
+        autoTrade: false,
+        proMode: false,
+        gasPriority: 'medium',
+        slippage: '0.5',
+      });
       console.log('New user created:', telegramId);
-      console.log('New user has wallet:', USER_HAS_WALLET);
 
       await ctx.reply(newUserStartMessage, {
         parse_mode: 'Markdown',
