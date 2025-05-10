@@ -54,24 +54,21 @@ export const referralCommandHandler: CommandHandler = {
   handler: async (ctx: BotContext): Promise<void> => {
     const userId = ctx.from?.id;
     const username = ctx.from?.username || `id${userId}`;
-
     if (!userId) return;
 
-    // Get user from database
+    // Get user
     const user = await UserService.getUserByTelegramId(userId.toString());
-
     if (!user) return;
 
     const neurodex = new NeuroDexApi();
     const referralLink = await neurodex.generateReferralLink(userId, username);
 
-    // Initialize referral stats if they don't exist
+    // Initialize referral stats
     await ReferralService.initializeReferralStats(user.id);
 
-    // Update user's referral code
-    const referralCode = referralLink.split('/').pop() || '';
-    if (referralCode && !user.referralCode) {
-      await ReferralService.upsertReferralCode(user.id, referralCode);
+    // Update user's referral code if they don't have one
+    if (!user.referralCode) {
+      await ReferralService.upsertReferralCode(user.id, referralLink);
     }
 
     await ctx.reply(referralMessage(referralLink), {
