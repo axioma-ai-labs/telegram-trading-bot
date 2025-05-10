@@ -7,8 +7,8 @@ import {
   slippageKeyboard,
   languageKeyboard,
   gasKeyboard,
-} from '@/bot/commands/settings';
-import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+} from '../commands/settings';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '../../utils/settingsGetters';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   const telegramId = ctx.from?.id?.toString();

@@ -1,5 +1,5 @@
 import { prisma } from './prisma';
-import { Settings, User, Wallet } from '../../generated/prisma';
+import { Settings, User, Wallet } from '../../../prisma/generated/prisma';
 
 export class UserService {
   /**

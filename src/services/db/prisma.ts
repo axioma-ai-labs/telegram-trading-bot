@@ -1,5 +1,5 @@
 import { withAccelerate } from '@prisma/extension-accelerate';
-import { PrismaClient } from '../../generated/prisma/edge';
+import { PrismaClient } from '../../../prisma/generated/prisma/edge';
 
 // PrismaClient is attached to the `global` object in development to prevent
 // exhausting your database connection limit.
