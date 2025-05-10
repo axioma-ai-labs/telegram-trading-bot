@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
-import { AppConfig, Environment, GasPriority } from '@/types/config';
+import { AppConfig, Environment, GasPriority } from '../types/config';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -98,4 +98,4 @@ const createConfig = (): AppConfig => {
   };
 };
 
-export default createConfig();
+export const config = createConfig();

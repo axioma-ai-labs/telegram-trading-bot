@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { UserService } from '../services/db/user.service';
+import { UserService } from '../src/services/db/user.service';
 
 async function testDatabaseConnection(): Promise<void> {
   try {

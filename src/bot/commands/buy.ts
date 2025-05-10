@@ -1,7 +1,7 @@
-import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { CommandHandler } from '../../types/commands';
+import { BotContext } from '../../types/config';
 import { newUserStartMessage, newUserStartKeyboard } from './start';
-import { hasWallet } from '@/utils/checkUser';
+import { hasWallet } from '../../utils/checkUser';
 
 export const buyTokenMessage = `Enter a token symbol or address to buy:`;
 

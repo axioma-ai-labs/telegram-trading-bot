@@ -1,9 +1,9 @@
-import { BotContext } from '@/types/config';
 import { InlineKeyboard } from 'grammy';
-import { startMessage, startKeyboard } from '@/bot/commands/start';
-import { settingsMessage, settingsKeyboard } from '@/bot/commands/settings';
-import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
+import { BotContext } from '../../types/config';
+import { startMessage, startKeyboard } from '../commands/start';
+import { settingsMessage, settingsKeyboard } from '../commands/settings';
+import { walletMessage, walletKeyboard } from '../commands/wallet';
+import { transactionsMessage, transactionsKeyboard } from '../commands/transactions';
 
 interface BackHandlerConfig {
   message: string;

@@ -7,7 +7,7 @@ import {
   ReverseQuoteParams,
   LimitOrderParams,
   DcaParams,
-} from '@/types/openocean';
+} from '../../types/openocean';
 
 /**
  * OpenOcean API client for interacting with OpenOcean DEX aggregator via QuickNode

@@ -1,7 +1,7 @@
-import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
-import { IS_NEW_USER } from '@/config/mock';
-import { deleteBotMessage } from '@/utils/deleteMessage';
+import { CommandHandler } from '../../types/commands';
+import { BotContext } from '../../types/config';
+import { IS_NEW_USER } from '../../config/mock';
+import { deleteBotMessage } from '../../utils/deleteMessage';
 
 export const sellTokenMessage = `Enter a token symbol or address to sell:`;
 

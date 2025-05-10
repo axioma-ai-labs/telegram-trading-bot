@@ -15,10 +15,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@scripts/*": ["scripts/*"],
-      "@tests/*": ["tests/*"]
+      "@root/*": ["*"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist", "tests/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "scripts/**/*", "tests/**/*", "src/generated/**/*"]
 } 

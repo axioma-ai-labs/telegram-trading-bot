@@ -1,6 +1,6 @@
-import { BotContext } from '@/types/config';
-import { SettingsService } from '@/services/db/settings.service';
-import { UserService } from '@/services/db/user.service';
+import { BotContext } from '../../types/config';
+import { SettingsService } from '../../services/db/settings.service';
+import { UserService } from '../../services/db/user.service';
 import {
   settingsMessage,
   settingsKeyboard,

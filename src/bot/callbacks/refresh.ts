@@ -1,9 +1,9 @@
-import { BotContext } from '@/types/config';
-import { depositMessage, depositKeyboard } from '@/bot/commands/deposit';
-import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { UserService } from '@/services/db/user.service';
-import { WalletService } from '@/services/db/wallet.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { BotContext } from '../../types/config';
+import { depositMessage, depositKeyboard } from '../commands/deposit';
+import { walletMessage, walletKeyboard } from '../commands/wallet';
+import { UserService } from '../../services/db/user.service';
+import { WalletService } from '../../services/db/wallet.service';
+import { NeuroDexApi } from '../../services/engine/neurodex';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
   const callbackData = ctx.callbackQuery?.data;
