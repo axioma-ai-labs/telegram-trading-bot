@@ -3,24 +3,26 @@ import { CommandHandler } from '../../types/commands';
 import { BotContext } from '../../types/config';
 import { SettingsService } from '../../services/db/settings.service';
 import { UserService } from '../../services/db/user.service';
-import { getLanguageName } from '../../utils/settingsGetters';
+import { getLanguageName, getGasPriorityName, getSlippageName } from '../../utils/settingsGetters';
 
-export const settingsMessage = `
-*⚙️ Settings*
+export const settingsMessage = (
+  slippage?: string,
+  language?: string,
+  gasPriority?: string
+): string => {
+  return `*⚙️ Settings*
 
 *Current Settings:*
-• Slippage: {slippage}
-• Language: {language}
-• Gas Priority: {gasPriority}
+• Slippage: ${slippage}
+• Language: ${language}
+• Gas Priority: ${gasPriority}
 
-*Available Options:*
-Supported languages: 🇺🇸 English, 🇩🇪 German, 🇫🇷 French, 🇷🇺 Russian, 🇻🇳 Vietnamese, 🇮🇩 Indonesian
-Slippage: 0.5%, 1%, 2%, 3%
-Gas: Low, Medium, High
+*Best Practices:*
+- Increase *slippage* to 1% for less liquid tokens
+- Set *gas priority* to high for fast transactions
 
-Please set your desired settings below.
-
-`;
+Please set your desired settings below.`;
+};
 
 export const settingsKeyboard = new InlineKeyboard()
   .text('📊 Slippage', 'set_slippage')
@@ -77,10 +79,11 @@ export const settingsCommandHandler: CommandHandler = {
         slippage: '0.5',
       });
     } else {
-      const message = settingsMessage
-        .replace('{slippage}', settings?.slippage || '1')
-        .replace('{language}', getLanguageName(settings?.language || 'en'))
-        .replace('{gasPriority}', settings?.gasPriority || 'Medium');
+      const message = settingsMessage(
+        getSlippageName(settings?.slippage || '1'),
+        getLanguageName(settings?.language || 'en'),
+        getGasPriorityName(settings?.gasPriority || 'medium')
+      );
 
       await ctx.reply(message, {
         parse_mode: 'Markdown',

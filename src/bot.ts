@@ -29,7 +29,8 @@ import { buyCommandHandler } from './bot/commands/buy';
 import { sellCommandHandler } from './bot/commands/sell';
 import { withdrawCommandHandler } from './bot/commands/withdraw';
 import { withdrawFunds } from './bot/callbacks/withdrawFunds';
-
+import { referralCommandHandler } from './bot/commands/referrals';
+import { getReferralLink, getReferralStats } from './bot/callbacks/handleReferrals';
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -59,6 +60,8 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
   set_slippage: handleSetSlippage,
   set_language: handleSetLanguage,
   set_gas: handleSetGas,
+  get_referral_link: getReferralLink,
+  get_referral_stats: getReferralStats,
 };
 
 // Parameterized handlers
@@ -110,6 +113,7 @@ bot.command(depositCommandHandler.command, depositCommandHandler.handler); // /d
 bot.command(buyCommandHandler.command, buyCommandHandler.handler); // /buy
 bot.command(sellCommandHandler.command, sellCommandHandler.handler); // /sell
 bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // /withdraw
+bot.command(referralCommandHandler.command, referralCommandHandler.handler); // /referrals
 
 // Set commands (quick access)
 bot.api.setMyCommands([
@@ -125,6 +129,7 @@ bot.api.setMyCommands([
     command: transactionsCommandHandler.command,
     description: transactionsCommandHandler.description,
   },
+  { command: referralCommandHandler.command, description: referralCommandHandler.description },
 ]);
 
 // Error handling

@@ -419,4 +419,16 @@ export class NeuroDexApi {
       txHash: order.txHash,
     };
   }
+
+  /**
+   * Generates a referral link for a user.
+   * @param userId - Telegram user ID
+   * @param username - Telegram username
+   * @returns Generated referral link
+   */
+  async generateReferralLink(userId: number, username: string): Promise<string> {
+    const referralCode = username || `id${userId}`;
+    const referralLink = `https://t.me/neurodex_bot?start=r-${referralCode}`;
+    return referralLink;
+  }
 }
