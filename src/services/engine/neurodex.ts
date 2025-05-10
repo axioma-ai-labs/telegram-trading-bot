@@ -1,5 +1,5 @@
-import { OpenOceanClient } from './openocean.service';
-import { config } from '../../config/config';
+import { OpenOceanClient } from '@/services/engine/openocean.service';
+import { config } from '@/config/config';
 import { formatEther, parseUnits } from 'ethers';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { Chain, GoldRushClient } from '@covalenthq/client-sdk';
@@ -12,8 +12,8 @@ import {
   TokenInfo,
   OrderInfo,
   WalletInfo,
-} from '../../types/neurodex';
-import { OpenOceanChain } from '../../types/openocean';
+} from '@/types/neurodex';
+import { OpenOceanChain } from '@/types/openocean';
 import { createPublicClient } from 'viem';
 import { http } from 'viem';
 

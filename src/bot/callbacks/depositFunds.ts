@@ -1,11 +1,11 @@
-import { BotContext } from '../../types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '../../config/mock';
-import { createWalletKeyboard } from '../commands/wallet';
-import { depositMessage } from '../commands/deposit';
-import { depositKeyboard } from '../commands/deposit';
-import { UserService } from '../../services/db/user.service';
-import { WalletService } from '../../services/db/wallet.service';
-import { NeuroDexApi } from '../../services/engine/neurodex';
+import { BotContext } from '@/types/config';
+import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
+import { createWalletKeyboard } from '@/bot/commands/wallet';
+import { depositMessage } from '@/bot/commands/deposit';
+import { depositKeyboard } from '@/bot/commands/deposit';
+import { UserService } from '@/services/db/user.service';
+import { WalletService } from '@/services/db/wallet.service';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export async function depositFunds(ctx: BotContext): Promise<void> {
   if (IS_NEW_USER || !USER_HAS_WALLET) {

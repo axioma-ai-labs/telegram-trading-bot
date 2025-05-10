@@ -12,11 +12,14 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["src/*"],
-      "@root/*": ["*"]
+      "@/*": ["./*"],
+      "@prisma-generated/*": ["../prisma/generated/*"]
     }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "scripts/**/*", "tests/**/*", "src/generated/**/*"]

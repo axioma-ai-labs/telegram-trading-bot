@@ -1,4 +1,4 @@
-import { GasPriority } from '../types/config';
+import { GasPriority } from '@/types/config';
 
 /**
  * Base parameters for trading operations

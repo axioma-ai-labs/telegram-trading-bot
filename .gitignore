@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+docker-compose.override.yaml
 
 # Build output
 dist/

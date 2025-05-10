@@ -1,10 +1,10 @@
-import { BotContext } from '../../types/config';
+import { BotContext } from '@/types/config';
 import {
   allTransactionsMessage,
   allTransactionKeyboard,
   transactionsMessage,
   transactionsKeyboard,
-} from '../commands/transactions';
+} from '@/bot/commands/transactions';
 
 export async function viewTransactions(ctx: BotContext): Promise<void> {
   // TODO: Fetch actual transactions from database

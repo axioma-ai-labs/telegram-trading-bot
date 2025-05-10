@@ -1,11 +1,11 @@
 import { InlineKeyboard } from 'grammy';
-import { CommandHandler } from '../../types/commands';
-import { BotContext } from '../../types/config';
-import { hasWallet } from '../../utils/checkUser';
-import { newUserStartMessage, newUserStartKeyboard } from './start';
-import { WalletService } from '../../services/db/wallet.service';
-import { UserService } from '../../services/db/user.service';
-import { NeuroDexApi } from '../../services/engine/neurodex';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/config';
+import { hasWallet } from '@/utils/checkUser';
+import { newUserStartMessage, newUserStartKeyboard } from '@/bot/commands/start';
+import { WalletService } from '@/services/db/wallet.service';
+import { UserService } from '@/services/db/user.service';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export const walletCreationOKMessage = `
 ✅ *Your wallet has been created successfully*

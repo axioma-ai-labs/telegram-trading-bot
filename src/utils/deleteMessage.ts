@@ -1,4 +1,4 @@
-import { BotContext } from '../types/config';
+import { BotContext } from '@/types/config';
 
 /**
  * Deletes a bot message after an optional delay.
