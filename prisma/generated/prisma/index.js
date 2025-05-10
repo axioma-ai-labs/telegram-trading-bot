@@ -175,7 +175,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/yashyn/Projects/neurodex-bot/src/generated/prisma",
+      "value": "/Users/gromdimon/Working/neurodex-bot/prisma/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -189,30 +189,31 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/yashyn/Projects/neurodex-bot/prisma/schema.prisma",
+    "sourceFilePath": "/Users/gromdimon/Working/neurodex-bot/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
+    "rootEnvPath": "../../../.env",
     "schemaEnvPath": "../../../.env"
   },
-  "relativePath": "../../../prisma",
+  "relativePath": "../..",
   "clientVersion": "6.7.0",
   "engineVersion": "3cff47a7f5d65c3ea74883f1d736e41d68ce91ed",
   "datasourceNames": [
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiNzZhZTNlM2ItM2Y1OS00YTE2LTg0ZGItM2MyNjFhNWNjNjgwIiwidGVuYW50X2lkIjoiNTg5OGU2ZmYyMWE2NzBjOTU2ZThhMmNiNDgwN2Q3MTgyNzEwZjUyNGQ0NjY3NDA1M2VlMjBmNGRmNmFhZTJmOSIsImludGVybmFsX3NlY3JldCI6IjhhYmJlYmM1LTA2YTktNGI3NS1hMDc1LWJjMzkxMjAxMTYyMyJ9.zsFX8fJBG4RIKWkWUqa4cvkk4TT2rlRrTkUSkON32Fk"
+        "value": null
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id         String    @id @default(uuid())\n  telegramId String    @unique\n  username   String?\n  firstName  String?\n  lastName   String?\n  createdAt  DateTime  @default(now())\n  updatedAt  DateTime  @updatedAt\n  wallets    Wallet[]\n  trades     Trade[]\n  settings   Settings?\n}\n\nmodel Wallet {\n  id                  String   @id @default(cuid())\n  address             String   @unique\n  chain               String\n  type                String   @default(\"generated\")\n  encryptedPrivateKey String?\n  createdAt           DateTime @default(now())\n  updatedAt           DateTime @updatedAt\n  user                User     @relation(fields: [userId], references: [id])\n  userId              String\n  trades              Trade[]\n\n  @@index([userId])\n}\n\nmodel Trade {\n  id           String   @id @default(uuid())\n  type         String // \"buy\" or \"sell\"\n  tokenAddress String\n  tokenSymbol  String\n  amount       Float\n  price        Float\n  totalValue   Float\n  status       String // \"pending\", \"completed\", \"failed\"\n  txHash       String?\n  userId       String\n  user         User     @relation(fields: [userId], references: [id])\n  walletId     String\n  wallet       Wallet   @relation(fields: [walletId], references: [id])\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Settings {\n  id          String   @id @default(uuid())\n  userId      String   @unique\n  user        User     @relation(fields: [userId], references: [id])\n  language    String   @default(\"en\")\n  autoTrade   Boolean  @default(false)\n  proMode     Boolean  @default(false)\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n  gasPriority String   @default(\"medium\")\n  slippage    String   @default(\"1\")\n}\n",
-  "inlineSchemaHash": "16c6e26986555270ace014f3bc8981f75cb97b18bb4225dfc06a65650395335d",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel User {\n  id         String    @id @default(uuid())\n  telegramId String    @unique\n  username   String?\n  firstName  String?\n  lastName   String?\n  createdAt  DateTime  @default(now())\n  updatedAt  DateTime  @updatedAt\n  wallets    Wallet[]\n  trades     Trade[]\n  settings   Settings?\n}\n\nmodel Wallet {\n  id                  String   @id @default(cuid())\n  address             String   @unique\n  chain               String\n  type                String   @default(\"generated\")\n  encryptedPrivateKey String?\n  createdAt           DateTime @default(now())\n  updatedAt           DateTime @updatedAt\n  user                User     @relation(fields: [userId], references: [id])\n  userId              String\n  trades              Trade[]\n\n  @@index([userId])\n}\n\nmodel Trade {\n  id           String   @id @default(uuid())\n  type         String // \"buy\" or \"sell\"\n  tokenAddress String\n  tokenSymbol  String\n  amount       Float\n  price        Float\n  totalValue   Float\n  status       String // \"pending\", \"completed\", \"failed\"\n  txHash       String?\n  userId       String\n  user         User     @relation(fields: [userId], references: [id])\n  walletId     String\n  wallet       Wallet   @relation(fields: [walletId], references: [id])\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n}\n\nmodel Settings {\n  id          String   @id @default(uuid())\n  userId      String   @unique\n  user        User     @relation(fields: [userId], references: [id])\n  language    String   @default(\"en\")\n  autoTrade   Boolean  @default(false)\n  proMode     Boolean  @default(false)\n  createdAt   DateTime @default(now())\n  updatedAt   DateTime @updatedAt\n  gasPriority String   @default(\"medium\")\n  slippage    String   @default(\"1\")\n}\n",
+  "inlineSchemaHash": "3dcd8755fe42a34dac00c1c46c51b3c2604c028ee31f4d7506a93f86dd52f033",
   "copyEngine": false
 }
 
@@ -221,7 +222,7 @@ const fs = require('fs')
 config.dirname = __dirname
 if (!fs.existsSync(path.join(__dirname, 'schema.prisma'))) {
   const alternativePaths = [
-    "src/generated/prisma",
+    "prisma/generated/prisma",
     "generated/prisma",
   ]
   

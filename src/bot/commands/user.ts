@@ -1,5 +1,5 @@
-import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { CommandHandler } from '../../types/commands';
+import { BotContext } from '../../types/config';
 
 const formatUserInfo = (ctx: BotContext): string => {
   const user = ctx.from;

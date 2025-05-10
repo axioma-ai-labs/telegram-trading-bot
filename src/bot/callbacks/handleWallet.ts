@@ -1,10 +1,10 @@
-import { hasWallet } from '@/utils/checkUser';
-import { deleteBotMessage } from '@/utils/deleteMessage';
-import { BotContext } from '@/types/config';
+import { hasWallet } from '../../utils/checkUser';
+import { deleteBotMessage } from '../../utils/deleteMessage';
+import { BotContext } from '../../types/config';
 import { walletMessage, walletCreationOKMessage, walletKeyboard } from '../commands/wallet';
-import { WalletService } from '@/services/db/wallet.service';
-import { UserService } from '@/services/db/user.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { WalletService } from '../../services/db/wallet.service';
+import { UserService } from '../../services/db/user.service';
+import { NeuroDexApi } from '../../services/engine/neurodex';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
   try {

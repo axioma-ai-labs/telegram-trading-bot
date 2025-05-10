@@ -1,6 +1,6 @@
-import { BotContext } from '@/types/config';
-import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
+import { BotContext } from '../../types/config';
+import { CommandHandler } from '../../types/commands';
 
 export const helpMessage = `
 *Help & Support*

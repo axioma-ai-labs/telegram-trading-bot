@@ -1,14 +1,14 @@
-import { BotContext } from '@/types/config';
-import { SettingsService } from '@/services/db/settings.service';
-import { UserService } from '@/services/db/user.service';
+import { BotContext } from '../../types/config';
+import { SettingsService } from '../../services/db/settings.service';
+import { UserService } from '../../services/db/user.service';
 import {
   settingsMessage,
   settingsKeyboard,
   slippageKeyboard,
   languageKeyboard,
   gasKeyboard,
-} from '@/bot/commands/settings';
-import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+} from '../commands/settings';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '../../utils/settingsGetters';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   const telegramId = ctx.from?.id?.toString();

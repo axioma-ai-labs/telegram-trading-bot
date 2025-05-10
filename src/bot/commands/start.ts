@@ -1,9 +1,9 @@
-import { BotContext } from '@/types/config';
-import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
-import { isUserRegistered, hasWallet } from '@/utils/checkUser';
-import { UserService } from '@/services/db/user.service';
-import { SettingsService } from '@/services/db/settings.service';
+import { BotContext } from '../../types/config';
+import { CommandHandler } from '../../types/commands';
+import { isUserRegistered, hasWallet } from '../../utils/checkUser';
+import { UserService } from '../../services/db/user.service';
+import { SettingsService } from '../../services/db/settings.service';
 
 export const startMessage = `
 *💸 Neurodex*

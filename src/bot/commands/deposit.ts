@@ -1,11 +1,11 @@
-import { CommandHandler } from '@/types/commands';
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
-import { createWalletKeyboard } from '@/bot/commands/wallet';
-import { UserService } from '@/services/db/user.service';
-import { WalletService } from '@/services/db/wallet.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { CommandHandler } from '../../types/commands';
+import { BotContext } from '../../types/config';
+import { IS_NEW_USER, USER_HAS_WALLET } from '../../config/mock';
+import { createWalletKeyboard } from '../commands/wallet';
+import { UserService } from '../../services/db/user.service';
+import { WalletService } from '../../services/db/wallet.service';
+import { NeuroDexApi } from '../../services/engine/neurodex';
 
 export const depositMessage = `📥 *Deposit ETH or Tokens*
 

@@ -1,7 +1,7 @@
-import { BotContext } from '@/types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
-import { createWalletKeyboard } from '@/bot/commands/wallet';
-import { withdrawMessage, withdrawKeyboard } from '@/bot/commands/withdraw';
+import { BotContext } from '../../types/config';
+import { IS_NEW_USER, USER_HAS_WALLET } from '../../config/mock';
+import { createWalletKeyboard } from '../commands/wallet';
+import { withdrawMessage, withdrawKeyboard } from '../commands/withdraw';
 
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   if (IS_NEW_USER || !USER_HAS_WALLET) {
