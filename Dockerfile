@@ -39,5 +39,8 @@ RUN pnpm install --prod --frozen-lockfile
 # Copy built files from builder stage
 COPY --from=builder /neurodex-bot/dist ./dist
 
+# Copy prisma to runtime
+COPY --from=builder /neurodex-bot/prisma ./prisma
+
 # Command to run the app
 CMD ["node", "dist/bot.js"] 
