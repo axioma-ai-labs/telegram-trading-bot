@@ -21,5 +21,5 @@
     "@typescript-eslint/no-explicit-any": "error",
     "prettier/prettier": "error"
   },
-  "ignorePatterns": ["src/generated/**/*", "dist/**/*"]
+  "ignorePatterns": ["prisma/generated/**/*", "dist/**/*"]
 } 
