@@ -19,5 +19,8 @@ export async function viewAllTransactions(ctx: BotContext): Promise<void> {
   await ctx.editMessageText(allTransactionsMessage, {
     parse_mode: 'Markdown',
     reply_markup: allTransactionKeyboard,
+    link_preview_options: {
+      is_disabled: true,
+    },
   });
 }
