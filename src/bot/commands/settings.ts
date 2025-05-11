@@ -3,7 +3,7 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { SettingsService } from '@/services/db/settings.service';
 import { UserService } from '@/services/db/user.service';
-import { getLanguageName } from '@/utils/settingsGetters';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 
 export const settingsMessage = (
   slippage?: string,

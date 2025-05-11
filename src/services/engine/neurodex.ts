@@ -11,8 +11,7 @@ import {
   OrderInfo,
   WalletInfo,
   SwapResponse,
-  BuyParams,
-  SellParams,
+  BaseTradeParams,
 } from '@/types/neurodex';
 import { DcaOrderResponse, LimitOrderResponse, OpenOceanChain } from '@/types/openocean';
 import { Address, createPublicClient, formatEther, parseUnits, http } from 'viem';
@@ -81,6 +80,18 @@ export class NeuroDexApi {
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
+  }
+
+  /**
+   * Generates a referral link for a user.
+   * @param userId - Telegram user ID
+   * @param username - Telegram username
+   * @returns Generated referral link
+   */
+  async generateReferralLink(userId: number, username: string): Promise<string> {
+    const referralCode = username || `id${userId}`;
+    const referralLink = `https://t.me/neurodex_bot?start=r-${referralCode}`;
+    return referralLink;
   }
 
   // private async encryptPrivateKey(privateKey: string): Promise<string> {
@@ -158,7 +169,7 @@ export class NeuroDexApi {
    * 2) Swap that native token for your token.
    */
   async buy(
-    params: BuyParams,
+    params: BaseTradeParams,
     chain: OpenOceanChain = 'base'
   ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
@@ -185,6 +196,7 @@ export class NeuroDexApi {
           gasPrice,
           slippage: params.slippage ?? '1',
           account: params.walletAddress,
+          referrer: params.referrer,
         },
         chain
       );
@@ -224,7 +236,7 @@ export class NeuroDexApi {
    * Single swap: token -> native.
    */
   async sell(
-    params: SellParams,
+    params: BaseTradeParams,
     chain: OpenOceanChain = 'base'
   ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
@@ -251,6 +263,7 @@ export class NeuroDexApi {
           gasPrice,
           slippage: params.slippage ?? '1',
           account: params.walletAddress,
+          referrer: params.referrer,
         },
         chain
       );

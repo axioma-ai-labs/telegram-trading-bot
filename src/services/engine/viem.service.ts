@@ -9,6 +9,7 @@ import {
   type Hash,
   type TransactionReceipt,
   PublicClient,
+  SendTransactionParameters,
   Abi,
 } from 'viem';
 import { base } from 'viem/chains';
@@ -84,7 +85,7 @@ export class ViemService {
       };
 
       // Send transaction
-      const hash = await walletClient.sendTransaction(txParams);
+      const hash = await walletClient.sendTransaction(txParams as SendTransactionParameters);
 
       // Wait for transaction receipt
       const receipt = await publicClient.waitForTransactionReceipt({ hash });

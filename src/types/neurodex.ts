@@ -16,22 +16,8 @@ export interface BaseTradeParams {
   walletAddress: string;
   /** User's private key */
   privateKey: string;
-}
-
-/**
- * Parameters for buying tokens
- */
-export interface BuyParams extends BaseTradeParams {
-  /** Amount of native token (ETH/BNB) to spend */
-  nativeAmount: string;
-}
-
-/**
- * Parameters for selling tokens
- */
-export interface SellParams extends BaseTradeParams {
-  /** Minimum amount of native token (ETH/BNB) to receive */
-  minNativeAmount: string;
+  /** Referral code */
+  referrer?: string;
 }
 
 /**
