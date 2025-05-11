@@ -185,6 +185,16 @@ Example usage (script for testing db ops):
 make run CMD="scripts/db-connection.ts"
 ```
 
+### Encryption
+
+We use `prisma-field-encryption` to encrypt the fields in the database. There're important things to remember:
+
+- Always use `/// @encrypted` annotation to encrypt the field.
+- Do not query encrypted fields!
+- Store the encryption key in the environment variable
+
+For more details - refer to the [prisma-field-encryption](https://github.com/47ng/prisma-field-encryption) repo.
+
 ### Migrations
 
 Migrations are handled by Prisma, so we don't have to write them manually. Just change the models in `prisma/schema.prisma` and run:
