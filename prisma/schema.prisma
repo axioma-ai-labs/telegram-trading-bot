@@ -27,6 +27,7 @@ model User {
   settings      Settings?
   referralCode  String?        @unique
   referredById  String?
+  termsAccepted Boolean        @default(false)
   referredBy    User?          @relation("Referrals", fields: [referredById], references: [id])
   referrals     User[]         @relation("Referrals")
   referralStats ReferralStats?

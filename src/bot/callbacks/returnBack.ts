@@ -31,7 +31,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     keyboard: referralKeyboard,
   },
   back_wallet: {
-    message: walletMessage,
+    message: walletMessage('walletAddress', 'ethBalance'),
     keyboard: walletKeyboard,
   },
   back_transactions: {

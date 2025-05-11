@@ -13,3 +13,8 @@ export async function hasWallet(telegramId: string): Promise<boolean> {
   const wallets = await WalletService.getWalletsByUserId(user.id);
   return wallets.length > 0;
 }
+
+export async function isTermsConditionsAccepted(telegramId: string): Promise<boolean> {
+  const user = await UserService.getUserByTelegramId(telegramId);
+  return user?.termsAccepted ?? false;
+}

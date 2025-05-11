@@ -1,10 +1,12 @@
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { CommandHandler } from '@/types/commands';
-import { isUserRegistered, hasWallet } from '@/utils/checkUser';
+import { isUserRegistered, hasWallet, isTermsConditionsAccepted } from '@/utils/checkUser';
 import { UserService } from '@/services/db/user.service';
 import { SettingsService } from '@/services/db/settings.service';
-
+import { ReferralService } from '@/services/db/referrals';
+import { NeuroDexApi } from '@/services/engine/neurodex';
+import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
 export const startMessage = `
 *💸 Neurodex*
 
@@ -38,17 +40,19 @@ export const startKeyboard = new InlineKeyboard()
 // New User
 ////////////////////////////////////////////////////////////
 
-export const newUserStartMessage = `
+export const acceptTermsConditionsMessage = `
 *💸 Neurodex*
 
-Neurodex is your lightning fast crypto trading bot
+Before we get started, please review and accept our terms of service and privacy policy.
 
-To be able to /buy, /sell or do any other actions, you have to create a wallet first. Create one now by clicking the button below.
-
-For any help setting up please refer to [this guide](https://docs.neurodex.xyz/getting-started/setup) or get /help.
+- [Terms of Service](https://docs.neurodex.xyz/terms-of-service)
+- [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)
 `;
 
-export const newUserStartKeyboard = new InlineKeyboard().text('💵 Create Wallet', 'create_wallet');
+export const acceptTermsConditionsKeyboard = new InlineKeyboard().text(
+  '✅ Accept',
+  'accept_terms_conditions'
+);
 
 export const startCommandHandler: CommandHandler = {
   command: 'start',
@@ -57,18 +61,61 @@ export const startCommandHandler: CommandHandler = {
     if (!ctx.from?.id) {
       return;
     }
-    const telegramId = ctx.from.id.toString();
-    const IS_REGISTERED = await isUserRegistered(telegramId);
-    const USER_HAS_WALLET = await hasWallet(telegramId);
 
-    if (!IS_REGISTERED || !USER_HAS_WALLET) {
+    const neurodex = new NeuroDexApi();
+    const telegramId = ctx.from.id.toString();
+    const payload = ctx.match?.toString() || ''; // Payload from referral link
+
+    const IS_REGISTERED = await isUserRegistered(telegramId);
+    const IS_ACCEPTED_TERMS_CONDITIONS = await isTermsConditionsAccepted(telegramId);
+    const USER_HAS_WALLET = await hasWallet(telegramId);
+    const referralLink = await neurodex.generateReferralLink(ctx.from.id, ctx.from.username || '');
+
+    // Referred user
+    if (payload && payload.startsWith('r-')) {
+      // TODO: optimize this logic for parsing the referral code
+      const referralCode = 'https://t.me/neuro_bro_test_bot?start=' + payload.trim();
+      const referrer = await ReferralService.getUserByReferralCode(referralCode);
+
+      if (!IS_REGISTERED && referrer) {
+        // Create new user with referral
+        const user = await UserService.upsertUser(telegramId, {
+          username: ctx.from.username,
+          firstName: ctx.from.first_name,
+          lastName: ctx.from.last_name,
+          referralCode: referralLink,
+        });
+
+        // Link the referral
+        await ReferralService.linkReferral(user.id, referrer.id);
+        console.log('Referrer:', referrer.id, 'has successfully referred:', user.id);
+
+        await SettingsService.upsertSettings(user.id, {
+          language: 'en',
+          autoTrade: false,
+          proMode: false,
+          gasPriority: 'medium',
+          slippage: '0.5',
+        });
+        console.log('New user created with referral:', telegramId);
+        await ctx.reply(acceptTermsConditionsMessage, {
+          parse_mode: 'Markdown',
+          reply_markup: acceptTermsConditionsKeyboard,
+        });
+        return;
+      }
+    }
+
+    // New user (no referral)
+    if (!IS_REGISTERED) {
       // New user without wallet
-      await UserService.upsertUser(telegramId, {
+      const user = await UserService.upsertUser(telegramId, {
         username: ctx.from.username,
         firstName: ctx.from.first_name,
         lastName: ctx.from.last_name,
+        referralCode: referralLink,
       });
-      await SettingsService.upsertSettings(telegramId, {
+      await SettingsService.upsertSettings(user.id, {
         language: 'en',
         autoTrade: false,
         proMode: false,
@@ -76,22 +123,32 @@ export const startCommandHandler: CommandHandler = {
         slippage: '0.5',
       });
       console.log('New user created:', telegramId);
-
-      await ctx.reply(newUserStartMessage, {
+      await ctx.reply(acceptTermsConditionsMessage, {
         parse_mode: 'Markdown',
-        reply_markup: newUserStartKeyboard,
+        reply_markup: acceptTermsConditionsKeyboard,
       });
-      return;
+    } else if (!IS_ACCEPTED_TERMS_CONDITIONS) {
+      console.log('User not accepted terms conditions:', telegramId);
+      await ctx.reply(acceptTermsConditionsMessage, {
+        parse_mode: 'Markdown',
+        reply_markup: acceptTermsConditionsKeyboard,
+      });
+    } else if (!USER_HAS_WALLET) {
+      console.log('User does not have a wallet:', telegramId);
+      await ctx.reply(createWalletMessage, {
+        parse_mode: 'Markdown',
+        reply_markup: createWalletKeyboard,
+      });
+    } else {
+      // Existing user with wallet & accepted terms conditions
+      console.log('Existing user:', telegramId);
+      await ctx.reply(startMessage, {
+        parse_mode: 'Markdown',
+        reply_markup: startKeyboard,
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
     }
-
-    // Existing user with wallet
-    console.log('Existing user:', telegramId);
-    await ctx.reply(startMessage, {
-      parse_mode: 'Markdown',
-      reply_markup: startKeyboard,
-      link_preview_options: {
-        is_disabled: true,
-      },
-    });
   },
 };

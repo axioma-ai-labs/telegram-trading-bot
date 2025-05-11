@@ -1,6 +1,6 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { newUserStartMessage, newUserStartKeyboard } from '@/bot/commands/start';
+import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
 import { hasWallet } from '@/utils/checkUser';
 
 export const buyTokenMessage = `Enter a token symbol or address to buy:`;
@@ -16,14 +16,14 @@ export const buyCommandHandler: CommandHandler = {
     const telegramId = ctx.from.id.toString();
     const USER_HAS_WALLET = await hasWallet(telegramId);
 
-    if (USER_HAS_WALLET) {
-      await ctx.reply(buyTokenMessage, {
+    if (!USER_HAS_WALLET) {
+      await ctx.reply(createWalletMessage, {
         parse_mode: 'Markdown',
+        reply_markup: createWalletKeyboard,
       });
     } else {
-      await ctx.reply(newUserStartMessage, {
+      await ctx.reply(buyTokenMessage, {
         parse_mode: 'Markdown',
-        reply_markup: newUserStartKeyboard,
       });
     }
   },

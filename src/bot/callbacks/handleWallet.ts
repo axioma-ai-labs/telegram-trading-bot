@@ -19,9 +19,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       if (!user?.id) return;
       const balance = await neurodex.getEthBalance(telegramId);
       const wallets = await WalletService.getWalletsByUserId(user.id);
-      const existingWalletMessage = walletMessage
-        .replace('{ethBalance}', balance.data || '0.000')
-        .replace('{walletAddress}', wallets[0].address);
+      const existingWalletMessage = walletMessage(wallets[0].address, balance.data || '0.000');
 
       await ctx.editMessageText(existingWalletMessage, {
         parse_mode: 'Markdown',
@@ -47,16 +45,17 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
 
     // Success msg
     const editedMessage = await ctx.editMessageText(
-      walletCreationOKMessage
-        .replace('{walletAddress}', wallet.address)
-        .replace('{privateKey}', wallet.privateKey),
+      walletCreationOKMessage(wallet.address, wallet.privateKey),
       {
         parse_mode: 'Markdown',
       }
     );
 
+    // delete message after 5 minutes
     if (typeof editedMessage === 'object' && 'message_id' in editedMessage) {
-      await deleteBotMessage(ctx, editedMessage.message_id, 30000);
+      deleteBotMessage(ctx, editedMessage.message_id, 50000).catch((error) => {
+        console.error('Error in scheduled message deletion:', error);
+      });
     }
 
     console.log(`Successfully created wallet for user ${telegramId}`);
