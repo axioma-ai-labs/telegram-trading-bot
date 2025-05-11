@@ -1,4 +1,5 @@
 import { Context, SessionFlavor } from 'grammy';
+import { Address } from 'viem';
 
 /**
  * Session data interface
@@ -17,8 +18,7 @@ export interface SessionData {
 export type BotContext = Context & SessionFlavor<SessionData>;
 
 export type Environment = 'development' | 'production';
-export type GasPriority = 'low' | 'medium' | 'high';
-import { Address } from 'viem';
+export type GasPriority = 'fast' | 'instant' | 'standard';
 
 export interface ChainConfig {
   baseChainId: number;
@@ -39,7 +39,8 @@ export interface WalletConfig {
 }
 
 export interface DatabaseConfig {
-  path: string;
+  url: string;
+  encryptionKey: string;
 }
 
 export interface NodeConfig {
@@ -47,7 +48,12 @@ export interface NodeConfig {
   baseMainnetRpc: string;
   baseSepoliaRpc: string;
   bncRpc: string;
-  openOceanAddonId: string;
+}
+
+export interface NativeTokenAddress {
+  base: string;
+  ethereum: string;
+  bsc: string;
 }
 
 export interface AppConfig {
@@ -55,11 +61,12 @@ export interface AppConfig {
   environment: Environment;
   telegramBotToken: string;
   chain: ChainConfig;
+  nativeTokenAddress: NativeTokenAddress;
   trading: TradingConfig;
   wallet: WalletConfig;
   database: DatabaseConfig;
   node: NodeConfig;
-  covalenthq_api_key: string;
+  covalenthqApiKey: string;
 }
 
 export interface GasPriceInfo {

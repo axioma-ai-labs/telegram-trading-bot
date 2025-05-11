@@ -6,39 +6,25 @@ import { AppConfig, Environment, GasPriority } from '@/types/config';
 dotenv.config();
 
 const envSchema = z.object({
-  // Project settings
-  PROJECT_NAME: z.string().default('Neurodex Bot'),
   ENVIRONMENT: z.enum(['development', 'production'] as const).default('production'),
 
-  // Telegram
   TELEGRAM_BOT_TOKEN: z.string().min(1, 'TELEGRAM_BOT_TOKEN is required'),
 
-  // Node RPCs
   ETHEREUM_MAINNET_RPC: z.string().url('ETHEREUM_MAINNET_RPC must be a valid URL'),
   BASE_MAINNET_RPC: z.string().url('BASE_MAINNET_RPC must be a valid URL'),
   BASE_SEPOLIA_RPC: z.string().url('BASE_SEPOLIA_RPC must be a valid URL'),
   BNC_RPC: z.string().url('BNC_RPC must be a valid URL'),
-  OPEN_OCEAN_ADDON_ID: z.string().min(1, 'OPEN_OCEAN_ADDON_ID is required'),
 
-  // Wallet
+  DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
+  PRISMA_FIELD_ENCRYPTION_KEY: z.string().min(32, 'PRISMA_FIELD_ENCRYPTION_KEY must be at least 32 characters'),
+
   WALLET_ENCRYPTION_KEY: z.string().min(32, 'WALLET_ENCRYPTION_KEY must be at least 32 characters'),
 
-  // Database
-  DB_PATH: z.string().default('./database.sqlite'),
-
-  // Chain IDs
-  BASE_CHAIN_ID: z.coerce.number().int().positive(),
-  BASE_SEPOLIA_CHAIN_ID: z.coerce.number().int().positive(),
-  ETHEREUM_CHAIN_ID: z.coerce.number().int().positive(),
-  BNB_CHAIN_ID: z.coerce.number().int().positive(),
-
-  // Trading settings
   DEFAULT_SLIPPAGE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE_WALLET: z.string().optional().default(''),
   DEFAULT_GAS_PRIORITY: z.enum(['low', 'medium', 'high'] as const).default('medium'),
 
-  // Covalent API Key
   COVALENTHQ_API_KEY: z.string().min(1, 'COVALENTHQ_API_KEY is required'),
 });
 
@@ -64,37 +50,60 @@ const parseEnv = (): z.infer<typeof envSchema> => {
  */
 const createConfig = (): AppConfig => {
   const env = parseEnv();
-
   return {
-    projectName: env.PROJECT_NAME,
+    // General settings
+    projectName: 'Neurodex',
     environment: env.ENVIRONMENT as Environment,
+
+    // Tg Bot Settings
     telegramBotToken: env.TELEGRAM_BOT_TOKEN,
+
+    // Chain IDs can be found here:
+    // - https://chainlist.org/
+    // - https://apis.openocean.finance/developer/developer-resources/supported-chains
     chain: {
-      baseChainId: env.BASE_CHAIN_ID,
-      baseSepoliaChainId: env.BASE_SEPOLIA_CHAIN_ID,
-      ethereumChainId: env.ETHEREUM_CHAIN_ID,
-      bnbChainId: env.BNB_CHAIN_ID,
+      baseChainId: 8453,
+      baseSepoliaChainId: 84532,
+      ethereumChainId: 1,
+      bnbChainId: 56,
     },
+
+    // Native Token Addresses
+    nativeTokenAddress: {
+      base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      bsc: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    },
+
+    // Node RPCs
+    node: {
+      ethereumMainnetRpc: env.ETHEREUM_MAINNET_RPC,
+      baseMainnetRpc: env.BASE_MAINNET_RPC,
+      baseSepoliaRpc: env.BASE_SEPOLIA_RPC,
+      bncRpc: env.BNC_RPC,
+    },
+
+    // Trading Settings
     trading: {
       defaultSlippage: env.DEFAULT_SLIPPAGE,
       defaultFee: env.DEFAULT_FEE,
       defaultFeeWallet: env.DEFAULT_FEE_WALLET,
       defaultGasPriority: env.DEFAULT_GAS_PRIORITY as GasPriority,
     },
+
+    // Database Settings
+    database: {
+      url: env.DATABASE_URL,
+      encryptionKey: env.PRISMA_FIELD_ENCRYPTION_KEY,
+    },
+
+    // Wallet Settings
     wallet: {
       encryptionKey: env.WALLET_ENCRYPTION_KEY,
     },
-    database: {
-      path: env.DB_PATH,
-    },
-    node: {
-      ethereumMainnetRpc: env.ETHEREUM_MAINNET_RPC,
-      baseMainnetRpc: env.BASE_MAINNET_RPC,
-      baseSepoliaRpc: env.BASE_SEPOLIA_RPC,
-      bncRpc: env.BNC_RPC,
-      openOceanAddonId: env.OPEN_OCEAN_ADDON_ID,
-    },
-    covalenthq_api_key: env.COVALENTHQ_API_KEY,
+
+    // Third Party APIs
+    covalenthqApiKey: env.COVALENTHQ_API_KEY,
   };
 };
 

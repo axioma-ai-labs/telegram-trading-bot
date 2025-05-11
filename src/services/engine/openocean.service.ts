@@ -161,7 +161,7 @@ export class OpenOceanClient {
    */
   async getGasPrice(
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<{ data: { standard: string } }>> {
+  ): Promise<OpenOceanResponse<{ data: { fast: string, instant: string, standard: string } }>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'gasPrice'), {
         headers: {

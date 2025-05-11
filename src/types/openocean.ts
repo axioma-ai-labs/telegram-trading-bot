@@ -7,10 +7,6 @@ export type OpenOceanChain = 'base' | 'ethereum' | 'bsc';
  * Base configuration for OpenOcean client
  */
 export interface OpenOceanConfig {
-  /** RPC endpoint URL */
-  rpcUrl: string;
-  /** OpenOcean addon ID */
-  addonId: string;
   /** Default chain to use */
   defaultChain: OpenOceanChain;
 }
