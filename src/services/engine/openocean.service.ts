@@ -7,6 +7,7 @@ import {
   ReverseQuoteParams,
   LimitOrderParams,
   DcaParams,
+  QuoteParams,
 } from '@/types/openocean';
 
 /**
@@ -48,23 +49,23 @@ export class OpenOceanClient {
   }
 
   /**
-   * Executes a swap operation
-   * @param params - Swap parameters
+   * Gets a quote for a token swap
+   * @param params - Quote parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
-   * @returns Swap transaction data
+   * @returns Quote data including token info, amounts, and routing details
    */
-  async swap(
-    params: SwapParams,
+  async quote(
+    params: QuoteParams,
     chain: OpenOceanChain = this.config.defaultChain
   ): Promise<OpenOceanResponse<any>> {
     try {
-      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'swap'), {
+      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'quote'), {
         params,
         headers: {
           'x-qn-api-chain': chain,
         },
       });
-      return { success: true, data };
+      return { success: true, data: data.data };
     } catch (error) {
       return {
         success: false,
@@ -91,6 +92,32 @@ export class OpenOceanClient {
         },
       });
       return { success: true, data: data.data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Prepares a swap operation
+   * @param params - Swap parameters
+   * @param chain - Target blockchain network (defaults to config defaultChain)
+   * @returns Swap transaction data
+   */
+  async swap(
+    params: SwapParams,
+    chain: OpenOceanChain = this.config.defaultChain
+  ): Promise<OpenOceanResponse<any>> {
+    try {
+      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'swap'), {
+        params,
+        headers: {
+          'x-qn-api-chain': chain,
+        },
+      });
+      return { success: true, data };
     } catch (error) {
       return {
         success: false,
@@ -146,7 +173,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Creates a limit order
+   * Prepares a limit order
    * @param params - Limit order parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Created order data
@@ -175,7 +202,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Cancels a limit order
+   * Prepares a limit order cancellation
    * @param hash - Order hash to cancel
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Cancellation result
@@ -232,7 +259,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Creates a DCA order
+   * Prepares a DCA order
    * @param params - DCA parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Created DCA order data
@@ -261,7 +288,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Cancels a DCA order
+   * Prepares a DCA order cancellation
    * @param hash - DCA order hash to cancel
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Cancellation result

@@ -39,14 +39,14 @@ export interface SwapParams {
  * Parameters for reverse quote operation
  */
 export interface ReverseQuoteParams {
+  /** Input token address */
+  inTokenAddress: string;
   /** Output token address */
   outTokenAddress: string;
   /** Desired output amount (in wei) */
-  outAmount: string;
+  amount: string;
   /** Gas price in wei */
   gasPrice: string;
-  /** User's wallet address */
-  account: string;
 }
 
 /**
@@ -85,6 +85,26 @@ export interface DcaParams {
   account: string;
   /** Optional slippage tolerance */
   slippage?: string;
+}
+
+/**
+ * Parameters for quote operation
+ */
+export interface QuoteParams {
+  /** Input token address */
+  inTokenAddress: string;
+  /** Output token address */
+  outTokenAddress: string;
+  /** Token amount with decimals */
+  amountDecimals?: string;
+  /** Gas price with decimals */
+  gasPriceDecimals?: string;
+  /** Slippage tolerance in percentage (0.05 to 50) */
+  slippage?: string;
+  /** Disabled DEX IDs separated by commas */
+  disabledDexIds?: string;
+  /** Enabled DEX IDs separated by commas */
+  enabledDexIds?: string;
 }
 
 /**
