@@ -2,6 +2,7 @@ import { IS_NEW_USER } from '@/config/mock';
 import { BotContext } from '@/types/config';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { buyTokenMessage } from '@/bot/commands/buy';
+
 export async function buyToken(ctx: BotContext): Promise<void> {
   // Case 1: User is not registered | works
   if (IS_NEW_USER) {

@@ -129,7 +129,8 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   referralCode: 'referralCode',
-  referredById: 'referredById'
+  referredById: 'referredById',
+  termsAccepted: 'termsAccepted'
 };
 
 exports.Prisma.ReferralStatsScalarFieldEnum = {

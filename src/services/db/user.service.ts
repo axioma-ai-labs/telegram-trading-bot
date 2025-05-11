@@ -11,6 +11,9 @@ export class UserService {
       username?: string;
       firstName?: string;
       lastName?: string;
+      termsAccepted?: boolean;
+      referredById?: string;
+      referralCode?: string;
     }
   ): Promise<User> {
     return prisma.user.upsert({
@@ -39,6 +42,7 @@ export class UserService {
       include: {
         settings: true,
         wallets: true,
+        referralStats: true,
       },
     });
   }
@@ -53,6 +57,13 @@ export class UserService {
         chain,
         userId,
       },
+    });
+  }
+
+  static async updateTermsAccepted(userId: string, termsAccepted: boolean): Promise<User> {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { termsAccepted },
     });
   }
 

@@ -40,9 +40,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
       const balance = await neurodex.getEthBalance(telegramId);
       const ethBalance = balance.success ? balance.data : '0.000';
 
-      const message = walletMessage
-        .replace('{ethBalance}', ethBalance || '0.000')
-        .replace('{walletAddress}', walletAddress);
+      const message = walletMessage(walletAddress, ethBalance || '0.000');
 
       await ctx.editMessageText(message, {
         parse_mode: 'Markdown',

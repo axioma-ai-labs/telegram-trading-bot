@@ -1332,6 +1332,7 @@ export namespace Prisma {
     updatedAt: Date | null
     referralCode: string | null
     referredById: string | null
+    termsAccepted: boolean | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -1344,6 +1345,7 @@ export namespace Prisma {
     updatedAt: Date | null
     referralCode: string | null
     referredById: string | null
+    termsAccepted: boolean | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -1356,6 +1358,7 @@ export namespace Prisma {
     updatedAt: number
     referralCode: number
     referredById: number
+    termsAccepted: number
     _all: number
   }
 
@@ -1370,6 +1373,7 @@ export namespace Prisma {
     updatedAt?: true
     referralCode?: true
     referredById?: true
+    termsAccepted?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -1382,6 +1386,7 @@ export namespace Prisma {
     updatedAt?: true
     referralCode?: true
     referredById?: true
+    termsAccepted?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -1394,6 +1399,7 @@ export namespace Prisma {
     updatedAt?: true
     referralCode?: true
     referredById?: true
+    termsAccepted?: true
     _all?: true
   }
 
@@ -1479,6 +1485,7 @@ export namespace Prisma {
     updatedAt: Date
     referralCode: string | null
     referredById: string | null
+    termsAccepted: boolean
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -1508,6 +1515,7 @@ export namespace Prisma {
     updatedAt?: boolean
     referralCode?: boolean
     referredById?: boolean
+    termsAccepted?: boolean
     wallets?: boolean | User$walletsArgs<ExtArgs>
     trades?: boolean | User$tradesArgs<ExtArgs>
     settings?: boolean | User$settingsArgs<ExtArgs>
@@ -1527,6 +1535,7 @@ export namespace Prisma {
     updatedAt?: boolean
     referralCode?: boolean
     referredById?: boolean
+    termsAccepted?: boolean
     referredBy?: boolean | User$referredByArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1540,6 +1549,7 @@ export namespace Prisma {
     updatedAt?: boolean
     referralCode?: boolean
     referredById?: boolean
+    termsAccepted?: boolean
     referredBy?: boolean | User$referredByArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1553,9 +1563,10 @@ export namespace Prisma {
     updatedAt?: boolean
     referralCode?: boolean
     referredById?: boolean
+    termsAccepted?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "telegramId" | "username" | "firstName" | "lastName" | "createdAt" | "updatedAt" | "referralCode" | "referredById", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "telegramId" | "username" | "firstName" | "lastName" | "createdAt" | "updatedAt" | "referralCode" | "referredById" | "termsAccepted", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     wallets?: boolean | User$walletsArgs<ExtArgs>
     trades?: boolean | User$tradesArgs<ExtArgs>
@@ -1592,6 +1603,7 @@ export namespace Prisma {
       updatedAt: Date
       referralCode: string | null
       referredById: string | null
+      termsAccepted: boolean
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2030,6 +2042,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly referralCode: FieldRef<"User", 'String'>
     readonly referredById: FieldRef<"User", 'String'>
+    readonly termsAccepted: FieldRef<"User", 'Boolean'>
   }
     
 
@@ -7205,7 +7218,8 @@ export namespace Prisma {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     referralCode: 'referralCode',
-    referredById: 'referredById'
+    referredById: 'referredById',
+    termsAccepted: 'termsAccepted'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -7332,6 +7346,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -7357,13 +7378,6 @@ export namespace Prisma {
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
   /**
    * Deep Input Types
    */
@@ -7382,6 +7396,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     referralCode?: StringNullableFilter<"User"> | string | null
     referredById?: StringNullableFilter<"User"> | string | null
+    termsAccepted?: BoolFilter<"User"> | boolean
     wallets?: WalletListRelationFilter
     trades?: TradeListRelationFilter
     settings?: XOR<SettingsNullableScalarRelationFilter, SettingsWhereInput> | null
@@ -7400,6 +7415,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     referralCode?: SortOrderInput | SortOrder
     referredById?: SortOrderInput | SortOrder
+    termsAccepted?: SortOrder
     wallets?: WalletOrderByRelationAggregateInput
     trades?: TradeOrderByRelationAggregateInput
     settings?: SettingsOrderByWithRelationInput
@@ -7421,6 +7437,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     referredById?: StringNullableFilter<"User"> | string | null
+    termsAccepted?: BoolFilter<"User"> | boolean
     wallets?: WalletListRelationFilter
     trades?: TradeListRelationFilter
     settings?: XOR<SettingsNullableScalarRelationFilter, SettingsWhereInput> | null
@@ -7439,6 +7456,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     referralCode?: SortOrderInput | SortOrder
     referredById?: SortOrderInput | SortOrder
+    termsAccepted?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -7457,6 +7475,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     referralCode?: StringNullableWithAggregatesFilter<"User"> | string | null
     referredById?: StringNullableWithAggregatesFilter<"User"> | string | null
+    termsAccepted?: BoolWithAggregatesFilter<"User"> | boolean
   }
 
   export type ReferralStatsWhereInput = {
@@ -7793,6 +7812,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     trades?: TradeCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
@@ -7811,6 +7831,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
@@ -7827,6 +7848,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     trades?: TradeUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
@@ -7845,6 +7867,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
@@ -7862,6 +7885,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
   }
 
   export type UserUpdateManyMutationInput = {
@@ -7873,6 +7897,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -7885,6 +7910,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type ReferralStatsCreateInput = {
@@ -8284,6 +8310,11 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type WalletListRelationFilter = {
     every?: WalletWhereInput
     some?: WalletWhereInput
@@ -8344,6 +8375,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     referralCode?: SortOrder
     referredById?: SortOrder
+    termsAccepted?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
@@ -8356,6 +8388,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     referralCode?: SortOrder
     referredById?: SortOrder
+    termsAccepted?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -8368,6 +8401,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     referralCode?: SortOrder
     referredById?: SortOrder
+    termsAccepted?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -8418,6 +8452,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type FloatFilter<$PrismaModel = never> = {
@@ -8629,11 +8671,6 @@ export namespace Prisma {
     totalValue?: SortOrder
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type SettingsCountOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
@@ -8668,14 +8705,6 @@ export namespace Prisma {
     updatedAt?: SortOrder
     gasPriority?: SortOrder
     slippage?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type WalletCreateNestedManyWithoutUserInput = {
@@ -8760,6 +8789,10 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type WalletUpdateManyWithoutUserNestedInput = {
@@ -9016,10 +9049,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type UserUpdateOneRequiredWithoutSettingsNestedInput = {
     create?: XOR<UserCreateWithoutSettingsInput, UserUncheckedCreateWithoutSettingsInput>
     connectOrCreate?: UserCreateOrConnectWithoutSettingsInput
@@ -9065,6 +9094,11 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -9137,6 +9171,14 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -9178,19 +9220,6 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type WalletCreateWithoutUserInput = {
@@ -9301,6 +9330,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     trades?: TradeCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
@@ -9318,6 +9348,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
@@ -9338,6 +9369,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     trades?: TradeCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
@@ -9354,6 +9386,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
@@ -9516,6 +9549,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     trades?: TradeUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
@@ -9533,6 +9567,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
@@ -9568,6 +9603,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     referralCode?: StringNullableFilter<"User"> | string | null
     referredById?: StringNullableFilter<"User"> | string | null
+    termsAccepted?: BoolFilter<"User"> | boolean
   }
 
   export type ReferralStatsUpsertWithoutUserInput = {
@@ -9612,6 +9648,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     trades?: TradeCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
@@ -9629,6 +9666,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
@@ -9660,6 +9698,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     trades?: TradeUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
@@ -9677,6 +9716,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
@@ -9692,6 +9732,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     trades?: TradeCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
     referredBy?: UserCreateNestedOneWithoutReferralsInput
@@ -9709,6 +9750,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
     referrals?: UserUncheckedCreateNestedManyWithoutReferredByInput
@@ -9780,6 +9822,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     trades?: TradeUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
     referredBy?: UserUpdateOneWithoutReferralsNestedInput
@@ -9797,6 +9840,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
     referrals?: UserUncheckedUpdateManyWithoutReferredByNestedInput
@@ -9828,6 +9872,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     settings?: SettingsCreateNestedOneWithoutUserInput
     referredBy?: UserCreateNestedOneWithoutReferralsInput
@@ -9845,6 +9890,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     settings?: SettingsUncheckedCreateNestedOneWithoutUserInput
     referrals?: UserUncheckedCreateNestedManyWithoutReferredByInput
@@ -9903,6 +9949,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
     referredBy?: UserUpdateOneWithoutReferralsNestedInput
@@ -9920,6 +9967,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
     referrals?: UserUncheckedUpdateManyWithoutReferredByNestedInput
@@ -9968,6 +10016,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
     wallets?: WalletCreateNestedManyWithoutUserInput
     trades?: TradeCreateNestedManyWithoutUserInput
     referredBy?: UserCreateNestedOneWithoutReferralsInput
@@ -9985,6 +10034,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     referralCode?: string | null
     referredById?: string | null
+    termsAccepted?: boolean
     wallets?: WalletUncheckedCreateNestedManyWithoutUserInput
     trades?: TradeUncheckedCreateNestedManyWithoutUserInput
     referrals?: UserUncheckedCreateNestedManyWithoutReferredByInput
@@ -10016,6 +10066,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     trades?: TradeUpdateManyWithoutUserNestedInput
     referredBy?: UserUpdateOneWithoutReferralsNestedInput
@@ -10033,6 +10084,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
     referredById?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     referrals?: UserUncheckedUpdateManyWithoutReferredByNestedInput
@@ -10073,6 +10125,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     referralCode?: string | null
+    termsAccepted?: boolean
   }
 
   export type WalletUpdateWithoutUserInput = {
@@ -10161,6 +10214,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUpdateManyWithoutUserNestedInput
     trades?: TradeUpdateManyWithoutUserNestedInput
     settings?: SettingsUpdateOneWithoutUserNestedInput
@@ -10177,6 +10231,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
     wallets?: WalletUncheckedUpdateManyWithoutUserNestedInput
     trades?: TradeUncheckedUpdateManyWithoutUserNestedInput
     settings?: SettingsUncheckedUpdateOneWithoutUserNestedInput
@@ -10193,6 +10248,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     referralCode?: NullableStringFieldUpdateOperationsInput | string | null
+    termsAccepted?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TradeCreateManyWalletInput = {

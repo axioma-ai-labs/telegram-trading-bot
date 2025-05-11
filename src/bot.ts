@@ -31,7 +31,7 @@ import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import { referralCommandHandler } from '@/bot/commands/referrals';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
-
+import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -63,6 +63,7 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
   set_gas: handleSetGas,
   get_referral_link: getReferralLink,
   get_referral_stats: getReferralStats,
+  accept_terms_conditions: acceptTermsConditions,
 };
 
 // Parameterized handlers

@@ -1,5 +1,8 @@
 import 'dotenv/config';
 import { UserService } from '../src/services/db/user.service';
+import { PrismaClient } from '../prisma/generated/prisma';
+
+const prisma = new PrismaClient();
 
 async function testDatabaseConnection(): Promise<void> {
   try {
@@ -35,6 +38,7 @@ async function testDatabaseConnection(): Promise<void> {
   } catch (error) {
     console.error('❌ Database test failed:', error);
   } finally {
+    await prisma.$disconnect();
     process.exit(0);
   }
 }
