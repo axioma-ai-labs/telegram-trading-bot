@@ -1,5 +1,5 @@
-import { BotContext } from '../../types/config';
-import { helpKeyboard, helpMessage } from '../commands/help';
+import { BotContext } from '@/types/config';
+import { helpKeyboard, helpMessage } from '@/bot/commands/help';
 
 export async function handleGetHelp(ctx: BotContext): Promise<void> {
   await ctx.editMessageText(helpMessage, {

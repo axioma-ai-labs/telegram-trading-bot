@@ -1,21 +1,20 @@
-import { OpenOceanClient } from './openocean.service';
-import { config } from '../../config/config';
-import { formatEther, parseUnits } from 'ethers';
+import { OpenOceanClient } from '@/services/engine/openocean.service';
+import { ViemService } from '@/services/engine/viem.service';
+import { config } from '@/config/config';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { Chain, GoldRushClient } from '@covalenthq/client-sdk';
+import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
 import {
-  BuyParams,
-  SellParams,
   DcaParams,
   LimitOrderParams,
   NeuroDexResponse,
   TokenInfo,
   OrderInfo,
   WalletInfo,
-} from '../../types/neurodex';
-import { OpenOceanChain } from '../../types/openocean';
-import { createPublicClient } from 'viem';
-import { http } from 'viem';
+  SwapResponse,
+  BaseTradeParams,
+} from '@/types/neurodex';
+import { DcaOrderResponse, LimitOrderResponse, OpenOceanChain } from '@/types/openocean';
+import { Address, createPublicClient, formatEther, parseUnits, http } from 'viem';
 
 /**
  * NeuroDex API service for handling trading operations
@@ -23,6 +22,7 @@ import { http } from 'viem';
  */
 export class NeuroDexApi {
   private readonly openOceanClient: OpenOceanClient;
+  private readonly viemService: ViemService;
   private readonly nativeTokenAddress: Record<OpenOceanChain, string> = {
     base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -35,6 +35,7 @@ export class NeuroDexApi {
       addonId: config.node.openOceanAddonId,
       defaultChain: 'base',
     });
+    this.viemService = new ViemService();
   }
 
   async createWallet(): Promise<WalletInfo> {
@@ -47,7 +48,10 @@ export class NeuroDexApi {
     };
   }
 
-  async getTokenBalances(chain: string = 'eth-mainnet', address: string): Promise<any> {
+  async getTokenBalances(
+    chain: string = 'eth-mainnet',
+    address: string
+  ): Promise<BalancesResponse | null> {
     const client = new GoldRushClient(config.covalenthq_api_key);
     const response = await client.BalanceService.getTokenBalancesForWalletAddress(
       chain as Chain,
@@ -76,6 +80,18 @@ export class NeuroDexApi {
         error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
+  }
+
+  /**
+   * Generates a referral link for a user.
+   * @param userId - Telegram user ID
+   * @param username - Telegram username
+   * @returns Generated referral link
+   */
+  async generateReferralLink(userId: number, username: string): Promise<string> {
+    const referralCode = username || `id${userId}`;
+    const referralLink = `https://t.me/neurodex_bot?start=r-${referralCode}`;
+    return referralLink;
   }
 
   // private async encryptPrivateKey(privateKey: string): Promise<string> {
@@ -124,7 +140,7 @@ export class NeuroDexApi {
       }
 
       const token = response.data.data.find(
-        (t: any) => t.address.toLowerCase() === tokenAddress.toLowerCase()
+        (t: TokenInfo) => t.address.toLowerCase() === tokenAddress.toLowerCase()
       );
       if (!token) {
         throw new Error('Token not found');
@@ -147,70 +163,137 @@ export class NeuroDexApi {
     }
   }
 
-  async buy(params: BuyParams, chain: OpenOceanChain = 'base'): Promise<NeuroDexResponse<any>> {
+  /**
+   * Buy a given amount of `tokenAddress` using the chain's native token.
+   * 1) Reverse-quote how much native token is needed.
+   * 2) Swap that native token for your token.
+   */
+  async buy(
+    params: BaseTradeParams,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
+      // 1) figure out how much native we need to spend
       const gasPrice = await this.getGasPrice(chain);
-      const slippage = params.slippage || config.trading.defaultSlippage;
-
-      const response = await this.openOceanClient.swap(
+      const native = this.nativeTokenAddress[chain];
+      const quote = await this.openOceanClient.quote(
         {
-          inTokenAddress: this.nativeTokenAddress[chain],
+          inTokenAddress: native,
           outTokenAddress: params.tokenAddress,
-          amount: params.nativeAmount,
-          gasPrice,
-          slippage: slippage.toString(),
-          account: params.account,
+          amountDecimals: params.amount,
+          gasPriceDecimals: gasPrice,
         },
         chain
       );
+      if (!quote.success) throw new Error(quote.error);
 
-      if (!response.success || !response.data) {
-        throw new Error('Failed to create swap transaction');
-      }
+      // 2) Prepare swap
+      const swap = await this.openOceanClient.swap(
+        {
+          inTokenAddress: native,
+          outTokenAddress: params.tokenAddress,
+          amount: params.amount,
+          gasPrice,
+          slippage: params.slippage ?? '1',
+          account: params.walletAddress,
+          referrer: params.referrer,
+        },
+        chain
+      );
+      if (!swap.success || !swap.data) throw new Error(swap.error || 'Swap data is undefined');
+
+      // 3) Execute swap
+      const account = privateKeyToAccount(params.privateKey as `0x${string}`);
+      const receipt = await this.viemService.executeTransaction(account, {
+        to: swap.data.data.to as Address,
+        data: swap.data.data.data,
+        value: swap.data.data.value,
+        gasPrice: swap.data.data.gasPrice,
+      });
 
       return {
         success: true,
-        data: response.data,
-        txHash: response.data.txHash,
+        data: {
+          inToken: swap.data.data.inToken,
+          outToken: swap.data.data.outToken,
+          inAmount: swap.data.data.inAmount,
+          outAmount: swap.data.data.outAmount,
+          estimatedGas: swap.data.data.estimatedGas,
+          price_impact: swap.data.data.price_impact,
+          txHash: receipt.transactionHash,
+        },
       };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error in buy',
       };
     }
   }
 
-  async sell(params: SellParams, chain: OpenOceanChain = 'base'): Promise<NeuroDexResponse<any>> {
+  /**
+   * Sell a given `amount` of tokenAddress into the chain's native token.
+   * Single swap: token -> native.
+   */
+  async sell(
+    params: BaseTradeParams,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
+      // 1) figure out how much native we need to spend
       const gasPrice = await this.getGasPrice(chain);
-      const slippage = params.slippage || config.trading.defaultSlippage;
-
-      const response = await this.openOceanClient.swap(
+      const native = this.nativeTokenAddress[chain];
+      const quote = await this.openOceanClient.quote(
         {
           inTokenAddress: params.tokenAddress,
-          outTokenAddress: this.nativeTokenAddress[chain],
-          amount: params.amount,
-          gasPrice,
-          slippage: slippage.toString(),
-          account: params.account,
+          outTokenAddress: native,
+          amountDecimals: params.amount,
+          gasPriceDecimals: gasPrice,
         },
         chain
       );
+      if (!quote.success) throw new Error(quote.error);
 
-      if (!response.success || !response.data) {
-        throw new Error('Failed to create swap transaction');
-      }
+      // 2) Prepare swap
+      const swap = await this.openOceanClient.swap(
+        {
+          inTokenAddress: params.tokenAddress,
+          outTokenAddress: native,
+          amount: params.amount,
+          gasPrice,
+          slippage: params.slippage ?? '1',
+          account: params.walletAddress,
+          referrer: params.referrer,
+        },
+        chain
+      );
+      if (!swap.success || !swap.data) throw new Error(swap.error || 'Swap data is undefined');
+
+      // 3) Execute swap
+      const account = privateKeyToAccount(params.privateKey as `0x${string}`);
+      const receipt = await this.viemService.executeTransaction(account, {
+        to: swap.data.data.to as Address,
+        data: swap.data.data.data,
+        value: swap.data.data.value,
+        gasPrice: swap.data.data.gasPrice,
+      });
 
       return {
         success: true,
-        data: response.data,
-        txHash: response.data.txHash,
+        data: {
+          inToken: swap.data.data.inToken,
+          outToken: swap.data.data.outToken,
+          inAmount: swap.data.data.inAmount,
+          outAmount: swap.data.data.outAmount,
+          estimatedGas: swap.data.data.estimatedGas,
+          price_impact: swap.data.data.price_impact,
+          txHash: receipt.transactionHash,
+        },
       };
-    } catch (error) {
+    } catch (err) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error in sell',
       };
     }
   }
@@ -224,7 +307,7 @@ export class NeuroDexApi {
   async createDca(
     params: DcaParams,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<DcaOrderResponse>> {
     try {
       const response = await this.openOceanClient.createDca(
         {
@@ -233,7 +316,7 @@ export class NeuroDexApi {
           totalAmount: params.totalAmount,
           intervals: params.intervals,
           intervalDuration: params.intervalDuration,
-          account: params.account,
+          account: params.walletAddress,
           slippage: params.slippage?.toString(),
         },
         chain
@@ -264,7 +347,7 @@ export class NeuroDexApi {
   async createLimitOrder(
     params: LimitOrderParams,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<LimitOrderResponse>> {
     try {
       const response = await this.openOceanClient.createLimitOrder(
         {
@@ -272,7 +355,7 @@ export class NeuroDexApi {
           takerTokenAddress: params.tokenAddress,
           makerAmount: parseUnits(params.targetPrice, 18).toString(),
           takerAmount: params.amount,
-          account: params.account,
+          account: params.walletAddress,
           expireTime: params.expireTime,
         },
         chain
@@ -303,13 +386,16 @@ export class NeuroDexApi {
   async cancelDca(
     orderHash: string,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<boolean>> {
     try {
       const response = await this.openOceanClient.cancelDca(orderHash, chain);
       if (!response.success) {
         throw new Error('Failed to cancel DCA order');
       }
-      return response;
+      return {
+        success: true,
+        data: true,
+      };
     } catch (error) {
       return {
         success: false,
@@ -327,13 +413,16 @@ export class NeuroDexApi {
   async cancelLimitOrder(
     orderHash: string,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<boolean>> {
     try {
       const response = await this.openOceanClient.cancelLimitOrder(orderHash, chain);
       if (!response.success) {
         throw new Error('Failed to cancel limit order');
       }
-      return response;
+      return {
+        success: true,
+        data: true,
+      };
     } catch (error) {
       return {
         success: false,
@@ -359,7 +448,7 @@ export class NeuroDexApi {
       }
       return {
         success: true,
-        data: response.data.map(this.mapOrderInfo),
+        data: response.data.data.map(this.mapOrderInfo),
       };
     } catch (error) {
       return {
@@ -386,7 +475,7 @@ export class NeuroDexApi {
       }
       return {
         success: true,
-        data: response.data.map(this.mapOrderInfo),
+        data: response.data.data.map(this.mapOrderInfo),
       };
     } catch (error) {
       return {
@@ -401,6 +490,7 @@ export class NeuroDexApi {
    * @param order - Raw order data
    * @returns Formatted order information
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapOrderInfo(order: any): OrderInfo {
     return {
       id: order.id,
@@ -418,17 +508,5 @@ export class NeuroDexApi {
       expiresAt: order.expiresAt,
       txHash: order.txHash,
     };
-  }
-
-  /**
-   * Generates a referral link for a user.
-   * @param userId - Telegram user ID
-   * @param username - Telegram username
-   * @returns Generated referral link
-   */
-  async generateReferralLink(userId: number, username: string): Promise<string> {
-    const referralCode = username || `id${userId}`;
-    const referralLink = `https://t.me/neurodex_bot?start=r-${referralCode}`;
-    return referralLink;
   }
 }

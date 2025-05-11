@@ -1,4 +1,4 @@
-import { GasPriority } from '../types/config';
+import { GasPriority } from '@/types/config';
 
 /**
  * Base parameters for trading operations
@@ -9,27 +9,15 @@ export interface BaseTradeParams {
   /** Amount to trade (in wei) */
   amount: string;
   /** Slippage tolerance in percentage */
-  slippage?: number;
+  slippage?: string;
   /** Gas priority level */
   gasPriority?: GasPriority;
   /** User's wallet address */
-  account: string;
-}
-
-/**
- * Parameters for buying tokens
- */
-export interface BuyParams extends BaseTradeParams {
-  /** Amount of native token (ETH/BNB) to spend */
-  nativeAmount: string;
-}
-
-/**
- * Parameters for selling tokens
- */
-export interface SellParams extends BaseTradeParams {
-  /** Minimum amount of native token (ETH/BNB) to receive */
-  minNativeAmount: string;
+  walletAddress: string;
+  /** User's private key */
+  privateKey: string;
+  /** Referral code */
+  referrer?: string;
 }
 
 /**
@@ -135,4 +123,17 @@ export interface WalletInfo {
   address: string;
 
   privateKey: string;
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResponse {
+  inToken: TokenInfo;
+  outToken: TokenInfo;
+  inAmount: string;
+  outAmount: string;
+  estimatedGas: string;
+  price_impact: string | undefined;
+  txHash: string;
 }

@@ -1,9 +1,9 @@
 import { InlineKeyboard } from 'grammy';
-import { CommandHandler } from '../../types/commands';
-import { BotContext } from '../../types/config';
-import { SettingsService } from '../../services/db/settings.service';
-import { UserService } from '../../services/db/user.service';
-import { getLanguageName, getGasPriorityName, getSlippageName } from '../../utils/settingsGetters';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/config';
+import { SettingsService } from '@/services/db/settings.service';
+import { UserService } from '@/services/db/user.service';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 
 export const settingsMessage = (
   slippage?: string,

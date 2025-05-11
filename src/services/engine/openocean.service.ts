@@ -7,7 +7,13 @@ import {
   ReverseQuoteParams,
   LimitOrderParams,
   DcaParams,
-} from '../../types/openocean';
+  QuoteParams,
+  QuoteResponse,
+  SwapResponse,
+  TokenInfo,
+  LimitOrderResponse,
+  DcaOrderResponse,
+} from '@/types/openocean';
 
 /**
  * OpenOcean API client for interacting with OpenOcean DEX aggregator via QuickNode
@@ -48,23 +54,23 @@ export class OpenOceanClient {
   }
 
   /**
-   * Executes a swap operation
-   * @param params - Swap parameters
+   * Gets a quote for a token swap
+   * @param params - Quote parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
-   * @returns Swap transaction data
+   * @returns Quote data including token info, amounts, and routing details
    */
-  async swap(
-    params: SwapParams,
+  async quote(
+    params: QuoteParams,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<QuoteResponse>> {
     try {
-      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'swap'), {
+      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'quote'), {
         params,
         headers: {
           'x-qn-api-chain': chain,
         },
       });
-      return { success: true, data };
+      return { success: true, data: data.data };
     } catch (error) {
       return {
         success: false,
@@ -82,7 +88,7 @@ export class OpenOceanClient {
   async reverseQuote(
     params: ReverseQuoteParams,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<QuoteResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'reverseQuote'), {
         params,
@@ -100,13 +106,39 @@ export class OpenOceanClient {
   }
 
   /**
+   * Prepares a swap operation
+   * @param params - Swap parameters
+   * @param chain - Target blockchain network (defaults to config defaultChain)
+   * @returns Swap transaction data
+   */
+  async swap(
+    params: SwapParams,
+    chain: OpenOceanChain = this.config.defaultChain
+  ): Promise<OpenOceanResponse<SwapResponse>> {
+    try {
+      const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'swap'), {
+        params,
+        headers: {
+          'x-qn-api-chain': chain,
+        },
+      });
+      return { success: true, data };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Gets list of supported tokens for a chain
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns List of tokens
    */
   async getTokens(
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: TokenInfo[] }>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'tokenList'), {
         headers: {
@@ -129,7 +161,7 @@ export class OpenOceanClient {
    */
   async getGasPrice(
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: { standard: string } }>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'gasPrice'), {
         headers: {
@@ -146,7 +178,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Creates a limit order
+   * Prepares a limit order
    * @param params - Limit order parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Created order data
@@ -154,7 +186,7 @@ export class OpenOceanClient {
   async createLimitOrder(
     params: LimitOrderParams,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<LimitOrderResponse>> {
     try {
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chain, 'limit-order', 'v1'),
@@ -175,7 +207,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Cancels a limit order
+   * Prepares a limit order cancellation
    * @param hash - Order hash to cancel
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Cancellation result
@@ -183,7 +215,7 @@ export class OpenOceanClient {
   async cancelLimitOrder(
     hash: string,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: { success: boolean } }>> {
     try {
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chain, 'cancelLimitOrder', 'v1'),
@@ -212,7 +244,7 @@ export class OpenOceanClient {
   async listLimitOrders(
     address: string,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: LimitOrderResponse['data'][] }>> {
     try {
       const { data } = await this.axiosInstance.get(
         this.buildEndpoint(chain, `address/${address}`, 'v1'),
@@ -232,7 +264,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Creates a DCA order
+   * Prepares a DCA order
    * @param params - DCA parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Created DCA order data
@@ -240,7 +272,7 @@ export class OpenOceanClient {
   async createDca(
     params: DcaParams,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<DcaOrderResponse>> {
     try {
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chain, 'dca/swap', 'v1'),
@@ -261,7 +293,7 @@ export class OpenOceanClient {
   }
 
   /**
-   * Cancels a DCA order
+   * Prepares a DCA order cancellation
    * @param hash - DCA order hash to cancel
    * @param chain - Target blockchain network (defaults to config defaultChain)
    * @returns Cancellation result
@@ -269,7 +301,7 @@ export class OpenOceanClient {
   async cancelDca(
     hash: string,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: { success: boolean } }>> {
     try {
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chain, 'dca/cancel', 'v1'),
@@ -298,7 +330,7 @@ export class OpenOceanClient {
   async listDcaOrders(
     address: string,
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: DcaOrderResponse['data'][] }>> {
     try {
       const { data } = await this.axiosInstance.get(
         this.buildEndpoint(chain, `dca/address/${address}`, 'v1'),
@@ -324,7 +356,7 @@ export class OpenOceanClient {
    */
   async listAllDcaOrders(
     chain: OpenOceanChain = this.config.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ data: DcaOrderResponse['data'][] }>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'dca/all', 'v1'), {
         headers: {

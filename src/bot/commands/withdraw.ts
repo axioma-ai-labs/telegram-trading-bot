@@ -1,10 +1,10 @@
 import { InlineKeyboard } from 'grammy';
-import { CommandHandler } from '../../types/commands';
-import { BotContext } from '../../types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '../../config/mock';
-import { createWalletKeyboard } from '../commands/wallet';
-import { deleteBotMessage } from '../../utils/deleteMessage';
-import { NeuroDexApi } from '../../services/engine/neurodex';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/config';
+import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
+import { createWalletKeyboard } from '@/bot/commands/wallet';
+import { deleteBotMessage } from '@/utils/deleteMessage';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export let withdrawMessage = `📤 *Withdraw ETH or other tokens*
 

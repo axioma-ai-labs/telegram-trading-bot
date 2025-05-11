@@ -1,7 +1,7 @@
-import { BotContext } from '../../types/config';
-import { IS_NEW_USER } from '../../config/mock';
-import { deleteBotMessage } from '../../utils/deleteMessage';
-import { sellTokenMessage } from '../commands/sell';
+import { BotContext } from '@/types/config';
+import { IS_NEW_USER } from '@/config/mock';
+import { deleteBotMessage } from '@/utils/deleteMessage';
+import { sellTokenMessage } from '@/bot/commands/sell';
 
 export async function sellToken(ctx: BotContext): Promise<void> {
   // Case 1: User is not registered | works

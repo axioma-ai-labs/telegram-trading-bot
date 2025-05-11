@@ -48,6 +48,8 @@ lint-fix:
 # Fix imports and format code
 format:
 	$(PRETTIER) --write "src/**/*.ts"
+	$(PRETTIER) --write "scripts/**/*.ts"
+	$(PRETTIER) --write "tests/**/*.ts"
 	$(PRISMA) format
 
 # Run some command with ts-node

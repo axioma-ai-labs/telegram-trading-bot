@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy';
-import { CommandHandler } from '../../types/commands';
-import { BotContext } from '../../types/config';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/config';
 
 export const transactionsMessage = `
 *📈 Transaction History*

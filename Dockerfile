@@ -39,8 +39,11 @@ RUN pnpm install --prod --frozen-lockfile
 # Copy built files from builder stage
 COPY --from=builder /neurodex-bot/dist ./dist
 
-# Copy prisma to runtime
+# Copy tsconfig and prisma to runtime
+COPY --from=builder /neurodex-bot/tsconfig.json ./tsconfig.json
 COPY --from=builder /neurodex-bot/prisma ./prisma
 
 # Command to run the app
-CMD ["node", "dist/bot.js"] 
+ENV TS_NODE_PROJECT=tsconfig.json
+ENV TS_NODE_BASEURL=./dist
+CMD ["node", "-r", "tsconfig-paths/register", "dist/bot.js"] 

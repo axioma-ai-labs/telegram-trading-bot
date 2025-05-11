@@ -5,7 +5,7 @@
   "main": "dist/bot.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/bot.js",
+    "start": "TS_NODE_PROJECT=tsconfig.json TS_NODE_BASEURL=./dist node -r tsconfig-paths/register dist/bot.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/bot.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -47,7 +47,6 @@
     "eslint-plugin-prettier": "^5.4.0",
     "prettier": "^3.5.3",
     "prisma": "^6.7.0",
-    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "ts-prune": "^0.10.3",
     "typescript": "5.5.3"
