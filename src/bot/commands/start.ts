@@ -29,6 +29,8 @@ export const startKeyboard = new InlineKeyboard()
   .text('Withdraw', 'withdraw')
   .text('Deposit', 'deposit')
   .row()
+  .text('💵 Referrals', 'get_referral_link')
+  .row()
   .text('⚙️ Settings', 'open_settings')
   .text('💬 Help', 'get_help');
 

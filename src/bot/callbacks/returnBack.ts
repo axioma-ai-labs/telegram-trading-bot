@@ -4,6 +4,8 @@ import { startMessage, startKeyboard } from '@/bot/commands/start';
 import { settingsMessage, settingsKeyboard } from '@/bot/commands/settings';
 import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
+import { referralKeyboard, referralMessage } from '../commands/referrals';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 
 interface BackHandlerConfig {
   message: string;
@@ -17,8 +19,16 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     keyboard: startKeyboard,
   },
   back_settings: {
-    message: settingsMessage,
+    message: settingsMessage(
+      getSlippageName('0.5'),
+      getLanguageName('en'),
+      getGasPriorityName('medium')
+    ),
     keyboard: settingsKeyboard,
+  },
+  back_referrals: {
+    message: referralMessage('referralLink'),
+    keyboard: referralKeyboard,
   },
   back_wallet: {
     message: walletMessage,

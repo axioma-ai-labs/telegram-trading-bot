@@ -25,10 +25,11 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
 
   const settings = await SettingsService.getUserSettingsByUserId(user.id);
 
-  const message = settingsMessage
-    .replace('{slippage}', getSlippageName(settings?.slippage || '1'))
-    .replace('{language}', getLanguageName(settings?.language || 'en'))
-    .replace('{gasPriority}', getGasPriorityName(settings?.gasPriority || 'medium'));
+  const message = settingsMessage(
+    getSlippageName(settings?.slippage || '1'),
+    getLanguageName(settings?.language || 'en'),
+    getGasPriorityName(settings?.gasPriority || 'medium')
+  );
 
   await ctx.editMessageText(message, {
     parse_mode: 'Markdown',
@@ -73,8 +74,22 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
   const user = await UserService.getUserByTelegramId(telegramId);
   if (!user) return;
 
+  const settings = await SettingsService.getUserSettingsByUserId(user.id);
+  if (!settings) return;
+
   await SettingsService.updateSlippage(user.id, slippage);
   await ctx.answerCallbackQuery(`Slippage set to ${getSlippageName(slippage)}`);
+  await ctx.editMessageText(
+    settingsMessage(
+      getSlippageName(slippage),
+      getLanguageName(settings?.language),
+      getGasPriorityName(settings?.gasPriority)
+    ),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: settingsKeyboard,
+    }
+  );
 };
 
 // Update gas priority
@@ -85,8 +100,22 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
   const user = await UserService.getUserByTelegramId(telegramId);
   if (!user) return;
 
+  const settings = await SettingsService.getUserSettingsByUserId(user.id);
+  if (!settings) return;
+
   await SettingsService.updateGasPriority(user.id, gasPriority);
   await ctx.answerCallbackQuery(`Gas priority set to ${getGasPriorityName(gasPriority)}`);
+  await ctx.editMessageText(
+    settingsMessage(
+      getSlippageName(settings?.slippage),
+      getLanguageName(settings?.language),
+      getGasPriorityName(gasPriority)
+    ),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: settingsKeyboard,
+    }
+  );
 };
 
 // Update language
@@ -97,6 +126,20 @@ export const updateLanguage = async (ctx: BotContext, language: string): Promise
   const user = await UserService.getUserByTelegramId(telegramId);
   if (!user) return;
 
+  const settings = await SettingsService.getUserSettingsByUserId(user.id);
+  if (!settings) return;
+
   await SettingsService.updateLanguage(user.id, language);
   await ctx.answerCallbackQuery(`Language set to ${getLanguageName(language)}`);
+  await ctx.editMessageText(
+    settingsMessage(
+      getSlippageName(settings?.slippage),
+      getLanguageName(language),
+      getGasPriorityName(settings?.gasPriority)
+    ),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: settingsKeyboard,
+    }
+  );
 };

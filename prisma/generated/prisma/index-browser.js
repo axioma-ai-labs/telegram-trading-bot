@@ -127,6 +127,20 @@ exports.Prisma.UserScalarFieldEnum = {
   firstName: 'firstName',
   lastName: 'lastName',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  referralCode: 'referralCode',
+  referredById: 'referredById'
+};
+
+exports.Prisma.ReferralStatsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  feeRate: 'feeRate',
+  totalReferrals: 'totalReferrals',
+  totalTrades: 'totalTrades',
+  totalVolume: 'totalVolume',
+  totalEarned: 'totalEarned',
+  createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
@@ -187,6 +201,7 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  ReferralStats: 'ReferralStats',
   Wallet: 'Wallet',
   Trade: 'Trade',
   Settings: 'Settings'
