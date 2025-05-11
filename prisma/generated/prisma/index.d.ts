@@ -1596,8 +1596,17 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       telegramId: string
+      /**
+       * @encrypted
+       */
       username: string | null
+      /**
+       * @encrypted
+       */
       firstName: string | null
+      /**
+       * @encrypted
+       */
       lastName: string | null
       createdAt: Date
       updatedAt: Date
@@ -3998,6 +4007,9 @@ export namespace Prisma {
       address: string
       chain: string
       type: string
+      /**
+       * @encrypted
+       */
       encryptedPrivateKey: string | null
       createdAt: Date
       updatedAt: Date
