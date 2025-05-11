@@ -19,7 +19,6 @@ import {
   updateSlippage,
   updateGasPriority,
   updateLanguage,
-
 } from '@/bot/callbacks/configureSettings';
 import { settingsCommandHandler } from '@/bot/commands/settings';
 import { transactionsCommandHandler } from '@/bot/commands/transactions';
@@ -32,7 +31,6 @@ import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import { referralCommandHandler } from '@/bot/commands/referrals';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
-
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 

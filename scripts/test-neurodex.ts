@@ -1,99 +1,101 @@
 import { NeuroDexApi } from '../src/services/engine/neurodex';
-import { parseUnits } from 'ethers';
 
-async function main(): Promise<void> {
-  const api = new NeuroDexApi();
-  const testAddress = '0x2FF855378Cd29f120CDF9d675E959cb5422ec5f2'; // Example wallet
+// Test wallet configuration
+// const TEST_WALLET = {
+//   address: '0x...', // Replace with your test wallet address
+//   privateKey: '0x...', // Replace with your test wallet private key
+// };
 
-  console.log('Testing NeuroDex API...\n');
+const TEST_WALLET = {
+  address: '0x6777aadba6ebe5f6bafee5c1bcfa46c4ed34b4b1',
+  privateKey: '2b2b07c796791efea8b7b651f1af0aa551b3031af32bf0cfec6252fa58814ebe',
+};
 
-  // Test getTokenBalances
-  console.log('1. Testing getTokenBalances...');
-  const balances = await api.getEthBalance(testAddress);
-  console.log('Token Balances:', JSON.stringify(balances, null, 2), '\n');
+// Test token addresses on Base
+const TEST_TOKENS = {
+  BRO: '0xc796E499CC8f599A2a8280825d8BdA92F7a895e0', // BRO on Base
+  WETH: '0x4200000000000000000000000000000000000006', // WETH on Base
+};
 
-  // Test getTokenInfo
-  console.log('2. Testing getTokenInfo...');
-  const tokenAddress = '0x4200000000000000000000000000000000000006'; // WETH on Base
-  const tokenInfo = await api.getTokenInfo(tokenAddress);
-  console.log('Token Info:', JSON.stringify(tokenInfo, null, 2), '\n');
+async function testBuy(): Promise<void> {
+  console.log('Testing buy functionality...');
 
-  // Test buy
-  console.log('3. Testing buy...');
-  const buyResult = await api.buy({
-    tokenAddress,
-    amount: parseUnits('1', 18).toString(), // 1 token
-    nativeAmount: parseUnits('0.1', 18).toString(), // 0.1 ETH
-    account: testAddress,
-    slippage: 1, // 1%
-  });
-  console.log('Buy Result:', JSON.stringify(buyResult, null, 2), '\n');
+  const neurodex = new NeuroDexApi();
 
-  // Test sell
-  console.log('4. Testing sell...');
-  const sellResult = await api.sell({
-    tokenAddress,
-    amount: parseUnits('1', 18).toString(), // 1 token
-    minNativeAmount: parseUnits('0.1', 18).toString(), // 0.1 ETH
-    account: testAddress,
-    slippage: 1, // 1%
-  });
-  console.log('Sell Result:', JSON.stringify(sellResult, null, 2), '\n');
+  try {
+    // Buy 10 USDC worth of WETH
+    const buyResult = await neurodex.buy({
+      tokenAddress: TEST_TOKENS.BRO,
+      amount: '10000000', // 10 BRO (6 decimals)
+      slippage: '1',
+      walletAddress: TEST_WALLET.address,
+      privateKey: TEST_WALLET.privateKey,
+    });
 
-  // Test createDca
-  console.log('5. Testing createDca...');
-  const dcaResult = await api.createDca({
-    tokenAddress,
-    amount: parseUnits('1', 18).toString(), // 1 token per interval
-    totalAmount: parseUnits('10', 18).toString(), // 10 ETH total
-    intervals: 10, // 10 intervals
-    intervalDuration: 3600, // 1 hour between intervals
-    account: testAddress,
-    slippage: 1, // 1%
-  });
-  console.log('DCA Result:', JSON.stringify(dcaResult, null, 2), '\n');
-
-  // Test createLimitOrder
-  console.log('6. Testing createLimitOrder...');
-  const limitOrderResult = await api.createLimitOrder({
-    tokenAddress,
-    amount: parseUnits('1', 18).toString(), // 1 token
-    targetPrice: '0.1', // 0.1 ETH per token
-    account: testAddress,
-    slippage: 1, // 1%
-  });
-  console.log('Limit Order Result:', JSON.stringify(limitOrderResult, null, 2), '\n');
-
-  // Test getDcaOrders
-  console.log('7. Testing getDcaOrders...');
-  const dcaOrders = await api.getDcaOrders(testAddress);
-  console.log('DCA Orders:', JSON.stringify(dcaOrders, null, 2), '\n');
-
-  // Test getLimitOrders
-  console.log('8. Testing getLimitOrders...');
-  const limitOrders = await api.getLimitOrders(testAddress);
-  console.log('Limit Orders:', JSON.stringify(limitOrders, null, 2), '\n');
-
-  // If we have any orders, test cancellation
-  if (dcaOrders.success && dcaOrders.data && dcaOrders.data.length > 0) {
-    console.log('9. Testing cancelDca...');
-    const cancelDcaResult = await api.cancelDca(dcaOrders.data[0].id);
-    console.log('Cancel DCA Result:', JSON.stringify(cancelDcaResult, null, 2), '\n');
-  }
-
-  if (limitOrders.success && limitOrders.data && limitOrders.data.length > 0) {
-    console.log('10. Testing cancelLimitOrder...');
-    const cancelLimitOrderResult = await api.cancelLimitOrder(limitOrders.data[0].id);
-    console.log(
-      'Cancel Limit Order Result:',
-      JSON.stringify(cancelLimitOrderResult, null, 2),
-      '\n'
-    );
+    if (buyResult.success) {
+      console.log('Buy successful!');
+      console.log('Transaction hash:', buyResult.data?.txHash);
+      console.log('Input amount:', buyResult.data?.inAmount);
+      console.log('Output amount:', buyResult.data?.outAmount);
+      console.log('Price impact:', buyResult.data?.price_impact);
+    } else {
+      console.error('Buy failed:', buyResult.error);
+    }
+  } catch (error) {
+    console.error('Error during buy test:', error);
   }
 }
 
+async function testSell(): Promise<void> {
+  console.log('Testing sell functionality...');
+
+  const neurodex = new NeuroDexApi();
+
+  try {
+    // Sell 0.01 WETH
+    const sellResult = await neurodex.sell({
+      tokenAddress: TEST_TOKENS.BRO,
+      amount: '10000000', // 10 BRO (6 decimals)
+      slippage: '1',
+      walletAddress: TEST_WALLET.address,
+      privateKey: TEST_WALLET.privateKey,
+    });
+
+    if (sellResult.success) {
+      console.log('Sell successful!');
+      console.log('Transaction hash:', sellResult.data?.txHash);
+      console.log('Input amount:', sellResult.data?.inAmount);
+      console.log('Output amount:', sellResult.data?.outAmount);
+      console.log('Price impact:', sellResult.data?.price_impact);
+    } else {
+      console.error('Sell failed:', sellResult.error);
+    }
+  } catch (error) {
+    console.error('Error during sell test:', error);
+  }
+}
+
+async function main(): Promise<void> {
+  // Check if wallet is configured
+  if (TEST_WALLET.address === '0x...' || TEST_WALLET.privateKey === '0x...') {
+    console.error('Please configure your test wallet address and private key in the script');
+    process.exit(1);
+  }
+
+  // Run tests
+  console.log('Starting NeuroDex API tests...');
+
+  // Test buy functionality
+  await testBuy();
+
+  // Wait for 5 seconds between tests
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  // Test sell functionality
+  await testSell();
+
+  console.log('Tests completed!');
+}
+
 // Run the tests
-main().catch((error) => {
-  console.error('Error running tests:', error);
-  process.exit(1);
-});
+main().catch(console.error);

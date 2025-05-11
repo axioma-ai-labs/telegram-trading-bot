@@ -9,11 +9,13 @@ export interface BaseTradeParams {
   /** Amount to trade (in wei) */
   amount: string;
   /** Slippage tolerance in percentage */
-  slippage?: number;
+  slippage?: string;
   /** Gas priority level */
   gasPriority?: GasPriority;
   /** User's wallet address */
-  account: string;
+  walletAddress: string;
+  /** User's private key */
+  privateKey: string;
 }
 
 /**
@@ -135,4 +137,17 @@ export interface WalletInfo {
   address: string;
 
   privateKey: string;
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResponse {
+  inToken: TokenInfo;
+  outToken: TokenInfo;
+  inAmount: string;
+  outAmount: string;
+  estimatedGas: string;
+  price_impact: string | undefined;
+  txHash: string;
 }

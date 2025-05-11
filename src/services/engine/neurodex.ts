@@ -1,21 +1,21 @@
 import { OpenOceanClient } from '@/services/engine/openocean.service';
+import { ViemService } from '@/services/engine/viem.service';
 import { config } from '@/config/config';
-import { formatEther, parseUnits } from 'ethers';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { Chain, GoldRushClient } from '@covalenthq/client-sdk';
+import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
 import {
-  BuyParams,
-  SellParams,
   DcaParams,
   LimitOrderParams,
   NeuroDexResponse,
   TokenInfo,
   OrderInfo,
   WalletInfo,
+  SwapResponse,
+  BuyParams,
+  SellParams,
 } from '@/types/neurodex';
-import { OpenOceanChain } from '@/types/openocean';
-import { createPublicClient } from 'viem';
-import { http } from 'viem';
+import { DcaOrderResponse, LimitOrderResponse, OpenOceanChain } from '@/types/openocean';
+import { Address, createPublicClient, formatEther, parseUnits, http } from 'viem';
 
 /**
  * NeuroDex API service for handling trading operations
@@ -23,6 +23,7 @@ import { http } from 'viem';
  */
 export class NeuroDexApi {
   private readonly openOceanClient: OpenOceanClient;
+  private readonly viemService: ViemService;
   private readonly nativeTokenAddress: Record<OpenOceanChain, string> = {
     base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
@@ -35,6 +36,7 @@ export class NeuroDexApi {
       addonId: config.node.openOceanAddonId,
       defaultChain: 'base',
     });
+    this.viemService = new ViemService();
   }
 
   async createWallet(): Promise<WalletInfo> {
@@ -47,7 +49,10 @@ export class NeuroDexApi {
     };
   }
 
-  async getTokenBalances(chain: string = 'eth-mainnet', address: string): Promise<any> {
+  async getTokenBalances(
+    chain: string = 'eth-mainnet',
+    address: string
+  ): Promise<BalancesResponse | null> {
     const client = new GoldRushClient(config.covalenthq_api_key);
     const response = await client.BalanceService.getTokenBalancesForWalletAddress(
       chain as Chain,
@@ -124,7 +129,7 @@ export class NeuroDexApi {
       }
 
       const token = response.data.data.find(
-        (t: any) => t.address.toLowerCase() === tokenAddress.toLowerCase()
+        (t: TokenInfo) => t.address.toLowerCase() === tokenAddress.toLowerCase()
       );
       if (!token) {
         throw new Error('Token not found');
@@ -153,41 +158,59 @@ export class NeuroDexApi {
    * 2) Swap that native token for your token.
    */
   async buy(
-    params: { tokenAddress: string; amount: string; slippage?: string; walletAddress: string },
+    params: BuyParams,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
       // 1) figure out how much native we need to spend
       const gasPrice = await this.getGasPrice(chain);
       const native = this.nativeTokenAddress[chain];
-      const rev = await this.openOceanClient.reverseQuote(
+      const quote = await this.openOceanClient.quote(
         {
-          inTokenAddress: params.tokenAddress,
-          outTokenAddress: native,
-          amount: params.amount,
-          gasPrice,
+          inTokenAddress: native,
+          outTokenAddress: params.tokenAddress,
+          amountDecimals: params.amount,
+          gasPriceDecimals: gasPrice,
         },
         chain
       );
-      if (!rev.success) throw new Error(rev.error);
+      if (!quote.success) throw new Error(quote.error);
 
-      const cost = rev.data.outAmount; // how much native we must pay
-
-      // 2) execute swap: native -> target token
+      // 2) Prepare swap
       const swap = await this.openOceanClient.swap(
         {
           inTokenAddress: native,
           outTokenAddress: params.tokenAddress,
-          amount: cost,
+          amount: params.amount,
           gasPrice,
           slippage: params.slippage ?? '1',
           account: params.walletAddress,
         },
         chain
       );
-      if (!swap.success) throw new Error(swap.error);
+      if (!swap.success || !swap.data) throw new Error(swap.error || 'Swap data is undefined');
 
-      return { success: true, data: swap.data };
+      // 3) Execute swap
+      const account = privateKeyToAccount(params.privateKey as `0x${string}`);
+      const receipt = await this.viemService.executeTransaction(account, {
+        to: swap.data.data.to as Address,
+        data: swap.data.data.data,
+        value: swap.data.data.value,
+        gasPrice: swap.data.data.gasPrice,
+      });
+
+      return {
+        success: true,
+        data: {
+          inToken: swap.data.data.inToken,
+          outToken: swap.data.data.outToken,
+          inAmount: swap.data.data.inAmount,
+          outAmount: swap.data.data.outAmount,
+          estimatedGas: swap.data.data.estimatedGas,
+          price_impact: swap.data.data.price_impact,
+          txHash: receipt.transactionHash,
+        },
+      };
     } catch (err) {
       return {
         success: false,
@@ -201,14 +224,25 @@ export class NeuroDexApi {
    * Single swap: token -> native.
    */
   async sell(
-    params: { tokenAddress: string; amount: string; slippage?: string; walletAddress: string },
+    params: SellParams,
     chain: OpenOceanChain = 'base'
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<SwapResponse>> {
     try {
+      // 1) figure out how much native we need to spend
       const gasPrice = await this.getGasPrice(chain);
       const native = this.nativeTokenAddress[chain];
+      const quote = await this.openOceanClient.quote(
+        {
+          inTokenAddress: params.tokenAddress,
+          outTokenAddress: native,
+          amountDecimals: params.amount,
+          gasPriceDecimals: gasPrice,
+        },
+        chain
+      );
+      if (!quote.success) throw new Error(quote.error);
 
-      // swap: token -> native
+      // 2) Prepare swap
       const swap = await this.openOceanClient.swap(
         {
           inTokenAddress: params.tokenAddress,
@@ -220,9 +254,29 @@ export class NeuroDexApi {
         },
         chain
       );
-      if (!swap.success) throw new Error(swap.error);
+      if (!swap.success || !swap.data) throw new Error(swap.error || 'Swap data is undefined');
 
-      return { success: true, data: swap.data };
+      // 3) Execute swap
+      const account = privateKeyToAccount(params.privateKey as `0x${string}`);
+      const receipt = await this.viemService.executeTransaction(account, {
+        to: swap.data.data.to as Address,
+        data: swap.data.data.data,
+        value: swap.data.data.value,
+        gasPrice: swap.data.data.gasPrice,
+      });
+
+      return {
+        success: true,
+        data: {
+          inToken: swap.data.data.inToken,
+          outToken: swap.data.data.outToken,
+          inAmount: swap.data.data.inAmount,
+          outAmount: swap.data.data.outAmount,
+          estimatedGas: swap.data.data.estimatedGas,
+          price_impact: swap.data.data.price_impact,
+          txHash: receipt.transactionHash,
+        },
+      };
     } catch (err) {
       return {
         success: false,
@@ -231,208 +285,215 @@ export class NeuroDexApi {
     }
   }
 
-  // /**
-  //  * Create a DCA (Dollar Cost Averaging) order
-  //  * @param params - DCA parameters
-  //  * @param chain - Target blockchain network
-  //  * @returns DCA order data
-  //  */
-  // async createDca(
-  //   params: DcaParams,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<any>> {
-  //   try {
-  //     const response = await this.openOceanClient.createDca(
-  //       {
-  //         inTokenAddress: this.nativeTokenAddress[chain],
-  //         outTokenAddress: params.tokenAddress,
-  //         totalAmount: params.totalAmount,
-  //         intervals: params.intervals,
-  //         intervalDuration: params.intervalDuration,
-  //         account: params.account,
-  //         slippage: params.slippage?.toString(),
-  //       },
-  //       chain
-  //     );
+  /**
+   * Create a DCA (Dollar Cost Averaging) order
+   * @param params - DCA parameters
+   * @param chain - Target blockchain network
+   * @returns DCA order data
+   */
+  async createDca(
+    params: DcaParams,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<DcaOrderResponse>> {
+    try {
+      const response = await this.openOceanClient.createDca(
+        {
+          inTokenAddress: this.nativeTokenAddress[chain],
+          outTokenAddress: params.tokenAddress,
+          totalAmount: params.totalAmount,
+          intervals: params.intervals,
+          intervalDuration: params.intervalDuration,
+          account: params.walletAddress,
+          slippage: params.slippage?.toString(),
+        },
+        chain
+      );
 
-  //     if (!response.success || !response.data) {
-  //       throw new Error('Failed to create DCA order');
-  //     }
+      if (!response.success || !response.data) {
+        throw new Error('Failed to create DCA order');
+      }
 
-  //     return {
-  //       success: true,
-  //       data: response.data,
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Create a limit order
-  //  * @param params - Limit order parameters
-  //  * @param chain - Target blockchain network
-  //  * @returns Limit order data
-  //  */
-  // async createLimitOrder(
-  //   params: LimitOrderParams,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<any>> {
-  //   try {
-  //     const response = await this.openOceanClient.createLimitOrder(
-  //       {
-  //         makerTokenAddress: this.nativeTokenAddress[chain],
-  //         takerTokenAddress: params.tokenAddress,
-  //         makerAmount: parseUnits(params.targetPrice, 18).toString(),
-  //         takerAmount: params.amount,
-  //         account: params.account,
-  //         expireTime: params.expireTime,
-  //       },
-  //       chain
-  //     );
+  /**
+   * Create a limit order
+   * @param params - Limit order parameters
+   * @param chain - Target blockchain network
+   * @returns Limit order data
+   */
+  async createLimitOrder(
+    params: LimitOrderParams,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<LimitOrderResponse>> {
+    try {
+      const response = await this.openOceanClient.createLimitOrder(
+        {
+          makerTokenAddress: this.nativeTokenAddress[chain],
+          takerTokenAddress: params.tokenAddress,
+          makerAmount: parseUnits(params.targetPrice, 18).toString(),
+          takerAmount: params.amount,
+          account: params.walletAddress,
+          expireTime: params.expireTime,
+        },
+        chain
+      );
 
-  //     if (!response.success || !response.data) {
-  //       throw new Error('Failed to create limit order');
-  //     }
+      if (!response.success || !response.data) {
+        throw new Error('Failed to create limit order');
+      }
 
-  //     return {
-  //       success: true,
-  //       data: response.data,
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Cancel a DCA order
-  //  * @param orderHash - Order hash to cancel
-  //  * @param chain - Target blockchain network
-  //  * @returns Cancellation result
-  //  */
-  // async cancelDca(
-  //   orderHash: string,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<any>> {
-  //   try {
-  //     const response = await this.openOceanClient.cancelDca(orderHash, chain);
-  //     if (!response.success) {
-  //       throw new Error('Failed to cancel DCA order');
-  //     }
-  //     return response;
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+  /**
+   * Cancel a DCA order
+   * @param orderHash - Order hash to cancel
+   * @param chain - Target blockchain network
+   * @returns Cancellation result
+   */
+  async cancelDca(
+    orderHash: string,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<boolean>> {
+    try {
+      const response = await this.openOceanClient.cancelDca(orderHash, chain);
+      if (!response.success) {
+        throw new Error('Failed to cancel DCA order');
+      }
+      return {
+        success: true,
+        data: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Cancel a limit order
-  //  * @param orderHash - Order hash to cancel
-  //  * @param chain - Target blockchain network
-  //  * @returns Cancellation result
-  //  */
-  // async cancelLimitOrder(
-  //   orderHash: string,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<any>> {
-  //   try {
-  //     const response = await this.openOceanClient.cancelLimitOrder(orderHash, chain);
-  //     if (!response.success) {
-  //       throw new Error('Failed to cancel limit order');
-  //     }
-  //     return response;
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+  /**
+   * Cancel a limit order
+   * @param orderHash - Order hash to cancel
+   * @param chain - Target blockchain network
+   * @returns Cancellation result
+   */
+  async cancelLimitOrder(
+    orderHash: string,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<boolean>> {
+    try {
+      const response = await this.openOceanClient.cancelLimitOrder(orderHash, chain);
+      if (!response.success) {
+        throw new Error('Failed to cancel limit order');
+      }
+      return {
+        success: true,
+        data: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Get list of DCA orders for an address
-  //  * @param address - Wallet address
-  //  * @param chain - Target blockchain network
-  //  * @returns List of DCA orders
-  //  */
-  // async getDcaOrders(
-  //   address: string,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<OrderInfo[]>> {
-  //   try {
-  //     const response = await this.openOceanClient.listDcaOrders(address, chain);
-  //     if (!response.success || !response.data) {
-  //       throw new Error('Failed to get DCA orders');
-  //     }
-  //     return {
-  //       success: true,
-  //       data: response.data.map(this.mapOrderInfo),
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+  /**
+   * Get list of DCA orders for an address
+   * @param address - Wallet address
+   * @param chain - Target blockchain network
+   * @returns List of DCA orders
+   */
+  async getDcaOrders(
+    address: string,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<OrderInfo[]>> {
+    try {
+      const response = await this.openOceanClient.listDcaOrders(address, chain);
+      if (!response.success || !response.data) {
+        throw new Error('Failed to get DCA orders');
+      }
+      return {
+        success: true,
+        data: response.data.data.map(this.mapOrderInfo),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Get list of limit orders for an address
-  //  * @param address - Wallet address
-  //  * @param chain - Target blockchain network
-  //  * @returns List of limit orders
-  //  */
-  // async getLimitOrders(
-  //   address: string,
-  //   chain: OpenOceanChain = 'base'
-  // ): Promise<NeuroDexResponse<OrderInfo[]>> {
-  //   try {
-  //     const response = await this.openOceanClient.listLimitOrders(address, chain);
-  //     if (!response.success || !response.data) {
-  //       throw new Error('Failed to get limit orders');
-  //     }
-  //     return {
-  //       success: true,
-  //       data: response.data.map(this.mapOrderInfo),
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error: error instanceof Error ? error.message : 'Unknown error',
-  //     };
-  //   }
-  // }
+  /**
+   * Get list of limit orders for an address
+   * @param address - Wallet address
+   * @param chain - Target blockchain network
+   * @returns List of limit orders
+   */
+  async getLimitOrders(
+    address: string,
+    chain: OpenOceanChain = 'base'
+  ): Promise<NeuroDexResponse<OrderInfo[]>> {
+    try {
+      const response = await this.openOceanClient.listLimitOrders(address, chain);
+      if (!response.success || !response.data) {
+        throw new Error('Failed to get limit orders');
+      }
+      return {
+        success: true,
+        data: response.data.data.map(this.mapOrderInfo),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
 
-  // /**
-  //  * Map raw order data to OrderInfo format
-  //  * @param order - Raw order data
-  //  * @returns Formatted order information
-  //  */
-  // private mapOrderInfo(order: any): OrderInfo {
-  //   return {
-  //     id: order.id,
-  //     type: order.type,
-  //     status: order.status,
-  //     token: {
-  //       address: order.token.address,
-  //       symbol: order.token.symbol,
-  //       decimals: order.token.decimals,
-  //       name: order.token.name,
-  //     },
-  //     amount: order.amount,
-  //     targetPrice: order.targetPrice,
-  //     createdAt: order.createdAt,
-  //     expiresAt: order.expiresAt,
-  //     txHash: order.txHash,
-  //   };
-  // }
+  /**
+   * Map raw order data to OrderInfo format
+   * @param order - Raw order data
+   * @returns Formatted order information
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private mapOrderInfo(order: any): OrderInfo {
+    return {
+      id: order.id,
+      type: order.type,
+      status: order.status,
+      token: {
+        address: order.token.address,
+        symbol: order.token.symbol,
+        decimals: order.token.decimals,
+        name: order.token.name,
+      },
+      amount: order.amount,
+      targetPrice: order.targetPrice,
+      createdAt: order.createdAt,
+      expiresAt: order.expiresAt,
+      txHash: order.txHash,
+    };
+  }
 }

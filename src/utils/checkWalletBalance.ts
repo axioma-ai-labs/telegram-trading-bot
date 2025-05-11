@@ -1,7 +1,7 @@
 /**
  * Utility function to check wallet token balances with proper BigInt handling
  */
-import { GoldRushClient, Chain } from '@covalenthq/client-sdk';
+import { GoldRushClient, Chain, BalancesResponse } from '@covalenthq/client-sdk';
 import { config } from '@/config/config';
 import { NeuroDexResponse } from '@/types/neurodex';
 
@@ -14,7 +14,7 @@ import { NeuroDexResponse } from '@/types/neurodex';
 export async function checkWalletBalance(
   chain: string = 'eth-mainnet',
   address: string
-): Promise<NeuroDexResponse<any>> {
+): Promise<NeuroDexResponse<BalancesResponse>> {
   try {
     const client = new GoldRushClient(config.covalenthq_api_key);
     const response = await client.BalanceService.getTokenBalancesForWalletAddress(
@@ -40,6 +40,6 @@ export async function checkWalletBalance(
 /**
  * Helper function to replace BigInt values with strings during JSON serialization
  */
-function replaceBigInt(_key: string, value: any): any {
+function replaceBigInt(_key: string, value: unknown): string | unknown {
   return typeof value === 'bigint' ? value.toString() : value;
 }

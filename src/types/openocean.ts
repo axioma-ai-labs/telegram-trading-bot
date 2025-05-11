@@ -16,6 +16,54 @@ export interface OpenOceanConfig {
 }
 
 /**
+ * Token information
+ */
+export interface TokenInfo {
+  /** Token address */
+  address: string;
+  /** Token symbol */
+  symbol: string;
+  /** Token decimals */
+  decimals: number;
+  /** Token name */
+  name: string;
+}
+
+/**
+ * Quote response data
+ */
+export interface QuoteResponse {
+  data: {
+    inToken: TokenInfo;
+    outToken: TokenInfo;
+    inAmount: string;
+    outAmount: string;
+    estimatedGas: string;
+    path: string[];
+    save: string;
+    price_impact: string;
+  };
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResponse {
+  data: {
+    inToken: TokenInfo;
+    outToken: TokenInfo;
+    inAmount: string;
+    outAmount: string;
+    estimatedGas: string;
+    to: string;
+    data: string;
+    value: string;
+    gasPrice: string;
+    price_impact?: string;
+  };
+}
+
+/**
  * Parameters for swap operation
  */
 export interface SwapParams {
@@ -117,4 +165,42 @@ export interface OpenOceanResponse<T> {
   data?: T;
   /** Error message if any */
   error?: string;
+}
+
+/**
+ * Limit order response data
+ */
+export interface LimitOrderResponse {
+  data: {
+    id: string;
+    makerToken: TokenInfo;
+    takerToken: TokenInfo;
+    makerAmount: string;
+    takerAmount: string;
+    account: string;
+    status: 'open' | 'filled' | 'cancelled' | 'expired';
+    createdAt: number;
+    expiresAt?: number;
+    txHash?: string;
+  };
+}
+
+/**
+ * DCA order response data
+ */
+export interface DcaOrderResponse {
+  data: {
+    id: string;
+    inToken: TokenInfo;
+    outToken: TokenInfo;
+    totalAmount: string;
+    intervals: number;
+    intervalDuration: number;
+    account: string;
+    status: 'active' | 'completed' | 'cancelled';
+    createdAt: number;
+    lastExecutedAt?: number;
+    nextExecutionAt?: number;
+    txHash?: string;
+  };
 }
