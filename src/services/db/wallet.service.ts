@@ -1,5 +1,5 @@
 import { prisma } from '@/services/db/prisma';
-import { Wallet } from '@prisma-generated/prisma';
+import { Wallet } from '@prisma/client/edge';
 
 export class WalletService {
   /**

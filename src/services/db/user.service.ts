@@ -1,5 +1,5 @@
 import { prisma } from '@/services/db/prisma';
-import { Settings, User, Wallet } from '@prisma-generated/prisma';
+import { Settings, User, Wallet } from '@prisma/client/edge';
 
 export class UserService {
   /**

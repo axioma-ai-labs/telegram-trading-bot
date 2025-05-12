@@ -1,5 +1,5 @@
 import { withAccelerate } from '@prisma/extension-accelerate';
-import { PrismaClient } from '@prisma-generated/prisma/edge';
+import { PrismaClient } from '@prisma/client/edge';
 import { fieldEncryptionExtension } from 'prisma-field-encryption';
 import { config } from '@/config/config';
 

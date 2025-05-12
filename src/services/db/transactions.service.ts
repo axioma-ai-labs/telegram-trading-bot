@@ -1,5 +1,5 @@
 import { prisma } from '@/services/db/prisma';
-import { Trade } from '@prisma-generated/prisma';
+import { Trade } from '@prisma/client/edge';
 
 export class TransactionsService {
   /**
