@@ -16,7 +16,7 @@ export async function checkWalletBalance(
   address: string
 ): Promise<NeuroDexResponse<BalancesResponse>> {
   try {
-    const client = new GoldRushClient(config.covalenthq_api_key);
+    const client = new GoldRushClient(config.covalenthqApiKey);
     const response = await client.BalanceService.getTokenBalancesForWalletAddress(
       chain as Chain,
       address

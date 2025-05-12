@@ -67,6 +67,8 @@ export interface AppConfig {
   database: DatabaseConfig;
   node: NodeConfig;
   covalenthqApiKey: string;
+  // Constants
+  MAX_UINT256: string;
 }
 
 export interface GasPriceInfo {

@@ -16,7 +16,9 @@ const envSchema = z.object({
   BNC_RPC: z.string().url('BNC_RPC must be a valid URL'),
 
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
-  PRISMA_FIELD_ENCRYPTION_KEY: z.string().min(32, 'PRISMA_FIELD_ENCRYPTION_KEY must be at least 32 characters'),
+  PRISMA_FIELD_ENCRYPTION_KEY: z
+    .string()
+    .min(32, 'PRISMA_FIELD_ENCRYPTION_KEY must be at least 32 characters'),
 
   WALLET_ENCRYPTION_KEY: z.string().min(32, 'WALLET_ENCRYPTION_KEY must be at least 32 characters'),
 
@@ -58,23 +60,6 @@ const createConfig = (): AppConfig => {
     // Tg Bot Settings
     telegramBotToken: env.TELEGRAM_BOT_TOKEN,
 
-    // Chain IDs can be found here:
-    // - https://chainlist.org/
-    // - https://apis.openocean.finance/developer/developer-resources/supported-chains
-    chain: {
-      baseChainId: 8453,
-      baseSepoliaChainId: 84532,
-      ethereumChainId: 1,
-      bnbChainId: 56,
-    },
-
-    // Native Token Addresses
-    nativeTokenAddress: {
-      base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-      ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-      bsc: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-    },
-
     // Node RPCs
     node: {
       ethereumMainnetRpc: env.ETHEREUM_MAINNET_RPC,
@@ -104,6 +89,24 @@ const createConfig = (): AppConfig => {
 
     // Third Party APIs
     covalenthqApiKey: env.COVALENTHQ_API_KEY,
+
+    // Constants
+    // Chain IDs can be found here:
+    // - https://chainlist.org/
+    // - https://apis.openocean.finance/developer/developer-resources/supported-chains
+    chain: {
+      baseChainId: 8453,
+      baseSepoliaChainId: 84532,
+      ethereumChainId: 1,
+      bnbChainId: 56,
+    },
+    // Native Token Addresses
+    nativeTokenAddress: {
+      base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+      bsc: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+    },
+    MAX_UINT256: '115792089237316195423570985008687907853269984665640564039457584007913129639935',
   };
 };
 

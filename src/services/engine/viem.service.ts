@@ -14,6 +14,8 @@ import {
 } from 'viem';
 import { base } from 'viem/chains';
 import { config } from '@/config/config';
+import { TokenInfo } from '@/types/neurodex';
+import { erc20Abi } from '@/utils/abis';
 
 /**
  * Viem service for executing smart contract transactions
@@ -62,8 +64,6 @@ export class ViemService {
       data: string;
       value: string;
       gasPrice: string;
-      maxFeePerGas?: string;
-      maxPriorityFeePerGas?: string;
     }
   ): Promise<TransactionReceipt> {
     try {
@@ -76,12 +76,6 @@ export class ViemService {
         data: params.data as `0x${string}`,
         value: BigInt(params.value),
         gasPrice: BigInt(params.gasPrice),
-        ...(params.maxFeePerGas && {
-          maxFeePerGas: BigInt(params.maxFeePerGas),
-        }),
-        ...(params.maxPriorityFeePerGas && {
-          maxPriorityFeePerGas: BigInt(params.maxPriorityFeePerGas),
-        }),
       };
 
       // Send transaction
@@ -174,5 +168,119 @@ export class ViemService {
   async getTransactionReceipt(hash: Hash): Promise<TransactionReceipt> {
     const publicClient = this.createPublicClient();
     return publicClient.getTransactionReceipt({ hash });
+  }
+
+  /**
+   * Get token allowance for ERC20 tokens
+   * @param tokenAddress Token contract address
+   * @param ownerAddress Owner address
+   * @param spenderAddress Spender address (typically exchange contract)
+   * @returns Allowance amount as string
+   */
+  async getTokenAllowance(
+    tokenAddress: Address,
+    ownerAddress: Address,
+    spenderAddress: Address
+  ): Promise<string> {
+    try {
+      // Native token (ETH) has unlimited allowance by design
+      if (
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase() ||
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.ethereum.toLowerCase() ||
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.bsc.toLowerCase()
+      ) {
+        return config.MAX_UINT256;
+      }
+
+      const publicClient = this.createPublicClient();
+
+      const allowance = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [ownerAddress, spenderAddress],
+      });
+
+      return allowance.toString();
+    } catch (error) {
+      console.error('Error getting token allowance:', error);
+      return '0';
+    }
+  }
+
+  /**
+   * Get token information using on-chain RPC calls
+   * @param tokenAddress The token's contract address
+   * @returns TokenInfo object with token details or null if failed
+   */
+  async getTokenInfo(tokenAddress: Address): Promise<TokenInfo | null> {
+    try {
+      // Handle native ETH specially
+      if (tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase()) {
+        return {
+          address: config.nativeTokenAddress.base,
+          symbol: 'ETH',
+          decimals: 18,
+        };
+      }
+
+      const publicClient = this.createPublicClient();
+
+      // Make parallel requests for token data
+      const [symbol, decimals] = await Promise.all([
+        publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: 'symbol',
+        }),
+        publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: 'decimals',
+        }),
+      ]);
+
+      return {
+        address: tokenAddress,
+        symbol: symbol as string,
+        decimals: Number(decimals),
+      };
+    } catch (error) {
+      console.error('Error fetching token info:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get token balance for a specific address
+   * @param tokenAddress The token's contract address
+   * @param walletAddress The wallet address to check balance for
+   * @returns Token balance as string
+   */
+  async getTokenBalance(tokenAddress: Address, walletAddress: Address): Promise<string> {
+    try {
+      const publicClient = this.createPublicClient();
+
+      // If it's ETH, get native balance
+      if (tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase()) {
+        const balance = await publicClient.getBalance({
+          address: walletAddress,
+        });
+        return balance.toString();
+      }
+
+      // For ERC20 tokens
+      const balance = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [walletAddress],
+      });
+
+      return balance.toString();
+    } catch (error) {
+      console.error('Error fetching token balance:', error);
+      return '0';
+    }
   }
 }

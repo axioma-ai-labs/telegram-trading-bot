@@ -8,7 +8,7 @@ const TEST_WALLET = {
 
 // Test token addresses on Base
 const TEST_TOKENS = {
-  USDC: '0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca', // USDC on Base
+  USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
   WETH: '0x4200000000000000000000000000000000000006', // WETH on Base
 };
 
@@ -20,12 +20,13 @@ async function testBuy(): Promise<void> {
   try {
     // Buy 10 USDC worth of WETH
     const buyResult = await neurodex.buy({
-      tokenAddress: TEST_TOKENS.USDC,
-      amount: '0.000000001', // 5 USDC
+      toTokenAddress: TEST_TOKENS.USDC,
+      fromAmount: '0.0001', // In ETH
       slippage: '1',
       gasPriority: 'standard',
       walletAddress: TEST_WALLET.address,
       privateKey: TEST_WALLET.privateKey,
+      referrer: '0x588AE3D9Df7DB26D9e773F34AbB548B0302B7d3B',
     });
 
     if (buyResult.success) {
@@ -48,14 +49,15 @@ async function testSell(): Promise<void> {
   const neurodex = new NeuroDexApi();
 
   try {
-    // Sell 0.01 WETH
+    // Sell 0.25 USDC
     const sellResult = await neurodex.sell({
-      tokenAddress: TEST_TOKENS.USDC,
-      amount: '5', // 5 USDC
+      fromTokenAddress: TEST_TOKENS.USDC,
+      fromAmount: 0.25, // 0.25 USDC
       slippage: '1',
       gasPriority: 'standard',
       walletAddress: TEST_WALLET.address,
       privateKey: TEST_WALLET.privateKey,
+      referrer: '0x588AE3D9Df7DB26D9e773F34AbB548B0302B7d3B',
     });
 
     if (sellResult.success) {

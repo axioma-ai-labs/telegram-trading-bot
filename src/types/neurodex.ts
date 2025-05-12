@@ -1,13 +1,9 @@
 import { GasPriority } from '@/types/config';
 
 /**
- * Base parameters for trading operations
+ * Basic trading parameters for trading operations
  */
-export interface BaseTradeParams {
-  /** Token address to trade */
-  tokenAddress: string;
-  /** Amount to trade (of trading token) */
-  amount: number;
+export interface BasicTradeParams {
   /** Slippage tolerance in percentage */
   slippage: number;
   /** Gas priority level */
@@ -21,9 +17,29 @@ export interface BaseTradeParams {
 }
 
 /**
+ * Buy parameters
+ */
+export interface BuyParams extends BasicTradeParams {
+  /** Token address to buy */
+  toTokenAddress: string;
+  /** Amount of Native Token to spend */
+  fromAmount: number;
+}
+
+/**
+ * Sell parameters
+ */
+export interface SellParams extends BasicTradeParams {
+  /** Token address to sell */
+  fromTokenAddress: string;
+  /** Amount to get in Native Token */
+  fromAmount: number;
+}
+
+/**
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
-export interface DcaParams extends BaseTradeParams {
+export interface DcaParams extends BasicTradeParams {
   /** Total amount to invest (of trading token) */
   totalAmount: number;
   /** Number of intervals */
@@ -35,11 +51,36 @@ export interface DcaParams extends BaseTradeParams {
 /**
  * Parameters for limit orders
  */
-export interface LimitOrderParams extends BaseTradeParams {
+export interface LimitOrderParams extends BasicTradeParams {
   /** Target price in native token */
   targetPrice: number;
   /** Order expiration timestamp */
   expireTime?: number;
+}
+
+/**
+ * Token information
+ */
+export interface TokenInfo {
+  /** Token address */
+  address: string;
+  /** Token symbol */
+  symbol: string;
+  /** Token decimals */
+  decimals: number;
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResult {
+  inToken: TokenInfo;
+  outToken: TokenInfo;
+  inAmount: number;
+  outAmount: number;
+  estimatedGas: number;
+  price_impact: number | undefined;
+  txHash: string;
 }
 
 /**
@@ -54,20 +95,6 @@ export interface NeuroDexResponse<T> {
   error?: string;
   /** Transaction hash if applicable */
   txHash?: string;
-}
-
-/**
- * Token information
- */
-export interface TokenInfo {
-  /** Token address */
-  address: string;
-  /** Token symbol */
-  symbol: string;
-  /** Token decimals */
-  decimals: number;
-  /** Token name */
-  name: string;
 }
 
 /**
@@ -123,17 +150,4 @@ export interface WalletInfo {
   address: string;
   /** Wallet private key */
   privateKey: string;
-}
-
-/**
- * Swap response data
- */
-export interface SwapResponse {
-  inToken: TokenInfo;
-  outToken: TokenInfo;
-  inAmount: number;
-  outAmount: number;
-  estimatedGas: number;
-  price_impact: number | undefined;
-  txHash: string;
 }
