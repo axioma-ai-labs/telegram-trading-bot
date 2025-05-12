@@ -3,64 +3,28 @@
  */
 export type OpenOceanChain = 'base' | 'ethereum' | 'bsc';
 
-/**
- * Base configuration for OpenOcean client
- */
-export interface OpenOceanConfig {
-  /** RPC endpoint URL */
-  rpcUrl: string;
-  /** OpenOcean addon ID */
-  addonId: string;
-  /** Default chain to use */
-  defaultChain: OpenOceanChain;
-}
+// ------------------------------------------------------------
+// Parameters
+// ------------------------------------------------------------
 
 /**
- * Token information
+ * Parameters for quote operation
  */
-export interface TokenInfo {
-  /** Token address */
-  address: string;
-  /** Token symbol */
-  symbol: string;
-  /** Token decimals */
-  decimals: number;
-  /** Token name */
-  name: string;
-}
-
-/**
- * Quote response data
- */
-export interface QuoteResponse {
-  data: {
-    inToken: TokenInfo;
-    outToken: TokenInfo;
-    inAmount: string;
-    outAmount: string;
-    estimatedGas: string;
-    path: string[];
-    save: string;
-    price_impact: string;
-  };
-}
-
-/**
- * Swap response data
- */
-export interface SwapResponse {
-  data: {
-    inToken: TokenInfo;
-    outToken: TokenInfo;
-    inAmount: string;
-    outAmount: string;
-    estimatedGas: string;
-    to: string;
-    data: string;
-    value: string;
-    gasPrice: string;
-    price_impact?: string;
-  };
+export interface QuoteParams {
+  /** Input token address */
+  inTokenAddress: string;
+  /** Output token address */
+  outTokenAddress: string;
+  /** Token amount with decimals */
+  amountDecimals?: string;
+  /** Gas price with decimals */
+  gasPriceDecimals?: string;
+  /** Slippage tolerance in percentage (0.05 to 50) */
+  slippage?: string;
+  /** Disabled DEX IDs separated by commas */
+  disabledDexIds?: string;
+  /** Enabled DEX IDs separated by commas */
+  enabledDexIds?: string;
 }
 
 /**
@@ -71,30 +35,24 @@ export interface SwapParams {
   inTokenAddress: string;
   /** Output token address */
   outTokenAddress: string;
-  /** Amount to swap (in wei) */
-  amount: string;
-  /** Gas price in wei */
-  gasPrice: string;
-  /** Slippage tolerance in percentage */
+  /** Amount to swap with decimals (e.g., for 1 USDT use 1000000) */
+  amountDecimals: string;
+  /** Gas price with decimals */
+  gasPriceDecimals: string;
+  /** Slippage tolerance in percentage (0.05 to 50), e.g., 1% slippage set as 1 */
   slippage: string;
   /** User's wallet address */
   account: string;
-  /** Optional referrer address */
+  /** Optional referrer address for tracking */
   referrer?: string;
-}
-
-/**
- * Parameters for reverse quote operation
- */
-export interface ReverseQuoteParams {
-  /** Input token address */
-  inTokenAddress: string;
-  /** Output token address */
-  outTokenAddress: string;
-  /** Desired output amount (in wei) */
-  amount: string;
-  /** Gas price in wei */
-  gasPrice: string;
+  /** Optional referrer fee percentage (0.01 to 5), e.g., 1.2% fee set as 1.2 */
+  referrerFee?: number;
+  /** Optional comma-separated list of DEX IDs to enable */
+  enabledDexIds?: string;
+  /** Optional comma-separated list of DEX IDs to disable */
+  disabledDexIds?: string;
+  /** Optional sending address (account becomes receiving address) */
+  sender?: string;
 }
 
 /**
@@ -135,24 +93,220 @@ export interface DcaParams {
   slippage?: string;
 }
 
+// ------------------------------------------------------------
+// Responses
+// ------------------------------------------------------------
+
 /**
- * Parameters for quote operation
+ * Token information
  */
-export interface QuoteParams {
-  /** Input token address */
-  inTokenAddress: string;
-  /** Output token address */
-  outTokenAddress: string;
-  /** Token amount with decimals */
-  amountDecimals?: string;
-  /** Gas price with decimals */
-  gasPriceDecimals?: string;
-  /** Slippage tolerance in percentage (0.05 to 50) */
-  slippage?: string;
-  /** Disabled DEX IDs separated by commas */
-  disabledDexIds?: string;
-  /** Enabled DEX IDs separated by commas */
-  enabledDexIds?: string;
+export interface TokenInfo {
+  /** Token address */
+  address: string;
+  /** Token symbol */
+  symbol: string;
+  /** Token decimals */
+  decimals: number;
+  /** Token name */
+  name: string;
+  /** Token USD price */
+  usd: string;
+  /** Token volume */
+  volume: number;
+}
+
+/**
+ * DEX information in quote response
+ */
+export interface DexInfo {
+  /** DEX index */
+  dexIndex: number;
+  /** DEX code/name */
+  dexCode: string;
+  /** Swap amount for this DEX */
+  swapAmount: string;
+}
+
+/**
+ * DEX route information
+ */
+export interface DexRoute {
+  /** DEX name */
+  dex: string;
+  /** DEX contract address */
+  id: string;
+  /** Number of parts */
+  parts: number;
+  /** Percentage of the route */
+  percentage: number;
+}
+
+/**
+ * Sub-route information
+ */
+export interface SubRoute {
+  /** From token address */
+  from: string;
+  /** To token address */
+  to: string;
+  /** Number of parts */
+  parts: number;
+  /** DEXes in this route */
+  dexes: DexRoute[];
+}
+
+/**
+ * Route information
+ */
+export interface Route {
+  /** Number of parts */
+  parts: number;
+  /** Percentage of the route */
+  percentage: number;
+  /** Sub-routes */
+  subRoutes: SubRoute[];
+}
+
+/**
+ * Path information
+ */
+export interface Path {
+  /** From token address */
+  from: string;
+  /** To token address */
+  to: string;
+  /** Total number of parts */
+  parts: number;
+  /** Routes */
+  routes: Route[];
+}
+
+/**
+ * Quote response data
+ */
+export interface QuoteResponse {
+  data: {
+    inToken: TokenInfo;
+    outToken: TokenInfo;
+    inAmount: string;
+    outAmount: string;
+    estimatedGas: string;
+    dexes: DexInfo[];
+    path: Path;
+    save: number;
+    price_impact: string;
+    exchange: string;
+  };
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResponse {
+  data: {
+    inToken: TokenInfo;
+    outToken: TokenInfo;
+    inAmount: string;
+    outAmount: string;
+    estimatedGas: number;
+    minOutAmount?: string;
+    from: string;
+    to: string;
+    value: string;
+    gasPrice: string;
+    data: string;
+    chainId: number;
+    rfqDeadline?: number;
+    gmxFee?: number;
+    price_impact?: string;
+  };
+}
+
+/**
+ * Token List response data
+ */
+export interface TokenListResponse {
+  data: {
+    tokens: TokenInfo[];
+  };
+}
+
+/**
+ * EIP-1559 gas price details
+ */
+export interface Eip1559GasPrice {
+  /** Legacy gas price in wei */
+  legacyGasPrice: number;
+  /** Max priority fee per gas in wei */
+  maxPriorityFeePerGas: number;
+  /** Max fee per gas in wei */
+  maxFeePerGas: number;
+  /** Estimated wait time in milliseconds */
+  waitTimeEstimate: number;
+}
+
+/**
+ * Gas price value can be either a simple number (legacy) or EIP-1559 details
+ */
+export type GasPriceValue = number | Eip1559GasPrice;
+
+/**
+ * Gas price response data
+ */
+export interface GasPriceResponse {
+  data: {
+    /** Base gas price (only present in EIP-1559 responses) */
+    base?: number;
+    /** Standard gas price */
+    standard: GasPriceValue;
+    /** Fast gas price */
+    fast: GasPriceValue;
+    /** Instant gas price */
+    instant: GasPriceValue;
+    /** Low gas price (only present in EIP-1559 responses) */
+    low?: GasPriceValue;
+  };
+  /** Gas prices without decimals (in ETH) */
+  without_decimals: {
+    /** Base gas price (only present in EIP-1559 responses) */
+    base?: number;
+    /** Standard gas price */
+    standard:
+      | number
+      | {
+          legacyGasPrice: number;
+          maxPriorityFeePerGas: number;
+          maxFeePerGas: number;
+          waitTimeEstimate: number;
+        };
+    /** Fast gas price */
+    fast:
+      | number
+      | {
+          legacyGasPrice: number;
+          maxPriorityFeePerGas: number;
+          maxFeePerGas: number;
+          waitTimeEstimate: number;
+        };
+    /** Instant gas price */
+    instant:
+      | number
+      | {
+          legacyGasPrice: number;
+          maxPriorityFeePerGas: number;
+          maxFeePerGas: number;
+          waitTimeEstimate: number;
+        };
+    /** Low gas price (only present in EIP-1559 responses) */
+    low?:
+      | number
+      | {
+          legacyGasPrice: number;
+          maxPriorityFeePerGas: number;
+          maxFeePerGas: number;
+          waitTimeEstimate: number;
+        };
+  };
 }
 
 /**

@@ -1,17 +1,13 @@
 import { GasPriority } from '@/types/config';
 
 /**
- * Base parameters for trading operations
+ * Basic trading parameters for trading operations
  */
-export interface BaseTradeParams {
-  /** Token address to trade */
-  tokenAddress: string;
-  /** Amount to trade (in wei) */
-  amount: string;
+export interface BasicTradeParams {
   /** Slippage tolerance in percentage */
-  slippage?: string;
+  slippage: number;
   /** Gas priority level */
-  gasPriority?: GasPriority;
+  gasPriority: GasPriority;
   /** User's wallet address */
   walletAddress: string;
   /** User's private key */
@@ -21,11 +17,31 @@ export interface BaseTradeParams {
 }
 
 /**
+ * Buy parameters
+ */
+export interface BuyParams extends BasicTradeParams {
+  /** Token address to buy */
+  toTokenAddress: string;
+  /** Amount of Native Token to spend */
+  fromAmount: number;
+}
+
+/**
+ * Sell parameters
+ */
+export interface SellParams extends BasicTradeParams {
+  /** Token address to sell */
+  fromTokenAddress: string;
+  /** Amount to get in Native Token */
+  fromAmount: number;
+}
+
+/**
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
-export interface DcaParams extends BaseTradeParams {
-  /** Total amount to invest (in wei) */
-  totalAmount: string;
+export interface DcaParams extends BasicTradeParams {
+  /** Total amount to invest (of trading token) */
+  totalAmount: number;
   /** Number of intervals */
   intervals: number;
   /** Interval duration in seconds */
@@ -35,11 +51,36 @@ export interface DcaParams extends BaseTradeParams {
 /**
  * Parameters for limit orders
  */
-export interface LimitOrderParams extends BaseTradeParams {
+export interface LimitOrderParams extends BasicTradeParams {
   /** Target price in native token */
-  targetPrice: string;
+  targetPrice: number;
   /** Order expiration timestamp */
   expireTime?: number;
+}
+
+/**
+ * Token information
+ */
+export interface TokenInfo {
+  /** Token address */
+  address: string;
+  /** Token symbol */
+  symbol: string;
+  /** Token decimals */
+  decimals: number;
+}
+
+/**
+ * Swap response data
+ */
+export interface SwapResult {
+  inToken: TokenInfo;
+  outToken: TokenInfo;
+  inAmount: number;
+  outAmount: number;
+  estimatedGas: number;
+  price_impact: number | undefined;
+  txHash: string;
 }
 
 /**
@@ -57,20 +98,6 @@ export interface NeuroDexResponse<T> {
 }
 
 /**
- * Token information
- */
-export interface TokenInfo {
-  /** Token address */
-  address: string;
-  /** Token symbol */
-  symbol: string;
-  /** Token decimals */
-  decimals: number;
-  /** Token name */
-  name: string;
-}
-
-/**
  * Trading pair information
  */
 export interface TradingPair {
@@ -79,11 +106,11 @@ export interface TradingPair {
   /** Quote token */
   quoteToken: TokenInfo;
   /** Current price in quote token */
-  price: string;
+  price: number;
   /** 24h volume */
-  volume24h: string;
+  volume24h: number;
   /** 24h price change percentage */
-  priceChange24h: string;
+  priceChange24h: number;
 }
 
 /**
@@ -104,13 +131,13 @@ export interface OrderInfo {
   /** Token being traded */
   token: TokenInfo;
   /** Amount to trade */
-  amount: string;
+  amount: number;
   /** Target price (for limit orders) */
-  targetPrice?: string;
+  targetPrice?: number;
   /** Created timestamp */
-  createdAt: number;
+  createdAt: Date;
   /** Expiration timestamp */
-  expiresAt?: number;
+  expiresAt?: Date;
   /** Transaction hash if executed */
   txHash?: string;
 }
@@ -121,19 +148,6 @@ export interface OrderInfo {
 export interface WalletInfo {
   /** Wallet address */
   address: string;
-
+  /** Wallet private key */
   privateKey: string;
-}
-
-/**
- * Swap response data
- */
-export interface SwapResponse {
-  inToken: TokenInfo;
-  outToken: TokenInfo;
-  inAmount: string;
-  outAmount: string;
-  estimatedGas: string;
-  price_impact: string | undefined;
-  txHash: string;
 }

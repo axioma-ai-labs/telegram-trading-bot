@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -17,9 +17,9 @@ datasource db {
 model User {
   id            String         @id @default(uuid())
   telegramId    String         @unique
-  username      String?
-  firstName     String?
-  lastName      String?
+  username      String? /// @encrypted
+  firstName     String? /// @encrypted
+  lastName      String? /// @encrypted
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   wallets       Wallet[]
@@ -51,7 +51,7 @@ model Wallet {
   address             String   @unique
   chain               String
   type                String   @default("generated")
-  encryptedPrivateKey String?
+  encryptedPrivateKey String? /// @encrypted
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   user                User     @relation(fields: [userId], references: [id])

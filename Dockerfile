@@ -15,6 +15,9 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
+# Generate prisma client
+RUN pnpm prisma generate --no-engine
+
 # Build the application
 RUN pnpm run build
 
@@ -39,9 +42,11 @@ RUN pnpm install --prod --frozen-lockfile
 # Copy built files from builder stage
 COPY --from=builder /neurodex-bot/dist ./dist
 
-# Copy tsconfig and prisma to runtime
+# Copy tsconfig to runtime
 COPY --from=builder /neurodex-bot/tsconfig.json ./tsconfig.json
-COPY --from=builder /neurodex-bot/prisma ./prisma
+
+# Copy prisma client from builder stage
+COPY --from=builder /neurodex-bot/node_modules/.prisma ./node_modules/.prisma
 
 # Command to run the app
 ENV TS_NODE_PROJECT=tsconfig.json
