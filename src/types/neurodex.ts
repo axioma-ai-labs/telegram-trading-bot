@@ -52,10 +52,44 @@ export interface DcaParams extends BasicTradeParams {
  * Parameters for limit orders
  */
 export interface LimitOrderParams extends BasicTradeParams {
-  /** Target price in native token */
-  targetPrice: number;
-  /** Order expiration timestamp */
-  expireTime?: number;
+  /** Maker token address (token to sell) */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address (token to buy) */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Amount of maker token with decimals */
+  makerAmount: string;
+  /** Amount of taker token with decimals */
+  takerAmount: string;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
+}
+
+/**
+ * Parameters for canceling a limit order
+ */
+export interface CancelLimitOrderParams extends BasicTradeParams {
+  /** Order hash */
+  orderHash: string;
+  /** Order data */
+  orderData: any;
+}
+
+/**
+ * Parameters for getting limit orders
+ */
+export interface GetLimitOrdersParams {
+  /** Wallet address */
+  address: string;
+  /** Statuses to filter */
+  statuses?: Array<number>;
+  /** Page number */
+  page?: number;
+  /** Limit number */
+  limit?: number;
 }
 
 /**
@@ -150,4 +184,37 @@ export interface WalletInfo {
   address: string;
   /** Wallet private key */
   privateKey: string;
+}
+
+/**
+ * Limit order information
+ */
+export interface LimitOrderInfo {
+  /** Order hash */
+  orderHash: string;
+  /** Order status */
+  status: string;
+  /** Order data */
+  data: {
+    /** Maker token symbol */
+    makerAssetSymbol: string;
+    /** Taker token symbol */
+    takerAssetSymbol: string;
+    /** Maker token amount */
+    makerAssetAmount: string;
+    /** Taker token amount */
+    takerAssetAmount: string;
+    /** Maker token address */
+    makerAssetAddress: string;
+    /** Taker token address */
+    takerAssetAddress: string;
+    /** Maker address */
+    maker: string;
+    /** Order hash */
+    orderHash: string;
+    /** Order creation time */
+    createDateTime: number;
+    /** Expiration time */
+    expiry: number;
+  };
 }

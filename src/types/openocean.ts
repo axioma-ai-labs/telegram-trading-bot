@@ -74,6 +74,38 @@ export interface LimitOrderParams {
 }
 
 /**
+ * Parameters for OpenOcean limit order SDK
+ */
+export interface LimitOrderCreateParams {
+  /** Maker token address */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Maker amount with decimals as string */
+  makerAmount: string;
+  /** Taker amount with decimals as string */
+  takerAmount: string;
+  /** Gas price */
+  gasPrice: number;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
+}
+
+/**
+ * Parameters for canceling a limit order onchain
+ */
+export interface LimitOrderCancelOnchainParams {
+  /** Order data */
+  orderData: any;
+  /** Gas price */
+  gasPrice: number;
+}
+
+/**
  * Parameters for DCA order creation
  */
 export interface DcaParams {
