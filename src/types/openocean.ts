@@ -342,6 +342,98 @@ export interface GasPriceResponse {
 }
 
 /**
+ * Limit order asset data
+ */
+export interface LimitOrderAssetData {
+  /** Asset address */
+  makerAsset: string;
+  /** Asset symbol */
+  makerAssetSymbol: string;
+  /** Asset decimals */
+  makerAssetDecimals: number;
+  /** Asset icon URL */
+  makerAssetIcon: string;
+  /** Taker asset address */
+  takerAsset: string;
+  /** Taker asset symbol */
+  takerAssetSymbol: string;
+  /** Taker asset decimals */
+  takerAssetDecimals: number;
+  /** Taker asset icon URL */
+  takerAssetIcon: string;
+  /** Get maker amount function data */
+  getMakerAmount: string;
+  /** Get taker amount function data */
+  getTakerAmount: string;
+  /** Maker asset data */
+  makerAssetData: string;
+  /** Taker asset data */
+  takerAssetData: string;
+  /** Salt value */
+  salt: string;
+  /** Permit data */
+  permit: string;
+  /** Predicate data */
+  predicate: string;
+  /** Interaction data */
+  interaction: string;
+  /** Making amount */
+  makingAmount: string;
+  /** Taking amount */
+  takingAmount: string;
+  /** Maker address */
+  maker: string;
+  /** Receiver address */
+  receiver: string;
+  /** Allowed sender address */
+  allowedSender: string;
+}
+
+/**
+ * Limit order item
+ */
+export interface LimitOrderItem {
+  /** Maker amount */
+  makerAmount: string;
+  /** Taker amount */
+  takerAmount: string;
+  /** Order signature */
+  signature: string;
+  /** Order hash */
+  orderHash: string;
+  /** Creation date time */
+  createDateTime: string;
+  /** Order maker address */
+  orderMaker: string;
+  /** Remaining maker amount */
+  remainingMakerAmount: string;
+  /** Maker balance */
+  makerBalance: string | null;
+  /** Maker allowance */
+  makerAllowance: string | null;
+  /** Expiration time */
+  expireTime: string;
+  /** Order status */
+  statuses: number;
+  /** Order data */
+  data: LimitOrderAssetData;
+  /** Maker rate */
+  makerRate: string | null;
+  /** Taker rate */
+  takerRate: string | null;
+}
+
+/**
+ * Limit orders response data
+ */
+export interface LimitOrdersResponse {
+  /** Response code */
+  code: number;
+  /** List of limit orders */
+  data: LimitOrderItem[];
+}
+
+/**
  * Response wrapper for OpenOcean API calls
  */
 export interface OpenOceanResponse<T> {

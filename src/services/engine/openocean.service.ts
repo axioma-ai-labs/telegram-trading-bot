@@ -14,6 +14,7 @@ import {
   TokenListResponse,
   GasPriceResponse,
   LimitOrderCancelOnchainParams,
+  LimitOrdersResponse,
 } from '@/types/openocean';
 
 /**
@@ -228,9 +229,13 @@ export class OpenOceanClient {
 
       const orderData = await this.sdk.createLimitOrder(order);
 
+      if (!chainId) {
+        throw new Error('Invalid chain');
+      }
+
       // Submit the order to the API
       const { data } = await this.axiosInstance.post(
-        this.buildEndpoint(chain, 'limit-order', 'v1'),
+        this.buildEndpoint(chainId.toString() as OpenOceanChain, 'limit-order', 'v1'),
         orderData,
         {
           headers: {
@@ -260,8 +265,17 @@ export class OpenOceanClient {
   ): Promise<OpenOceanResponse<any>> {
     try {
       // First cancel on API
+      const chainId =
+        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      if (!chainId) {
+        throw new Error('Invalid chain');
+      }
       const { data: apiCancelResult } = await this.axiosInstance.post(
-        this.buildEndpoint(chain, 'limit-order/cancelLimitOrder', 'v1'),
+        this.buildEndpoint(
+          chainId.toString() as OpenOceanChain,
+          'limit-order/cancelLimitOrder',
+          'v1'
+        ),
         { orderHash: orderHash },
         {
           headers: {
@@ -270,7 +284,7 @@ export class OpenOceanClient {
         }
       );
 
-      if (!(apiCancelResult.status === 3 || apiCancelResult.status === 4)) {
+      if (!(apiCancelResult.data.status === 3 || apiCancelResult.data.status === 4)) {
         throw new Error('Failed to cancel order on API');
       }
 
@@ -292,7 +306,7 @@ export class OpenOceanClient {
   async cancelLimitOrderOnchain(
     params: LimitOrderCancelOnchainParams,
     chain: OpenOceanChain = this.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<{ code: number}>> {
     try {
       if (!this.sdk) {
         throw new Error('SDK not initialized. Call initializeSdk first.');
@@ -333,11 +347,23 @@ export class OpenOceanClient {
     sortBy: string = 'createDateTime',
     exclude: string = '0',
     chain: OpenOceanChain = this.defaultChain
-  ): Promise<OpenOceanResponse<any>> {
+  ): Promise<OpenOceanResponse<LimitOrdersResponse>> {
     try {
-      const statusesString = statuses.join(',');
+      const statusesString = `[${statuses.join(',')}]`;
+      const chainId =
+        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      if (!chainId) {
+        throw new Error('Invalid chain');
+      }
+      if (this.chainId && this.chainId !== chainId) {
+        throw new Error('SDK not initialized for this chain');
+      }
       const { data } = await this.axiosInstance.get(
-        this.buildEndpoint(chain, `limit-order/address/${address}`, 'v1'),
+        this.buildEndpoint(
+          chainId.toString() as OpenOceanChain,
+          `limit-order/address/${address}`,
+          'v1'
+        ),
         {
           params: {
             statuses: statusesString,

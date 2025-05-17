@@ -1,6 +1,4 @@
 import { NeuroDexApi } from '../src/services/engine/neurodex';
-import Web3 from 'web3';
-import { config } from '../src/config/config';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -24,11 +22,8 @@ async function testCreateLimitOrder(): Promise<void> {
   const neurodex = new NeuroDexApi();
 
   try {
-    // Set the expiration time to 1 day
-    const expireTime = '1D';
-
     // Create a limit order to sell USDC for WETH
-    // Example: Creating a limit order to sell 1 USDC for 0.00025 WETH
+    // Example: Creating a limit order to sell 1 USDC for 0.00041 WETH
     const limitOrderResult = await neurodex.createLimitOrder(
       {
         makerTokenAddress: TEST_TOKENS.USDC, // Token to sell
@@ -36,8 +31,8 @@ async function testCreateLimitOrder(): Promise<void> {
         takerTokenAddress: TEST_TOKENS.WETH, // Token to buy
         takerTokenDecimals: 18, // WETH has 18 decimals
         makerAmount: '1000000', // 1 USDC with decimals
-        takerAmount: '250000000000000', // 0.00025 WETH with decimals
-        expire: expireTime,
+        takerAmount: '410000000000000', // 0.00041 WETH with decimals
+        expire: '1D',
         slippage: 1,
         gasPriority: 'standard',
         walletAddress: TEST_WALLET.address,
@@ -67,7 +62,7 @@ async function testGetLimitOrders(): Promise<void> {
     const limitOrders = await neurodex.getLimitOrders(
       {
         address: TEST_WALLET.address,
-        statuses: [1, 3, 5],
+        statuses: [1, 2, 3, 4, 5, 6, 7],
       },
       'base'
     );
@@ -87,8 +82,8 @@ async function testGetLimitOrders(): Promise<void> {
           console.log(
             `Taker Asset: ${order.data.takerAssetSymbol} (${order.data.takerAssetAmount})`
           );
-          console.log(`Created: ${new Date(order.data.createDateTime * 1000).toLocaleString()}`);
-          console.log(`Expires: ${new Date(order.data.expiry * 1000).toLocaleString()}`);
+          console.log(`Created: ${order.data.createDateTime}`);
+          console.log(`Expires: ${order.data.expiry}`);
         });
       }
     } else {
@@ -99,12 +94,9 @@ async function testGetLimitOrders(): Promise<void> {
   }
 }
 
-async function testCancelLimitOrder(orderHash: string): Promise<void> {
-  console.log(`Testing cancel limit order for hash: ${orderHash}`);
-
-  const neurodex = new NeuroDexApi();
-
+async function testCancelLimitOrder(): Promise<void> {
   try {
+    const neurodex = new NeuroDexApi();
     // First, get the order details to pass to cancel function
     const limitOrders = await neurodex.getLimitOrders(
       {
@@ -123,7 +115,7 @@ async function testCancelLimitOrder(orderHash: string): Promise<void> {
     const orderToCancel = limitOrders.data[0];
 
     if (!orderToCancel) {
-      console.error(`Order with hash ${orderHash} not found`);
+      console.error(`Order with hash ${orderToCancel.orderHash} not found`);
       return;
     }
 
@@ -132,6 +124,11 @@ async function testCancelLimitOrder(orderHash: string): Promise<void> {
       {
         orderHash: orderToCancel.orderHash,
         orderData: orderToCancel.data,
+        slippage: 1,
+        gasPriority: 'standard',
+        walletAddress: TEST_WALLET.address,
+        privateKey: TEST_WALLET.privateKey,
+        referrer: '0x588AE3D9Df7DB26D9e773F34AbB548B0302B7d3B',
       },
       'base'
     );
@@ -150,7 +147,7 @@ async function testCancelLimitOrder(orderHash: string): Promise<void> {
 async function main(): Promise<void> {
   // Check if wallet is configured
   if (TEST_WALLET.address === '' || TEST_WALLET.privateKey === '') {
-    console.error('Please configure your test wallet address and private key in the script');
+    console.error('Please configure your test wallet address and private key in .env.local');
     process.exit(1);
   }
 
@@ -166,10 +163,11 @@ async function main(): Promise<void> {
   // Test 2: Get all limit orders
   await testGetLimitOrders();
 
-  // Uncomment and add an order hash to test cancellation
   // Wait for 3 seconds
-  // await new Promise(resolve => setTimeout(resolve, 3000));
-  // await testCancelLimitOrder('ORDER_HASH_HERE');
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  // Test 3: Cancel a limit order
+  await testCancelLimitOrder();
 
   console.log('Tests completed!');
 }

@@ -534,6 +534,7 @@ export class NeuroDexApi {
 
       if (!result.success) {
         // If the order is not cancelled onchain, try to cancel it onchain
+        // TODO: This doesn't work atm!!!
         const gasPrice = await this.getGasPrice(chain, params.gasPriority);
         const onchainResult = await this.openOceanClient.cancelLimitOrderOnchain(
           {
@@ -582,6 +583,8 @@ export class NeuroDexApi {
         params.statuses,
         params.page,
         params.limit,
+        'createDateTime',
+        '0',
         chain
       );
       if (!response.success || !response.data) {
