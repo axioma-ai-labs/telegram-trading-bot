@@ -20,7 +20,6 @@ help:
 	@echo "  make lint        - Run eslint"
 	@echo "  make lint-fix    - Fix linting errors automatically"
 	@echo "  make format      - Format code with prettier"
-	@echo "  make run <cmd>   - Run some command with ts-node"
 	@echo "  make test        - Run tests"
 	@echo "  make check       - Run all checks (lint + type check)"
 	@echo "  make migrate     - Run Prisma migrations"
@@ -51,10 +50,6 @@ format:
 	$(PRETTIER) --write "scripts/**/*.ts"
 	$(PRETTIER) --write "tests/**/*.ts"
 	$(PRISMA) format
-
-# Run some command with ts-node
-run:
-	$(TS_NODE) -r tsconfig-paths/register $(CMD)
 
 # Run tests
 test:

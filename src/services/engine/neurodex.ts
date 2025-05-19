@@ -15,6 +15,10 @@ import {
   CancelLimitOrderParams,
   LimitOrderInfo,
   GetLimitOrdersParams,
+  DcaParams,
+  CancelDcaOrderParams,
+  GetDcaOrdersParams,
+  DcaOrderInfo,
 } from '@/types/neurodex';
 import { OpenOceanChain } from '@/types/openocean';
 import { GasPriority } from '@/types/config';
@@ -474,7 +478,7 @@ export class NeuroDexApi {
   async createLimitOrder(
     params: LimitOrderParams,
     chain: OpenOceanChain = this.chain
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
       const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
       const web3 = new Web3(config.node.baseMainnetRpc);
@@ -522,7 +526,7 @@ export class NeuroDexApi {
   async cancelLimitOrder(
     params: CancelLimitOrderParams,
     chain: OpenOceanChain = this.chain
-  ): Promise<NeuroDexResponse<any>> {
+  ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
       const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
       const web3 = new Web3(config.node.baseMainnetRpc);
@@ -591,15 +595,223 @@ export class NeuroDexApi {
         throw new Error('Failed to get limit orders: ' + (response.error || 'Unknown error'));
       }
 
+      // Transform the response to match our LimitOrderInfo interface
+      const orders: LimitOrderInfo[] = response.data.data.map((order) => ({
+        orderHash: order.orderHash,
+        status: this.mapOrderStatus(order.statuses),
+        data: {
+          makerAssetSymbol: order.data.makerAssetSymbol,
+          takerAssetSymbol: order.data.takerAssetSymbol,
+          makerAssetAmount: order.data.makingAmount,
+          takerAssetAmount: order.data.takingAmount,
+          makerAssetAddress: order.data.makerAsset,
+          takerAssetAddress: order.data.takerAsset,
+          maker: order.data.maker,
+          orderHash: order.orderHash,
+          createDateTime: new Date(order.createDateTime).getTime(),
+          expiry: new Date(order.expireTime).getTime(),
+        },
+      }));
+
       return {
         success: true,
-        data: response.data.data || [],
+        data: orders,
       };
     } catch (error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error in getLimitOrders',
       };
+    }
+  }
+
+  /**
+   * Create a DCA order using OpenOcean SDK
+   * @param params - DCA order parameters
+   * @param chain - Target blockchain network
+   * @returns Created DCA order data
+   */
+  async createDcaOrder(
+    params: DcaParams,
+    chain: OpenOceanChain = this.chain
+  ): Promise<NeuroDexResponse<{ code: number }>> {
+    try {
+      const web3 = new Web3(config.node.baseMainnetRpc);
+      const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
+      web3.eth.accounts.wallet.add(account);
+      const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+
+      const result = await this.openOceanClient.createDcaOrder(
+        {
+          provider: web3,
+          address: params.walletAddress,
+          makerTokenAddress: params.makerTokenAddress,
+          makerTokenDecimals: params.makerTokenDecimals,
+          takerTokenAddress: params.takerTokenAddress,
+          takerTokenDecimals: params.takerTokenDecimals,
+          makerAmount: params.makerAmount,
+          gasPrice: gasPrice,
+          expire: '30D', // Default to 30 days for DCA
+          time: params.time,
+          times: params.times,
+          minPrice: params.minPrice,
+          maxPrice: params.maxPrice,
+          version: 'v2',
+        },
+        chain
+      );
+
+      if (!result.success || !result.data) {
+        throw new Error('Failed to create DCA order: ' + (result.error || 'Unknown error'));
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error in createDcaOrder',
+      };
+    }
+  }
+
+  /**
+   * Cancel a DCA order using OpenOcean SDK
+   * @param params - Cancel DCA order parameters
+   * @param chain - Target blockchain network
+   * @returns Cancellation result
+   */
+  async cancelDcaOrder(
+    params: CancelDcaOrderParams,
+    chain: OpenOceanChain = this.chain
+  ): Promise<NeuroDexResponse<{ code: number }>> {
+    try {
+      const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
+      const web3 = new Web3(config.node.baseMainnetRpc);
+      const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
+      web3.eth.accounts.wallet.add(account);
+      this.openOceanClient.initializeSdk(chainId, web3 as Web3, account.address);
+
+      // First try to cancel via API
+      const result = await this.openOceanClient.cancelDcaOrderAPI(params.orderHash, chain);
+
+      if (!result.success) {
+        // If API cancellation fails, try onchain cancellation
+        const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+        const onchainResult = await this.openOceanClient.cancelDcaOrderOnchain(
+          {
+            orderData: params.orderData,
+            gasPrice: gasPrice,
+          },
+          chain
+        );
+        if (!onchainResult.success) {
+          throw new Error(
+            'Failed to cancel DCA order: ' + (onchainResult.error || 'Unknown error')
+          );
+        }
+        return {
+          success: true,
+          data: onchainResult.data,
+        };
+      }
+
+      return {
+        success: true,
+        data: result.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error in cancelDcaOrder',
+      };
+    }
+  }
+
+  /**
+   * Get list of DCA orders for an address
+   * @param params - Parameters for getting DCA orders
+   * @param chain - Target blockchain network
+   * @returns List of DCA orders
+   */
+  async getDcaOrders(
+    params: GetDcaOrdersParams,
+    chain: OpenOceanChain = this.chain
+  ): Promise<NeuroDexResponse<DcaOrderInfo[]>> {
+    try {
+      const response = await this.openOceanClient.getDcaOrders(
+        {
+          address: params.address,
+          statuses: params.statuses || [1, 3, 4], // Default to active, cancelled, and filled orders
+          limit: params.limit || 100,
+          orderHash: '', // Not needed for listing orders
+        },
+        chain
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error('Failed to get DCA orders: ' + (response.error || 'Unknown error'));
+      }
+
+      // Transform the response to match our DcaOrderInfo interface
+      const orders: DcaOrderInfo[] = response.data.data.map((order) => ({
+        orderHash: order.orderHash,
+        status: this.mapOrderStatus(order.statuses),
+        data: {
+          makerAssetSymbol: order.data.makerAssetSymbol,
+          takerAssetSymbol: order.data.takerAssetSymbol,
+          makingAmount: order.data.makingAmount,
+          takingAmount: order.data.takingAmount,
+          makerAsset: order.data.makerAsset,
+          takerAsset: order.data.takerAsset,
+          maker: order.data.maker,
+        },
+        createDateTime: order.createDateTime,
+        expireTime: order.expireTime,
+        time: order.time,
+        times: order.times,
+        have_filled: order.have_filled,
+        minPrice: order.minPrice,
+        maxPrice: order.maxPrice,
+      }));
+
+      return {
+        success: true,
+        data: orders,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error in getDcaOrders',
+      };
+    }
+  }
+
+  /**
+   * Maps OpenOcean order status codes to human-readable status strings
+   * @param status - OpenOcean status code
+   * @returns Human-readable status string
+   */
+  private mapOrderStatus(status: number): string {
+    switch (status) {
+      case 1:
+        return 'unfilled';
+      case 2:
+        return 'failed';
+      case 3:
+        return 'cancelled';
+      case 4:
+        return 'filled';
+      case 5:
+        return 'pending';
+      case 6:
+        return 'hash_not_exist';
+      case 7:
+        return 'expired';
+      default:
+        return 'unknown';
     }
   }
 }

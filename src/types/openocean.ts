@@ -1,3 +1,5 @@
+import Web3 from 'web3';
+
 /**
  * Supported blockchain networks for OpenOcean integration
  */
@@ -100,34 +102,174 @@ export interface LimitOrderCreateParams {
  */
 export interface LimitOrderCancelOnchainParams {
   /** Order data */
-  orderData: any;
+  orderData: LimitOrderAssetData;
   /** Gas price */
   gasPrice: number;
 }
 
 /**
- * Parameters for DCA order creation
+ * Parameters for DCA order creation with SDK
  */
-export interface DcaParams {
-  /** Input token address */
-  inTokenAddress: string;
-  /** Output token address */
-  outTokenAddress: string;
-  /** Total amount to invest (in wei) */
-  totalAmount: string;
+export interface DcaOrderCreateParams {
+  /** Web3 provider */
+  provider: Web3;
+  /** Account address */
+  address: string;
+  /** Maker token address */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Maker amount with decimals as string */
+  makerAmount: string;
+  /** Taker amount with decimals as string (default "1") */
+  takerAmount?: string;
+  /** Gas price */
+  gasPrice: number;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
+  /** Optional receiver address */
+  receiver?: string;
+  /** Optional receiver input data */
+  receiverInputData?: string;
+  /** Interval time in seconds */
+  time: number;
+  /** Frequency of the DCA order */
+  times: number;
+  /** Optional minimum price range */
+  minPrice?: string;
+  /** Optional maximum price range */
+  maxPrice?: string;
+  /** Optional version (v1 or v2) */
+  version?: string;
+  /** Optional referrer address */
+  referrer?: string;
+  /** Optional referrer fee percentage (0-5) */
+  referrerFee?: string;
+}
+
+/**
+ * DCA order data structure
+ */
+export interface DcaOrderData {
+  /** Salt value from SDK */
+  salt: string;
+  /** Maker token address */
+  makerAsset: string;
+  /** Taker token address */
+  takerAsset: string;
+  /** Maker address */
+  maker: string;
+  /** Receiver address */
+  receiver: string;
+  /** Allowed sender address */
+  allowedSender: string;
+  /** Making amount with decimals */
+  makingAmount: string;
+  /** Taking amount with decimals */
+  takingAmount: string;
+  /** Maker asset data */
+  makerAssetData: string;
+  /** Taker asset data */
+  takerAssetData: string;
+  /** Get maker amount function data */
+  getMakerAmount: string;
+  /** Get taker amount function data */
+  getTakerAmount: string;
+  /** Predicate data */
+  predicate: string;
+  /** Permit data */
+  permit: string;
+  /** Interaction data */
+  interaction: string;
+}
+
+/**
+ * Parameters for DCA order API creation
+ */
+export interface DcaOrderCreateApiParams {
+  /** Total amount with decimals */
+  makerAmount: string;
+  /** Default amount (usually "1") */
+  takerAmount: string;
+  /** User signature */
+  signature: string;
+  /** Order hash */
+  orderHash: string;
+  /** Wallet address */
+  orderMaker: string;
+  /** Remaining amount */
+  remainingMakerAmount: string;
+  /** Order data from SDK */
+  data: DcaOrderData;
+  /** Whether order is active */
+  isActive: boolean;
+  /** Chain ID */
+  chainId: number;
+  /** Expire time in seconds */
+  expireTime: number;
+  /** Amount rate */
+  amountRate: string;
+  /** Interaction data */
+  interaction: string;
+  /** Interval time in seconds */
+  time: number;
   /** Number of intervals */
-  intervals: number;
-  /** Interval duration in seconds */
-  intervalDuration: number;
-  /** User's wallet address */
-  account: string;
-  /** Optional slippage tolerance */
-  slippage?: string;
+  times: number;
+  /** Optional minimum price */
+  minPrice?: string;
+  /** Optional maximum price */
+  maxPrice?: string;
+  /** Optional version (v1 or v2) */
+  version?: string;
+  /** Optional referrer address */
+  referrer?: string;
+  /** Optional referrer fee percentage (0-5) */
+  referrerFee?: string;
+}
+
+/**
+ * Parameters for canceling a DCA order onchain
+ */
+export interface DcaOrderCancelOnchainParams {
+  /** Order data */
+  orderData: DcaOrderAssetData;
+  /** Gas price */
+  gasPrice: number;
+}
+
+/**
+ * Parameters for getting DCA order data
+ */
+export interface DcaOrderGetParams {
+  /** Statuses of the DCA order */
+  statuses: Array<number>;
+  /** Order hash */
+  orderHash: string;
+  /** Limit of the DCA order */
+  limit?: number;
+  /** Account address (only for getting DCA for specific account) */
+  address?: string;
 }
 
 // ------------------------------------------------------------
 // Responses
 // ------------------------------------------------------------
+
+/**
+ * Response wrapper for OpenOcean API calls
+ */
+export interface OpenOceanResponse<T> {
+  /** Success status */
+  success: boolean;
+  /** Response data */
+  data?: T;
+  /** Error message if any */
+  error?: string;
+}
 
 /**
  * Token information
@@ -434,18 +576,6 @@ export interface LimitOrdersResponse {
 }
 
 /**
- * Response wrapper for OpenOcean API calls
- */
-export interface OpenOceanResponse<T> {
-  /** Success status */
-  success: boolean;
-  /** Response data */
-  data?: T;
-  /** Error message if any */
-  error?: string;
-}
-
-/**
  * Limit order response data
  */
 export interface LimitOrderResponse {
@@ -464,21 +594,101 @@ export interface LimitOrderResponse {
 }
 
 /**
- * DCA order response data
+ * DCA order asset data
  */
-export interface DcaOrderResponse {
-  data: {
-    id: string;
-    inToken: TokenInfo;
-    outToken: TokenInfo;
-    totalAmount: string;
-    intervals: number;
-    intervalDuration: number;
-    account: string;
-    status: 'active' | 'completed' | 'cancelled';
-    createdAt: number;
-    lastExecutedAt?: number;
-    nextExecutionAt?: number;
-    txHash?: string;
-  };
+export interface DcaOrderAssetData {
+  /** Maker token address */
+  makerAsset: string;
+  /** Maker token symbol */
+  makerAssetSymbol: string;
+  /** Maker token decimals */
+  makerAssetDecimals: number;
+  /** Maker token icon URL */
+  makerAssetIcon: string;
+  /** Taker token address */
+  takerAsset: string;
+  /** Taker token symbol */
+  takerAssetSymbol: string;
+  /** Taker token decimals */
+  takerAssetDecimals: number;
+  /** Taker token icon URL */
+  takerAssetIcon: string;
+  /** Get maker amount function data */
+  getMakerAmount: string;
+  /** Get taker amount function data */
+  getTakerAmount: string;
+  /** Maker asset data */
+  makerAssetData: string;
+  /** Taker asset data */
+  takerAssetData: string;
+  /** Salt value */
+  salt: string;
+  /** Permit data */
+  permit: string;
+  /** Predicate data */
+  predicate: string;
+  /** Interaction data */
+  interaction: string;
+  /** Making amount */
+  makingAmount: string;
+  /** Taking amount */
+  takingAmount: string;
+  /** Maker address */
+  maker: string;
+  /** Receiver address */
+  receiver: string;
+  /** Allowed sender address */
+  allowedSender: string;
+}
+
+/**
+ * DCA order response item
+ */
+export interface DcaOrderItem {
+  /** Maker amount */
+  makerAmount: string;
+  /** Taker amount */
+  takerAmount: string;
+  /** Order hash */
+  orderHash: string;
+  /** Creation date time */
+  createDateTime: string;
+  /** Order maker address */
+  orderMaker: string;
+  /** Remaining maker amount */
+  remainingMakerAmount: string;
+  /** Maker balance */
+  makerBalance: string | null;
+  /** Maker allowance */
+  makerAllowance: string | null;
+  /** Expiration time */
+  expireTime: string;
+  /** Order status */
+  statuses: number;
+  /** Interval time in seconds */
+  time: number;
+  /** Number of intervals */
+  times: number;
+  /** Number of filled intervals */
+  have_filled: number | null;
+  /** Minimum price */
+  minPrice: string | null;
+  /** Maximum price */
+  maxPrice: string | null;
+  /** Order data */
+  data: DcaOrderAssetData;
+  /** Maker rate */
+  makerRate: string | null;
+  /** Taker rate */
+  takerRate: string | null;
+}
+
+/**
+ * DCA orders list response
+ */
+export interface DcaOrdersResponse {
+  /** Response code */
+  code: number;
+  /** List of DCA orders */
+  data: DcaOrderItem[];
 }

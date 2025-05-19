@@ -1,4 +1,5 @@
 import { GasPriority } from '@/types/config';
+import { DcaOrderAssetData, LimitOrderAssetData } from '@/types/openocean';
 
 /**
  * Basic trading parameters for trading operations
@@ -40,12 +41,24 @@ export interface SellParams extends BasicTradeParams {
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
 export interface DcaParams extends BasicTradeParams {
-  /** Total amount to invest (of trading token) */
-  totalAmount: number;
+  /** Maker token address (token to sell) */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address (token to buy) */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Total amount to invest with decimals */
+  makerAmount: string;
+  /** Interval time in seconds */
+  time: number;
   /** Number of intervals */
-  intervals: number;
-  /** Interval duration in seconds */
-  intervalDuration: number;
+  times: number;
+  /** Optional minimum price range */
+  minPrice?: string;
+  /** Optional maximum price range */
+  maxPrice?: string;
 }
 
 /**
@@ -75,7 +88,7 @@ export interface CancelLimitOrderParams extends BasicTradeParams {
   /** Order hash */
   orderHash: string;
   /** Order data */
-  orderData: any;
+  orderData: LimitOrderAssetData;
 }
 
 /**
@@ -217,4 +230,67 @@ export interface LimitOrderInfo {
     /** Expiration time */
     expiry: number;
   };
+}
+
+/**
+ * Parameters for canceling a DCA order
+ */
+export interface CancelDcaOrderParams extends BasicTradeParams {
+  /** Order hash */
+  orderHash: string;
+  /** Order data */
+  orderData: DcaOrderAssetData;
+}
+
+/**
+ * Parameters for getting DCA orders
+ */
+export interface GetDcaOrdersParams {
+  /** Wallet address */
+  address: string;
+  /** Statuses to filter */
+  statuses?: Array<number>;
+  /** Limit number */
+  limit?: number;
+}
+
+/**
+ * DCA order information
+ */
+export interface DcaOrderInfo {
+  /** Order hash */
+  orderHash: string;
+  /** Order status */
+  status: string;
+  /** Order data */
+  data: {
+    /** Maker token symbol */
+    makerAssetSymbol: string;
+    /** Taker token symbol */
+    takerAssetSymbol: string;
+    /** Maker token amount */
+    makingAmount: string;
+    /** Taker token amount */
+    takingAmount: string;
+    /** Maker token address */
+    makerAsset: string;
+    /** Taker token address */
+    takerAsset: string;
+    /** Maker address */
+    maker: string;
+  };
+  /** Creation date time */
+  createDateTime: string;
+  /** Expiration time */
+  expireTime: string;
+  /** Interval time in seconds */
+  time: number;
+  /** Number of intervals */
+  times: number;
+  /** Number of filled intervals */
+  have_filled: number | null;
+  /** Minimum price */
+  minPrice: string | null;
+  /** Maximum price */
+  maxPrice: string | null;
 }
