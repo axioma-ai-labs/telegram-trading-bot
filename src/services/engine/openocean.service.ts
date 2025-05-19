@@ -436,7 +436,7 @@ export class OpenOceanClient {
         receiverInputData: params.receiverInputData || '',
         mode: 'Dca',
       };
-
+      // TODO: Fix this part. Now it throws an error.
       const sdkOrder = await openoceanLimitOrderSdk.createLimitOrder(wallet, order);
 
       // Prepare API parameters
