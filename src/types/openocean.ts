@@ -95,6 +95,14 @@ export interface LimitOrderCreateParams {
   gasPrice: number;
   /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
   expire: string;
+  /** Optional receiver address */
+  receiver?: string;
+  /** Optional receiver input data */
+  receiverInputData?: string;
+  /** Optional referrer address */
+  referrer?: string;
+  /** Optional referrer fee percentage (0-5) */
+  referrerFee?: number;
 }
 
 /**

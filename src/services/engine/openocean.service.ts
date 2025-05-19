@@ -238,9 +238,14 @@ export class OpenOceanClient {
       }
 
       // Submit the order to the API
+      const apiParams = {
+        ...orderData,
+        referrer: params.referrer || '',
+        referrerFee: params.referrerFee || '',
+      };
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chainId.toString() as OpenOceanChain, 'limit-order', 'v1'),
-        orderData,
+        apiParams,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -410,29 +415,29 @@ export class OpenOceanClient {
       // const account = (this.sdk as any).web3.defaultAccount;
 
       // Create order with SDK
-      const sdkOrder = await openoceanLimitOrderSdk.createLimitOrder(
-        {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          provider: params.provider as any,
-          chainKey: chain,
-          account: params.address,
-          chainId: chainId!.toString(),
-          mode: 'Dca',
-        },
-        {
-          makerTokenAddress: params.makerTokenAddress,
-          makerTokenDecimals: params.makerTokenDecimals,
-          takerTokenAddress: params.takerTokenAddress,
-          takerTokenDecimals: params.takerTokenDecimals,
-          makerAmount: params.makerAmount,
-          takerAmount: params.takerAmount || '1',
-          gasPrice: params.gasPrice,
-          expire: params.expire,
-          receiver: params.receiver || '',
-          receiverInputData: params.receiverInputData || '',
-          mode: 'Dca',
-        }
-      );
+      const wallet = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        provider: params.provider as any,
+        chainKey: chain,
+        account: params.address,
+        chainId: chainId!.toString(),
+        mode: 'Dca',
+      };
+      const order = {
+        makerTokenAddress: params.makerTokenAddress,
+        makerTokenDecimals: params.makerTokenDecimals,
+        takerTokenAddress: params.takerTokenAddress,
+        takerTokenDecimals: params.takerTokenDecimals,
+        makerAmount: params.makerAmount,
+        takerAmount: params.takerAmount || '1',
+        gasPrice: params.gasPrice,
+        expire: params.expire,
+        receiver: params.receiver || '',
+        receiverInputData: params.receiverInputData || '',
+        mode: 'Dca',
+      };
+
+      const sdkOrder = await openoceanLimitOrderSdk.createLimitOrder(wallet, order);
 
       // Prepare API parameters
       const apiParams: DcaOrderCreateApiParams = {

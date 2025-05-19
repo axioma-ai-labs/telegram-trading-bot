@@ -497,6 +497,8 @@ export class NeuroDexApi {
           takerAmount: params.takerAmount,
           gasPrice: gasPrice,
           expire: params.expire,
+          referrer: params.referrer || '',
+          referrerFee: 1,
         },
         chain
       );
