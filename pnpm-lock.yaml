@@ -11,6 +11,9 @@ importers:
       '@covalenthq/client-sdk':
         specifier: ^2.2.6
         version: 2.2.6
+      '@grammyjs/ratelimiter':
+        specifier: ^1.2.1
+        version: 1.2.1
       '@openocean.finance/limitorder-sdk':
         specifier: ^0.2.29
         version: 0.2.29(bufferutil@4.0.9)(utf-8-validate@5.0.10)(webpack@5.99.8)
@@ -156,6 +159,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  '@grammyjs/ratelimiter@1.2.1':
+    resolution: {integrity: sha512-4bmVUBCBnIb2epbDiBLCvvnVjaYg7kDCPR1Ptt6gqoxm5vlD8BjainYv+yjF6221hu2KUv8QAckumDI+6xyGsQ==}
   '@ethereumjs/tx@3.5.2':
     resolution: {integrity: sha512-gQDNJWKrSDGu2w7w0PzVXVBNMzb7wwdDOmOqczmhNjqFxFuIbhVJDwiGEnxFNC2/b8ifcZzY7MLcluizohRzNw==}
 
@@ -3191,6 +3196,8 @@ snapshots:
       '@ethersproject/logger': 5.8.0
       '@ethersproject/properties': 5.8.0
       '@ethersproject/strings': 5.8.0
+
+  '@grammyjs/ratelimiter@1.2.1': {}
 
   '@grammyjs/types@3.20.0': {}
 

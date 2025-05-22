@@ -97,6 +97,25 @@ If not specified - all methods will be executed and run.
 make run CMD="scripts/create_test_wallet.ts"
 ```
 
+### Rate limiting tests
+
+For the rate limiting tests, we need to install `k6`. For Mac it's as simple as:
+
+```bash
+brew install k6
+```
+
+Then we can run the test with:
+
+```bash
+pnpm test:load
+```
+
+or a quick version:
+
+```bash
+pnpm test:load:quick
+```
 
 ## Development
 
