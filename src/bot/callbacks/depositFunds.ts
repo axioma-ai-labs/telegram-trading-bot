@@ -1,7 +1,7 @@
 import { BotContext } from '@/types/config';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { depositMessage, depositKeyboard } from '@/bot/commands/deposit';
-import { UserService } from '@/services/db/user.service';
+import { UserService } from '@/services/prisma/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export async function depositFunds(ctx: BotContext): Promise<void> {

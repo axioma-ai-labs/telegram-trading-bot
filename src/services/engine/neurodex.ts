@@ -25,6 +25,7 @@ import { OpenOceanChain } from '@/types/openocean';
 import { GasPriority } from '@/types/config';
 import { erc20Abi } from '@/utils/abis';
 import Web3 from 'web3';
+import { PrivateStorageService } from '@/services/supabase/private-storage.service';
 
 /**
  * NeuroDex API service for handling trading operations
@@ -116,13 +117,18 @@ export class NeuroDexApi {
   }
 
   /**
-   * Creates a new wallet. Uses Viem.
-   *
+   * Creates a new wallet and stores its encrypted private key
    * @returns WalletInfo
    */
   async createWallet(): Promise<WalletInfo> {
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
+
+    // Store the encrypted private key
+    const stored = await PrivateStorageService.storePrivateKey(account.address, privateKey);
+    if (!stored) {
+      throw new Error('Failed to store private key securely');
+    }
 
     return {
       address: account.address,
@@ -183,32 +189,6 @@ export class NeuroDexApi {
     const referralLink = `https://t.me/neuro_bro_test_bot?start=r-${referralCode}`;
     return referralLink;
   }
-
-  // private async encryptPrivateKey(privateKey: string): Promise<string> {
-  //   const iv = crypto.randomBytes(12); // GCM recommends 12 bytes
-  //   const key = crypto.createHash('sha256').update(config.wallet.encryptionKey).digest();
-  //   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-
-  //   const encrypted = Buffer.concat([cipher.update(privateKey, 'utf8'), cipher.final()]);
-  //   const authTag = cipher.getAuthTag();
-
-  //   return [iv.toString('hex'), authTag.toString('hex'), encrypted.toString('hex')].join(':');
-  // }
-
-  // private async decryptPrivateKey(encrypted: string): Promise<string> {
-  //   const [ivHex, tagHex, dataHex] = encrypted.split(':');
-  //   const iv = Buffer.from(ivHex, 'hex');
-  //   const tag = Buffer.from(tagHex, 'hex');
-  //   const data = Buffer.from(dataHex, 'hex');
-  //   const key = crypto.createHash('sha256').update(config.wallet.encryptionKey).digest();
-
-  //   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  //   decipher.setAuthTag(tag);
-
-  //   const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
-
-  //   return decrypted.toString('utf8');
-  // }
 
   /**
    * Get gas price for a given chain. Uses OpenOcean API.
@@ -869,6 +849,20 @@ export class NeuroDexApi {
         return 'expired';
       default:
         return 'unknown';
+    }
+  }
+
+  /**
+   * Retrieves the private key for a wallet address
+   * @param walletAddress - The wallet address to get the private key for
+   * @returns The private key or null if not found
+   */
+  async getPrivateKey(walletAddress: string): Promise<string | null> {
+    try {
+      return await PrivateStorageService.getPrivateKey(walletAddress);
+    } catch (error) {
+      console.error('Error retrieving private key:', error);
+      return null;
     }
   }
 }

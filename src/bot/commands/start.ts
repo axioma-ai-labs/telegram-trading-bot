@@ -1,9 +1,9 @@
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { CommandHandler } from '@/types/commands';
-import { UserService } from '@/services/db/user.service';
-import { SettingsService } from '@/services/db/settings.service';
-import { ReferralService } from '@/services/db/referrals';
+import { UserService } from '@/services/prisma/user.service';
+import { SettingsService } from '@/services/prisma/settings.service';
+import { ReferralService } from '@/services/prisma/referrals.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
 

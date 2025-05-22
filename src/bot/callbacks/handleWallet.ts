@@ -1,8 +1,8 @@
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { BotContext } from '@/types/config';
 import { walletMessage, walletCreationOKMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { WalletService } from '@/services/db/wallet.service';
-import { UserService } from '@/services/db/user.service';
+import { WalletService } from '@/services/prisma/wallet.service';
+import { UserService } from '@/services/prisma/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
@@ -29,10 +29,10 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       return;
     }
 
-    // Create new wallet
+    // Create new wallet with encrypted storage
     const wallet = await neurodex.createWallet();
 
-    // Store wallet
+    // Store wallet in database
     await WalletService.createWallet({
       address: wallet.address,
       chain: 'ethereum',
@@ -40,7 +40,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       type: 'generated',
     });
 
-    // Success msg
+    // Success message
     const editedMessage = await ctx.editMessageText(
       walletCreationOKMessage(wallet.address, wallet.privateKey),
       {
@@ -48,7 +48,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       }
     );
 
-    // Delete message after 5 minutes
+    // Delete message after 5 minutes for security
     if (typeof editedMessage === 'object' && 'message_id' in editedMessage) {
       deleteBotMessage(ctx, editedMessage.message_id, 50000).catch((error) => {
         console.error('Error in scheduled message deletion:', error);
@@ -58,6 +58,9 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
     console.log(`Successfully created wallet for user ${telegramId}`);
   } catch (error) {
     console.error('Error creating wallet:', error);
-    await ctx.reply('❌ Error creating wallet. Please try again later.');
+    await ctx.editMessageText(
+      '❌ Failed to create wallet. Please try again later or contact support.',
+      { parse_mode: 'Markdown' }
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { BotContext } from '@/types/config';
-import { SettingsService } from '@/services/db/settings.service';
-import { UserService } from '@/services/db/user.service';
+import { SettingsService } from '@/services/prisma/settings.service';
+import { UserService } from '@/services/prisma/user.service';
 import {
   settingsMessage,
   settingsKeyboard,

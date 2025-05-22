@@ -36,10 +36,6 @@ export interface TradingConfig {
   defaultGasPriority: GasPriority;
 }
 
-export interface WalletConfig {
-  encryptionKey: string;
-}
-
 export interface DatabaseConfig {
   url: string;
   encryptionKey: string;
@@ -58,6 +54,16 @@ export interface NativeTokenAddress {
   bsc: string;
 }
 
+export interface SupabaseConfig {
+  url: string;
+  key: string;
+  serviceKey: string;
+}
+
+export interface EncryptionConfig {
+  masterPassword: string;
+}
+
 export interface AppConfig {
   projectName: string;
   environment: Environment;
@@ -65,10 +71,11 @@ export interface AppConfig {
   chain: ChainConfig;
   nativeTokenAddress: NativeTokenAddress;
   trading: TradingConfig;
-  wallet: WalletConfig;
   database: DatabaseConfig;
   node: NodeConfig;
   covalenthqApiKey: string;
+  supabase: SupabaseConfig;
+  encryption: EncryptionConfig;
   // Constants
   MAX_UINT256: string;
 }

@@ -1,7 +1,7 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { UserService } from '@/services/db/user.service';
+import { UserService } from '@/services/prisma/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export const walletCreationOKMessage = (walletAddress: string, privateKey: string): string => `

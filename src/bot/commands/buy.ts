@@ -1,7 +1,7 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
-import { UserService } from '@/services/db/user.service';
+import { UserService } from '@/services/prisma/user.service';
 import { InlineKeyboard } from 'grammy';
 import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 

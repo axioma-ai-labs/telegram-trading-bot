@@ -1,7 +1,7 @@
 import { BotContext } from '@/types/config';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { buyTokenMessage } from '@/bot/commands/buy';
-import { UserService } from '@/services/db/user.service';
+import { UserService } from '@/services/prisma/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { BuyParams } from '@/types/neurodex';
 

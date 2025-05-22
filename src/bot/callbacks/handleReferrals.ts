@@ -6,8 +6,8 @@ import {
   referralStatsMessage,
   referralStatsKeyboard,
 } from '../commands/referrals';
-import { ReferralService } from '../../services/db/referrals';
-import { UserService } from '../../services/db/user.service';
+import { ReferralService } from '../../services/prisma/referrals.service';
+import { UserService } from '../../services/prisma/user.service';
 
 export async function getReferralLink(ctx: BotContext): Promise<void> {
   const userId = ctx.from?.id;

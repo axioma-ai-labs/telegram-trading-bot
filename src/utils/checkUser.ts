@@ -1,5 +1,5 @@
-import { UserService } from '@/services/db/user.service';
-import { WalletService } from '@/services/db/wallet.service';
+import { UserService } from '@/services/prisma/user.service';
+import { WalletService } from '@/services/prisma/wallet.service';
 
 export async function isUserRegistered(telegramId: string): Promise<boolean> {
   const user = await UserService.getUserByTelegramId(telegramId);

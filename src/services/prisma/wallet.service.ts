@@ -1,5 +1,6 @@
-import { prisma } from '@/services/db/prisma';
+import { prisma } from '@/services/prisma/client';
 import { Wallet } from '@prisma/client/edge';
+import { PrivateStorageService } from '@/services/supabase/private-storage.service';
 
 export class WalletService {
   /**
@@ -62,9 +63,13 @@ export class WalletService {
   }
 
   /**
-   * Delete wallet
+   * Delete wallet and its associated private key
    */
   static async deleteWallet(address: string): Promise<Wallet> {
+    // Delete the private key first
+    await PrivateStorageService.deletePrivateKey(address);
+    
+    // Then delete the wallet record
     return prisma.wallet.delete({
       where: { address },
     });

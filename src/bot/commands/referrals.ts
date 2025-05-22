@@ -2,8 +2,8 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { InlineKeyboard } from 'grammy';
-import { ReferralService } from '@/services/db/referrals';
-import { UserService } from '@/services/db/user.service';
+import { ReferralService } from '@/services/prisma/referrals.service';
+import { UserService } from '@/services/prisma/user.service';
 
 export const referralMessage = (referralLink: string): string => {
   return [
