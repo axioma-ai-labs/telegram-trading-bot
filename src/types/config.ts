@@ -1,6 +1,17 @@
 import { Context, SessionFlavor } from 'grammy';
 import { Address } from 'viem';
 
+export type OperationType = 'buy' | 'sell' | 'dca' | 'limit' | null;
+
+export interface OperationState {
+  type: OperationType;
+  token?: string;
+  amount?: number;
+  interval?: number;
+  times?: number;
+  customInterval?: boolean;
+}
+
 /**
  * Session data interface
  */
@@ -9,9 +20,7 @@ export interface SessionData {
   username?: string;
   startTime: number;
   lastInteractionTime: number;
-  waitingForToken?: boolean;
-  waitingForAmount?: boolean;
-  selectedToken?: string;
+  currentOperation: OperationState | null;
 }
 
 /**

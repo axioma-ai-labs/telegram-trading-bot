@@ -4,15 +4,16 @@ import { buyTokenMessage } from '@/bot/commands/buy';
 import { UserService } from '@/services/db/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { BuyParams } from '@/types/neurodex';
+import {
+  error_message,
+  not_registered_message,
+  no_wallet_message,
+  invalid_amount_message,
+  insufficient_funds_message,
+  invalid_token_message,
+  custom_amount_prompt,
+} from '@/bot/commands/buy';
 
-const error_message = '❌ Transaction failed. Please try again later.';
-const invalid_amount_message = '❌ Invalid amount selected. Please try again.';
-const insufficient_funds_message =
-  '❌ Insufficient funds to complete the transaction.\n\nPlease ensure you have enough ETH to cover:\n• The transaction amount\n• Gas fees';
-const no_wallet_message = "❌ You don't have a wallet.\n\nPlease use /wallet to create one.";
-const not_registered_message = '❌ You are not registered.\n\nPlease use /start to begin.';
-const invalid_token_message = '❌ No token selected. Please select a token first.';
-const custom_amount_prompt = 'Please enter the amount of ETH you want to spend:';
 const transaction_success_message = (amount: number, token: string, txHash: string): string =>
   `✅ Buy order for ${amount} ETH on ${token} was successful!\n\n` +
   `Transaction details:\n` +
@@ -42,7 +43,11 @@ export async function buyToken(ctx: BotContext): Promise<void> {
     return;
   }
 
-  ctx.session.waitingForToken = true;
+  // Initialize buy operation
+  ctx.session.currentOperation = {
+    type: 'buy',
+  };
+
   await ctx.reply(buyTokenMessage, {
     parse_mode: 'Markdown',
   });
@@ -56,6 +61,7 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
   const settings = user?.settings;
   const USER_HAS_WALLET = user?.wallets && user.wallets.length > 0;
   const IS_REGISTERED = user !== null;
+  const { currentOperation } = ctx.session;
 
   if (!IS_REGISTERED) {
     const message = await ctx.reply(not_registered_message);
@@ -69,7 +75,7 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     return;
   }
 
-  if (!ctx.session.selectedToken) {
+  if (!currentOperation?.token) {
     const message = await ctx.reply(invalid_token_message);
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
@@ -80,7 +86,6 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     await ctx.reply(custom_amount_prompt, {
       parse_mode: 'Markdown',
     });
-    ctx.session.waitingForAmount = true;
     return;
   }
 
@@ -93,7 +98,7 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
 
   try {
     const params: BuyParams = {
-      toTokenAddress: ctx.session.selectedToken,
+      toTokenAddress: currentOperation.token,
       fromAmount: parsedAmount,
       slippage: Number(settings?.slippage || '1'),
       gasPriority: 'standard',
@@ -109,20 +114,19 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     if (buyResult.success && buyResult.data?.txHash) {
       const message = transaction_success_message(
         parsedAmount,
-        ctx.session.selectedToken,
+        currentOperation.token,
         buyResult.data.txHash
       );
       await ctx.reply(message, {
         parse_mode: 'Markdown',
       });
+      ctx.session.currentOperation = null;
     } else {
       // check if no mooooooooney
       const errorMessage = buyResult.error?.toLowerCase() || '';
       if (errorMessage.includes('insufficient funds')) {
         const message = await ctx.reply(insufficient_funds_message);
         await deleteBotMessage(ctx, message.message_id, 10000);
-
-        // TODO: check for other stuff
       } else {
         const message = await ctx.reply(error_message);
         await deleteBotMessage(ctx, message.message_id, 10000);

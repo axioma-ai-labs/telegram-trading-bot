@@ -7,8 +7,7 @@ import { ReferralService } from '@/services/db/referrals';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
 
-export const startMessage = `
-*💸 Neurodex*
+export const startMessage = `*💸 Neurodex*
 
 Neurodex is your lightning fast crypto trading bot
 
@@ -16,16 +15,20 @@ Buy and sell crypto with ease using Neurodex.
 
 /buy - Buy any crypto token on Base, BSC & Ethereum
 /sell - Sell any crypto token on Base, BSC & Ethereum
+/dca - Dollar Cost Averaging (DCA)
+/limit - Create limit orders
 /wallet - Manage your wallet
 /settings - Configure your bot settings
 /help - Get help and support
 
-Powered by [Neurobro](https://neurobro.ai) | [Docs](https://docs.neurodex.xyz)
-`;
+Powered by [Neurobro](https://neurobro.ai) and [Docs](https://docs.neurodex.xyz)`;
 
 export const startKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
   .text('Sell', 'sell')
+  .row()
+  .text('DCA', 'dca')
+  .text('Limit orders', 'limit_orders')
   .row()
   .text('Wallet', 'create_wallet')
   .text('Withdraw', 'withdraw')
@@ -40,14 +43,12 @@ export const startKeyboard = new InlineKeyboard()
 // New User
 ////////////////////////////////////////////////////////////
 
-export const acceptTermsConditionsMessage = `
-*💸 Neurodex*
+export const acceptTermsConditionsMessage = `*💸 Neurodex*
 
 Before we get started, please review and accept our terms of service and privacy policy.
 
-- [Terms of Service](https://docs.neurodex.xyz/terms-of-service)
-- [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)
-`;
+\\- [Terms of Service](https://docs.neurodex.xyz/terms-of-service)
+\\- [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)`;
 
 export const acceptTermsConditionsKeyboard = new InlineKeyboard().text(
   '✅ Accept',

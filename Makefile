@@ -48,7 +48,6 @@ lint-fix:
 format:
 	$(PRETTIER) --write "src/**/*.ts"
 	$(PRETTIER) --write "scripts/**/*.ts"
-	$(PRETTIER) --write "tests/**/*.ts"
 	$(PRISMA) format
 
 # Run tests
