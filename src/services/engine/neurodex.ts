@@ -19,6 +19,7 @@ import {
   CancelDcaOrderParams,
   GetDcaOrdersParams,
   DcaOrderInfo,
+  TokenData,
 } from '@/types/neurodex';
 import { OpenOceanChain } from '@/types/openocean';
 import { GasPriority } from '@/types/config';
@@ -277,6 +278,60 @@ export class NeuroDexApi {
       throw new Error(
         `Token approval failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
+    }
+  }
+
+  /**
+   * Gets token data from DexScreener API for a given token address.
+   *
+   * @param tokenAddress - The contract address of the token
+   * @param _network - The blockchain network name (unused but kept for interface compatibility)
+   * @returns Token data response with metadata
+   */
+  async getTokenDataByContractAddress(
+    tokenAddress: string,
+    _network: string // Prefix with underscore to indicate intentionally unused
+  ): Promise<NeuroDexResponse<TokenData>> {
+    try {
+      const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Token not found');
+      }
+
+      const data = (await response.json()) as {
+        pairs: Array<{
+          baseToken: { name: string; symbol: string; logoURI?: string };
+          priceUsd: string;
+          chainId: string;
+        }>;
+      };
+      const pair = data.pairs[0]; // get first pair based on dexscreener api docs
+
+      if (!pair) {
+        throw new Error('No trading pairs found for token');
+      }
+
+      return {
+        success: true,
+        data: {
+          address: tokenAddress,
+          name: pair.baseToken.name,
+          symbol: pair.baseToken.symbol,
+          decimals: 18,
+          price: Number(pair.priceUsd) || undefined,
+          totalSupply: undefined,
+          marketCap: undefined,
+          logo: pair.baseToken.logoURI,
+          chain: pair.chainId,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch token data',
+      };
     }
   }
 
