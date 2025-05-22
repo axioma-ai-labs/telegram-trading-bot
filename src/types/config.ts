@@ -5,11 +5,13 @@ import { Address } from 'viem';
  * Session data interface
  */
 export interface SessionData {
-  // Add your session data fields here
   userId?: number;
   username?: string;
   startTime: number;
   lastInteractionTime: number;
+  waitingForToken?: boolean;
+  waitingForAmount?: boolean;
+  selectedToken?: string;
 }
 
 /**

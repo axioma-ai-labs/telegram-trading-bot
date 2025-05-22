@@ -1,12 +1,12 @@
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { CommandHandler } from '@/types/commands';
-import { isUserRegistered, hasWallet, isTermsConditionsAccepted } from '@/utils/checkUser';
 import { UserService } from '@/services/db/user.service';
 import { SettingsService } from '@/services/db/settings.service';
 import { ReferralService } from '@/services/db/referrals';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
+
 export const startMessage = `
 *💸 Neurodex*
 
@@ -66,9 +66,10 @@ export const startCommandHandler: CommandHandler = {
     const telegramId = ctx.from.id.toString();
     const payload = ctx.match?.toString() || ''; // Payload from referral link
 
-    const IS_REGISTERED = await isUserRegistered(telegramId);
-    const IS_ACCEPTED_TERMS_CONDITIONS = await isTermsConditionsAccepted(telegramId);
-    const USER_HAS_WALLET = await hasWallet(telegramId);
+    const user = await UserService.getUserByTelegramId(telegramId);
+    const USER_HAS_WALLET = user?.wallets && user.wallets.length > 0;
+    const IS_ACCEPTED_TERMS_CONDITIONS = user?.termsAccepted ?? false;
+    const IS_REGISTERED = user !== null;
     const referralLink = await neurodex.generateReferralLink(ctx.from.id, ctx.from.username || '');
 
     // Referred user

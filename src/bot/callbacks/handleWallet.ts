@@ -1,4 +1,3 @@
-import { hasWallet } from '@/utils/checkUser';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { BotContext } from '@/types/config';
 import { walletMessage, walletCreationOKMessage, walletKeyboard } from '@/bot/commands/wallet';
@@ -8,18 +7,20 @@ import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
   try {
-    if (!ctx.from?.id) return;
+    const telegramId = ctx.from?.id?.toString();
+    if (!telegramId) return;
 
-    const telegramId = ctx.from.id.toString();
-    const USER_HAS_WALLET = await hasWallet(telegramId);
+    const user = await UserService.getUserByTelegramId(telegramId);
+    if (!user) return;
+
     const neurodex = new NeuroDexApi();
 
-    if (USER_HAS_WALLET) {
-      const user = await UserService.getUserByTelegramId(telegramId);
-      if (!user?.id) return;
+    // Check if user already has a wallet
+    if (user.wallets && user.wallets.length > 0) {
       const balance = await neurodex.getEthBalance(telegramId);
-      const wallets = await WalletService.getWalletsByUserId(user.id);
-      const existingWalletMessage = walletMessage(wallets[0].address, balance.data || '0.000');
+      const ethBalance = balance.success && balance.data ? balance.data : '0.000';
+
+      const existingWalletMessage = walletMessage(user.wallets[0].address, ethBalance);
 
       await ctx.editMessageText(existingWalletMessage, {
         parse_mode: 'Markdown',
@@ -28,11 +29,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       return;
     }
 
-    // Get user from database
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user?.id) return;
-
-    // Create wallet
+    // Create new wallet
     const wallet = await neurodex.createWallet();
 
     // Store wallet
@@ -51,7 +48,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       }
     );
 
-    // delete message after 5 minutes
+    // Delete message after 5 minutes
     if (typeof editedMessage === 'object' && 'message_id' in editedMessage) {
       deleteBotMessage(ctx, editedMessage.message_id, 50000).catch((error) => {
         console.error('Error in scheduled message deletion:', error);
