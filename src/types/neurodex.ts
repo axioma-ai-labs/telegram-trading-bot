@@ -1,4 +1,5 @@
 import { GasPriority } from '@/types/config';
+import { DcaOrderAssetData, LimitOrderAssetData } from '@/types/openocean';
 
 /**
  * Basic trading parameters for trading operations
@@ -40,22 +41,68 @@ export interface SellParams extends BasicTradeParams {
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
 export interface DcaParams extends BasicTradeParams {
-  /** Total amount to invest (of trading token) */
-  totalAmount: number;
+  /** Maker token address (token to sell) */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address (token to buy) */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Total amount to invest with decimals */
+  makerAmount: string;
+  /** Interval time in seconds */
+  time: number;
   /** Number of intervals */
-  intervals: number;
-  /** Interval duration in seconds */
-  intervalDuration: number;
+  times: number;
+  /** Optional minimum price range */
+  minPrice?: string;
+  /** Optional maximum price range */
+  maxPrice?: string;
 }
 
 /**
  * Parameters for limit orders
  */
 export interface LimitOrderParams extends BasicTradeParams {
-  /** Target price in native token */
-  targetPrice: number;
-  /** Order expiration timestamp */
-  expireTime?: number;
+  /** Maker token address (token to sell) */
+  makerTokenAddress: string;
+  /** Maker token decimals */
+  makerTokenDecimals: number;
+  /** Taker token address (token to buy) */
+  takerTokenAddress: string;
+  /** Taker token decimals */
+  takerTokenDecimals: number;
+  /** Amount of maker token with decimals */
+  makerAmount: string;
+  /** Amount of taker token with decimals */
+  takerAmount: string;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
+}
+
+/**
+ * Parameters for canceling a limit order
+ */
+export interface CancelLimitOrderParams extends BasicTradeParams {
+  /** Order hash */
+  orderHash: string;
+  /** Order data */
+  orderData: LimitOrderAssetData;
+}
+
+/**
+ * Parameters for getting limit orders
+ */
+export interface GetLimitOrdersParams {
+  /** Wallet address */
+  address: string;
+  /** Statuses to filter */
+  statuses?: Array<number>;
+  /** Page number */
+  page?: number;
+  /** Limit number */
+  limit?: number;
 }
 
 /**
@@ -68,6 +115,24 @@ export interface TokenInfo {
   symbol: string;
   /** Token decimals */
   decimals: number;
+}
+
+/**
+ * Extended token data with additional information
+ */
+export interface TokenData extends TokenInfo {
+  /** Token name */
+  name: string;
+  /** Current price in USD */
+  price?: number;
+  /** Total supply */
+  totalSupply?: number;
+  /** Market cap */
+  marketCap?: number;
+  /** Token logo URL */
+  logo?: string;
+  /** Chain ID */
+  chain: string;
 }
 
 /**
@@ -150,4 +215,100 @@ export interface WalletInfo {
   address: string;
   /** Wallet private key */
   privateKey: string;
+}
+
+/**
+ * Limit order information
+ */
+export interface LimitOrderInfo {
+  /** Order hash */
+  orderHash: string;
+  /** Order status */
+  status: string;
+  /** Order data */
+  data: {
+    /** Maker token symbol */
+    makerAssetSymbol: string;
+    /** Taker token symbol */
+    takerAssetSymbol: string;
+    /** Maker token amount */
+    makerAssetAmount: string;
+    /** Taker token amount */
+    takerAssetAmount: string;
+    /** Maker token address */
+    makerAssetAddress: string;
+    /** Taker token address */
+    takerAssetAddress: string;
+    /** Maker address */
+    maker: string;
+    /** Order hash */
+    orderHash: string;
+    /** Order creation time */
+    createDateTime: number;
+    /** Expiration time */
+    expiry: number;
+  };
+}
+
+/**
+ * Parameters for canceling a DCA order
+ */
+export interface CancelDcaOrderParams extends BasicTradeParams {
+  /** Order hash */
+  orderHash: string;
+  /** Order data */
+  orderData: DcaOrderAssetData;
+}
+
+/**
+ * Parameters for getting DCA orders
+ */
+export interface GetDcaOrdersParams {
+  /** Wallet address */
+  address: string;
+  /** Statuses to filter */
+  statuses?: Array<number>;
+  /** Limit number */
+  limit?: number;
+}
+
+/**
+ * DCA order information
+ */
+export interface DcaOrderInfo {
+  /** Order hash */
+  orderHash: string;
+  /** Order status */
+  status: string;
+  /** Order data */
+  data: {
+    /** Maker token symbol */
+    makerAssetSymbol: string;
+    /** Taker token symbol */
+    takerAssetSymbol: string;
+    /** Maker token amount */
+    makingAmount: string;
+    /** Taker token amount */
+    takingAmount: string;
+    /** Maker token address */
+    makerAsset: string;
+    /** Taker token address */
+    takerAsset: string;
+    /** Maker address */
+    maker: string;
+  };
+  /** Creation date time */
+  createDateTime: string;
+  /** Expiration time */
+  expireTime: string;
+  /** Interval time in seconds */
+  time: number;
+  /** Number of intervals */
+  times: number;
+  /** Number of filled intervals */
+  have_filled: number | null;
+  /** Minimum price */
+  minPrice: string | null;
+  /** Maximum price */
+  maxPrice: string | null;
 }

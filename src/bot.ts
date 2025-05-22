@@ -8,7 +8,7 @@ import { walletCommandHandler } from '@/bot/commands/wallet';
 import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
 import { handleGetHelp } from '@/bot/callbacks/getHelp';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
-import { buyToken } from '@/bot/callbacks/buyToken';
+import { buyToken, performBuy } from '@/bot/callbacks/buyToken';
 import { sellToken } from '@/bot/callbacks/sellToken';
 import { handleRefresh } from '@/bot/callbacks/refresh';
 import {
@@ -25,7 +25,7 @@ import { transactionsCommandHandler } from '@/bot/commands/transactions';
 import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
 import depositCommandHandler from '@/bot/commands/deposit';
 import { depositFunds } from '@/bot/callbacks/depositFunds';
-import { buyCommandHandler } from '@/bot/commands/buy';
+import { buyCommandHandler, buyTokenKeyboard, tokenFoundMessage } from '@/bot/commands/buy';
 import { sellCommandHandler } from '@/bot/commands/sell';
 import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
@@ -33,6 +33,8 @@ import { referralCommandHandler } from '@/bot/commands/referrals';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
 import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
 import { limit } from '@grammyjs/ratelimiter';
+import { NeuroDexApi } from './services/engine/neurodex';
+import { deleteBotMessage } from './utils/deleteMessage';
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
@@ -42,6 +44,9 @@ bot.use(
     initial: (): SessionData => ({
       startTime: Date.now(),
       lastInteractionTime: Date.now(),
+      waitingForToken: false,
+      waitingForAmount: false,
+      selectedToken: '',
     }),
   })
 );
@@ -115,6 +120,9 @@ const PARAMETERIZED_HANDLERS: Record<string, (ctx: BotContext, param: string) =>
   gas: async (ctx, param) => {
     await updateGasPriority(ctx, param);
   },
+  amount: async (ctx, param) => {
+    await performBuy(ctx, param);
+  },
 };
 
 // Callback handlers
@@ -171,6 +179,55 @@ bot.api.setMyCommands([
   },
   { command: referralCommandHandler.command, description: referralCommandHandler.description },
 ]);
+
+// Handle token input for buy command
+bot.on('message:text', async (ctx) => {
+  // Case 1: Waiting for token input
+  if (ctx.session.waitingForToken) {
+    const tokenInput = ctx.message.text;
+    if (!tokenInput) return;
+
+    // Reset the waiting state
+    ctx.session.waitingForToken = false;
+
+    try {
+      const neurodex = new NeuroDexApi();
+      const tokenData = await neurodex.getTokenDataByContractAddress(tokenInput, 'base');
+
+      // Set the waiting state for amount input
+      ctx.session.waitingForAmount = true;
+      ctx.session.selectedToken = tokenInput;
+
+      await ctx.reply(tokenFoundMessage(tokenData), {
+        parse_mode: 'Markdown',
+        reply_markup: buyTokenKeyboard,
+      });
+    } catch (error) {
+      const not_found_message = `❌ Token not found. Please check the token contract address and try again.`;
+      await ctx.reply(not_found_message, {
+        parse_mode: 'Markdown',
+      });
+      ctx.session.waitingForToken = true; // Re-enable (wait for next attempt)
+    }
+
+    // Case 2: Waiting for amount input
+  } else if (ctx.session.waitingForAmount) {
+    const amountInput = ctx.message.text;
+    if (!amountInput) return;
+
+    const parsedAmount = parseFloat(amountInput);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      const invalid_amount_message = await ctx.reply(
+        '❌ Invalid amount. Please enter a valid number greater than 0.'
+      );
+      await deleteBotMessage(ctx, invalid_amount_message.message_id);
+      ctx.session.waitingForAmount = true;
+      return;
+    }
+    ctx.session.waitingForAmount = false;
+    await performBuy(ctx, amountInput);
+  }
+});
 
 // Error handling
 bot.catch((err) => {

@@ -2,8 +2,8 @@ import { NeuroDexApi } from '../src/services/engine/neurodex';
 
 // Test wallet configuration
 const TEST_WALLET = {
-  address: '0x...', // Replace with your test wallet address
-  privateKey: '0x...', // Add your private key here. Keep "0x" prefix!!
+  address: process.env.TEST_WALLET_ADDRESS || '0x...',
+  privateKey: process.env.TEST_WALLET_PRIVATE_KEY || '0x...',
 };
 
 // Test token addresses on Base

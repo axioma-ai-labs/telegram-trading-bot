@@ -1,10 +1,8 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { UserService } from '@/services/db/user.service';
-import { WalletService } from '@/services/db/wallet.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 
 export const depositMessage = `📥 *Deposit ETH or Tokens*
@@ -26,7 +24,14 @@ export const depositCommandHandler: CommandHandler = {
   command: 'deposit',
   description: 'Display your wallet address for deposits',
   handler: async (ctx: BotContext): Promise<void> => {
-    if (IS_NEW_USER || !USER_HAS_WALLET) {
+    const telegramId = ctx.from?.id?.toString();
+    if (!telegramId) return;
+
+    const user = await UserService.getUserByTelegramId(telegramId);
+    if (!user) return;
+
+    // Check if user has a wallet
+    if (!user.wallets || user.wallets.length === 0) {
       await ctx.reply("⚠️ You don't have a wallet yet.\n\nYou need to create a new wallet first:", {
         parse_mode: 'Markdown',
         reply_markup: createWalletKeyboard,
@@ -34,29 +39,20 @@ export const depositCommandHandler: CommandHandler = {
       return;
     }
 
-    if (USER_HAS_WALLET) {
-      const telegramId = ctx.from?.id.toString();
-      const neurodex = new NeuroDexApi();
-      if (!telegramId) return;
+    const neurodex = new NeuroDexApi();
+    const balance = await neurodex.getEthBalance(telegramId);
 
-      const user = await UserService.getUserByTelegramId(telegramId);
-      if (!user?.id) return;
+    const message = depositMessage
+      .replace('{ethBalance}', balance.data || '0.000')
+      .replace('{walletAddress}', user.wallets[0].address);
 
-      const wallets = await WalletService.getWalletsByUserId(user.id);
-      const balance = await neurodex.getEthBalance(telegramId);
-
-      const message = depositMessage
-        .replace('{ethBalance}', balance.data || '0.000')
-        .replace('{walletAddress}', wallets[0].address);
-
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: depositKeyboard,
-        link_preview_options: {
-          is_disabled: true,
-        },
-      });
-    }
+    await ctx.reply(message, {
+      parse_mode: 'Markdown',
+      reply_markup: depositKeyboard,
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   },
 };
 
