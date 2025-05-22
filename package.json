@@ -10,6 +10,8 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest",
+    "test:load": "k6 run tests/rate-limit.test.js",
+    "test:load:quick": "k6 run --iterations 10 tests/rate-limit.test.js",
     "lint:fix": "eslint . --ext .ts --fix"
   },
   "keywords": [
