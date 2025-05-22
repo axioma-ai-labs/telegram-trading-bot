@@ -32,6 +32,8 @@ import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import { referralCommandHandler } from '@/bot/commands/referrals';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
 import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
+import { limit } from '@grammyjs/ratelimiter';
+
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -41,6 +43,42 @@ bot.use(
       startTime: Date.now(),
       lastInteractionTime: Date.now(),
     }),
+  })
+);
+
+// Rate limiting middleware
+// 1. 3 requests per second
+bot.use(
+  limit({
+    timeFrame: 1000,
+    limit: 3,
+    onLimitExceeded: async (ctx) => {
+      await ctx.reply('Please slow down! Maximum 3 requests per second.');
+    },
+  })
+);
+
+// 2. 50 requests per minute
+bot.use(
+  limit({
+    timeFrame: 60 * 1000, // 1 minute in ms
+    limit: 50,
+    onLimitExceeded: async (ctx) => {
+      await ctx.reply('You have exceeded the limit of 50 requests per minute. Please wait.');
+    },
+    keyPrefix: 'minute',
+  })
+);
+
+// 3. 300 requests per 15 minutes
+bot.use(
+  limit({
+    timeFrame: 15 * 60 * 1000, // 15 minutes in ms
+    limit: 300,
+    onLimitExceeded: async (ctx) => {
+      await ctx.reply('You have exceeded the limit of 300 requests per 15 minutes. Please wait.');
+    },
+    keyPrefix: '15min',
   })
 );
 
