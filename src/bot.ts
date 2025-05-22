@@ -32,6 +32,8 @@ import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import { referralCommandHandler } from '@/bot/commands/referrals';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
 import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
+import logger from '@/config/logger';
+
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // Add session middleware with proper typing
@@ -98,7 +100,7 @@ bot.on('callback_query', async (ctx) => {
 
   // 3) Regular callbacks
   const handler = CALLBACK_HANDLERS[callbackData];
-  console.log('callbackData: ', callbackData);
+  logger.info(`callbackData: ${callbackData}`);
   if (handler) {
     await handler(ctx);
     return;
@@ -137,24 +139,24 @@ bot.api.setMyCommands([
 // Error handling
 bot.catch((err) => {
   const ctx = err.ctx;
-  console.error(`Error while handling update ${ctx.update.update_id}:`);
-  console.error(err.error);
+  logger.error(`Error while handling update ${ctx.update.update_id}:`);
+  logger.error(err.error);
 });
 
 // Run the bot
 const main = async (): Promise<void> => {
   try {
     if (config.environment === 'development') {
-      console.log(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
     } else {
-      console.log(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
     }
 
     // Start the bot
     await bot.start();
-    console.log('Bot started successfully!');
+    logger.info('Bot started successfully!');
   } catch (error) {
-    console.error('Failed to start bot:', error);
+    logger.error('Failed to start bot:', error);
     process.exit(1);
   }
 };

@@ -1,5 +1,6 @@
 import { GoldRushClient } from '@covalenthq/client-sdk';
 import { config } from '../src/config/config';
+import logger from '../src/config/logger';
 
 const walletAddress = '0xc7C86BaDa2d114960A4729772d3FDDdb342cc7Fb';
 
@@ -10,7 +11,7 @@ const ApiServices = async (): Promise<void> => {
     'base-mainnet',
     walletAddress
   );
-  console.log(resp.data);
+  logger.info(resp.data);
 };
 
 // Check balance multichains
@@ -20,7 +21,7 @@ const MultiChainApiServices = async (): Promise<void> => {
     quoteCurrency: 'USD',
     limit: 10,
   });
-  console.log(resp.data);
+  logger.info(resp.data);
 };
 
 ApiServices();

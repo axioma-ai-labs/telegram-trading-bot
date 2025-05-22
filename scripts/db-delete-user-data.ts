@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { PrismaClient } from '../prisma/generated/prisma';
+import { PrismaClient } from '../node_modules/.prisma/client';
+import logger from '../src/config/logger';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ const prisma = new PrismaClient();
  */
 async function deleteUserData(userId: string): Promise<void> {
   try {
-    console.log(`Starting deletion of user data for ID: ${userId}`);
+    logger.info(`Starting deletion of user data for ID: ${userId}`);
 
     // Delete all trades associated with user's wallets
     const deletedTrades = await prisma.trade.deleteMany({
@@ -18,7 +19,7 @@ async function deleteUserData(userId: string): Promise<void> {
         userId: userId,
       },
     });
-    console.log(`✅ Deleted ${deletedTrades.count} trades`);
+    logger.info(`✅ Deleted ${deletedTrades.count} trades`);
 
     // Delete all wallets associated with the user
     const deletedWallets = await prisma.wallet.deleteMany({
@@ -26,7 +27,7 @@ async function deleteUserData(userId: string): Promise<void> {
         userId: userId,
       },
     });
-    console.log(`✅ Deleted ${deletedWallets.count} wallets`);
+    logger.info(`✅ Deleted ${deletedWallets.count} wallets`);
 
     // Delete user's settings
     const deletedSettings = await prisma.settings.deleteMany({
@@ -34,7 +35,7 @@ async function deleteUserData(userId: string): Promise<void> {
         userId: userId,
       },
     });
-    console.log(`✅ Deleted ${deletedSettings.count} settings records`);
+    logger.info(`✅ Deleted ${deletedSettings.count} settings records`);
 
     // Delete user's referral stats
     const deletedStats = await prisma.referralStats.deleteMany({
@@ -42,7 +43,7 @@ async function deleteUserData(userId: string): Promise<void> {
         userId: userId,
       },
     });
-    console.log(`✅ Deleted ${deletedStats.count} referral stats records`);
+    logger.info(`✅ Deleted ${deletedStats.count} referral stats records`);
 
     // Update any users who were referred by this user
     const updatedReferrals = await prisma.user.updateMany({
@@ -53,7 +54,7 @@ async function deleteUserData(userId: string): Promise<void> {
         referredById: null,
       },
     });
-    console.log(`✅ Updated ${updatedReferrals.count} referral relationships`);
+    logger.info(`✅ Updated ${updatedReferrals.count} referral relationships`);
 
     // Finally, delete the user
     const deletedUser = await prisma.user.delete({
@@ -61,11 +62,11 @@ async function deleteUserData(userId: string): Promise<void> {
         id: userId,
       },
     });
-    console.log(`✅ Deleted user: ${deletedUser.telegramId}`);
+    logger.info(`✅ Deleted user: ${deletedUser.telegramId}`);
 
-    console.log('✅ All user data deleted successfully');
+    logger.info('✅ All user data deleted successfully');
   } catch (error) {
-    console.error('❌ Error deleting user data:', error);
+    logger.error('❌ Error deleting user data:', error);
     throw error;
   } finally {
     await prisma.$disconnect();
@@ -76,18 +77,18 @@ async function deleteUserData(userId: string): Promise<void> {
 const userId = process.argv[2];
 
 if (!userId) {
-  console.error('❌ Please provide a user ID as a command line argument');
-  console.error('Usage: run CMD="scripts/db-delete-user-data.ts <userId>"');
+  logger.error('❌ Please provide a user ID as a command line argument');
+  logger.error('Usage: run CMD="scripts/db-delete-user-data.ts <userId>"');
   process.exit(1);
 }
 
 // Execute deletion
 deleteUserData(userId)
   .then(() => {
-    console.log('✅ Deletion process completed');
+    logger.info('✅ Deletion process completed');
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Deletion process failed:', error);
+    logger.error('❌ Deletion process failed:', error);
     process.exit(1);
   });

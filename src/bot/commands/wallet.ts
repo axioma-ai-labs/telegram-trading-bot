@@ -5,6 +5,7 @@ import { hasWallet } from '@/utils/checkUser';
 import { WalletService } from '@/services/db/wallet.service';
 import { UserService } from '@/services/db/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import logger from '@/config/logger';
 
 export const walletCreationOKMessage = (walletAddress: string, privateKey: string): string => `
 ✅ *Your wallet has been created successfully*
@@ -78,7 +79,7 @@ export const walletCommandHandler: CommandHandler = {
         return;
       }
       const wallets = await WalletService.getWalletsByUserId(user.id);
-      console.log('Wallets:', wallets);
+      logger.info('Wallets:', wallets);
 
       // fetch data
       const api = new NeuroDexApi();

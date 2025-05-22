@@ -16,6 +16,7 @@ import { base } from 'viem/chains';
 import { config } from '@/config/config';
 import { TokenInfo } from '@/types/neurodex';
 import { erc20Abi } from '@/utils/abis';
+import logger from '@/config/logger';
 
 /**
  * Viem service for executing smart contract transactions
@@ -86,7 +87,7 @@ export class ViemService {
 
       return receipt;
     } catch (error) {
-      console.error('Transaction execution failed:', error);
+      logger.error('Transaction execution failed:', error);
       throw error;
     }
   }
@@ -127,7 +128,7 @@ export class ViemService {
 
       return receipt;
     } catch (error) {
-      console.error('Contract method execution failed:', error);
+      logger.error('Contract method execution failed:', error);
       throw error;
     }
   }
@@ -155,7 +156,7 @@ export class ViemService {
 
       return gasEstimate.toString();
     } catch (error) {
-      console.error('Gas estimation failed:', error);
+      logger.error('Gas estimation failed:', error);
       throw error;
     }
   }
@@ -203,7 +204,7 @@ export class ViemService {
 
       return allowance.toString();
     } catch (error) {
-      console.error('Error getting token allowance:', error);
+      logger.error('Error getting token allowance:', error);
       return '0';
     }
   }
@@ -246,7 +247,7 @@ export class ViemService {
         decimals: Number(decimals),
       };
     } catch (error) {
-      console.error('Error fetching token info:', error);
+      logger.error('Error fetching token info:', error);
       return null;
     }
   }
@@ -279,7 +280,7 @@ export class ViemService {
 
       return balance.toString();
     } catch (error) {
-      console.error('Error fetching token balance:', error);
+      logger.error('Error fetching token balance:', error);
       return '0';
     }
   }

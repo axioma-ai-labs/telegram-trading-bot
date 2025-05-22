@@ -9,6 +9,7 @@ import { NeuroDexResponse, WalletInfo, SwapResult, BuyParams, SellParams } from 
 import { OpenOceanChain } from '@/types/openocean';
 import { GasPriority } from '@/types/config';
 import { erc20Abi } from '@/utils/abis';
+import logger from '@/config/logger';
 
 /**
  * NeuroDex API service for handling trading operations
@@ -92,7 +93,7 @@ export class NeuroDexApi {
 
       return result;
     } catch (error) {
-      console.error('Error in getTokenAmount:', error);
+      logger.error('Error in getTokenAmount:', error);
       throw new Error(
         `Failed to convert amount for token ${tokenAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -258,7 +259,7 @@ export class NeuroDexApi {
       // Check if approval was successful
       return receipt.status === 'success';
     } catch (error) {
-      console.error('Error checking/approving token:', error);
+      logger.error('Error checking/approving token:', error);
       throw new Error(
         `Token approval failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

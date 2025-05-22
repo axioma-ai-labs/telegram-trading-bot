@@ -7,6 +7,8 @@ import { SettingsService } from '@/services/db/settings.service';
 import { ReferralService } from '@/services/db/referrals';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
+import logger from '@/config/logger';
+
 export const startMessage = `
 *💸 Neurodex*
 
@@ -88,7 +90,7 @@ export const startCommandHandler: CommandHandler = {
 
         // Link the referral
         await ReferralService.linkReferral(user.id, referrer.id);
-        console.log('Referrer:', referrer.id, 'has successfully referred:', user.id);
+        logger.info('Referrer:', referrer.id, 'has successfully referred:', user.id);
 
         await SettingsService.upsertSettings(user.id, {
           language: 'en',
@@ -97,7 +99,7 @@ export const startCommandHandler: CommandHandler = {
           gasPriority: 'medium',
           slippage: '0.5',
         });
-        console.log('New user created with referral:', telegramId);
+        logger.info('New user created with referral:', telegramId);
         await ctx.reply(acceptTermsConditionsMessage, {
           parse_mode: 'Markdown',
           reply_markup: acceptTermsConditionsKeyboard,
@@ -122,26 +124,26 @@ export const startCommandHandler: CommandHandler = {
         gasPriority: 'medium',
         slippage: '0.5',
       });
-      console.log('New user created:', telegramId);
+      logger.info('New user created:', telegramId);
       await ctx.reply(acceptTermsConditionsMessage, {
         parse_mode: 'Markdown',
         reply_markup: acceptTermsConditionsKeyboard,
       });
     } else if (!IS_ACCEPTED_TERMS_CONDITIONS) {
-      console.log('User not accepted terms conditions:', telegramId);
+      logger.info('User not accepted terms conditions:', telegramId);
       await ctx.reply(acceptTermsConditionsMessage, {
         parse_mode: 'Markdown',
         reply_markup: acceptTermsConditionsKeyboard,
       });
     } else if (!USER_HAS_WALLET) {
-      console.log('User does not have a wallet:', telegramId);
+      logger.info('User does not have a wallet:', telegramId);
       await ctx.reply(createWalletMessage, {
         parse_mode: 'Markdown',
         reply_markup: createWalletKeyboard,
       });
     } else {
       // Existing user with wallet & accepted terms conditions
-      console.log('Existing user:', telegramId);
+      logger.info('Existing user:', telegramId);
       await ctx.reply(startMessage, {
         parse_mode: 'Markdown',
         reply_markup: startKeyboard,

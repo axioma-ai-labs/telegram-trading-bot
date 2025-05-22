@@ -4,6 +4,7 @@ import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { UserService } from '@/services/db/user.service';
 import { WalletService } from '@/services/db/wallet.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import logger from '@/config/logger';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
   const callbackData = ctx.callbackQuery?.data;
@@ -66,7 +67,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
       return;
     } else {
       // Handle other errors
-      console.error('Error in handleRefresh:', error);
+      logger.error('Error in handleRefresh:', error);
       await ctx.answerCallbackQuery({
         text: '❌ Failed to refresh. Please try again.',
         show_alert: true,

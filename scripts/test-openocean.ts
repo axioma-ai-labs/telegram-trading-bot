@@ -3,6 +3,7 @@ import { config } from '../src/config/config';
 import axios from 'axios';
 import { GasResponse, GasData } from '../src/types/config';
 import { parseUnits } from 'ethers';
+import logger from '../src/config/logger';
 
 // STEP 1: Test connection to QuickNode RPC endpoint | ✅ WORKS!
 export async function testQuickNodeConnection(): Promise<{
@@ -42,7 +43,7 @@ export async function getGasEstimates(): Promise<GasResponse> {
 
     const data = response.data;
 
-    console.log(data);
+    logger.info(data);
 
     // Ensure the data is in the expected format or transform it
     if (!data) {
@@ -102,7 +103,7 @@ export async function getGasEstimates(): Promise<GasResponse> {
       },
     };
   } catch (error) {
-    console.error(
+    logger.error(
       'Error fetching gas price:',
       error instanceof Error ? error.message : String(error)
     );
@@ -180,7 +181,7 @@ export async function getQuote(
       data,
     };
   } catch (error) {
-    console.error('Failed to get quote:', error instanceof Error ? error.message : String(error));
+    logger.error('Failed to get quote:', error instanceof Error ? error.message : String(error));
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -229,7 +230,7 @@ export async function getWalletTokenBalance(
       result: data,
     };
   } catch (error) {
-    console.error('Error fetching wallet token balances:', error);
+    logger.error('Error fetching wallet token balances:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -260,7 +261,7 @@ export async function getTokenList(
       data,
     };
   } catch (error) {
-    console.error(
+    logger.error(
       'Failed to get token list:',
       error instanceof Error ? error.message : String(error)
     );
@@ -290,7 +291,7 @@ export async function getTransaction(
       data,
     };
   } catch (error) {
-    console.error(
+    logger.error(
       'Failed to get transaction details:',
       error instanceof Error ? error.message : String(error)
     );
@@ -345,7 +346,7 @@ export async function getSwap(
       data,
     };
   } catch (error) {
-    console.error(
+    logger.error(
       'Failed to get swap transaction:',
       error instanceof Error ? error.message : String(error)
     );
@@ -365,32 +366,32 @@ if (require.main === module) {
   const testFunction = process.argv[2];
 
   if (testFunction === 'connection' || !testFunction) {
-    console.log('Running QuickNode connection test...');
+    logger.info('Running QuickNode connection test...');
     testQuickNodeConnection()
       .then((result) => {
         if (result.success) {
-          console.log(result.result);
+          logger.info(result.result);
         } else {
-          console.error('Connection failed:', result.error);
+          logger.error('Connection failed:', result.error);
         }
       })
-      .catch((error) => console.error('Error during connection test:', error));
+      .catch((error) => logger.error('Error during connection test:', error));
   }
 
   if (testFunction === 'gas' || !testFunction) {
     getGasEstimates()
       .then((result) => {
-        console.log(JSON.stringify(result, null, 2));
+        logger.info(JSON.stringify(result, null, 2));
       })
-      .catch((error) => console.error('Error fetching gas estimates:', error));
+      .catch((error) => logger.error('Error fetching gas estimates:', error));
   }
 
   if (testFunction === 'mev' || !testFunction) {
     testMevProtection()
       .then((result) => {
-        console.log(JSON.stringify(result, null, 2));
+        logger.info(JSON.stringify(result, null, 2));
       })
-      .catch((error) => console.error('Error during MEV protection test:', error));
+      .catch((error) => logger.error('Error during MEV protection test:', error));
   }
 
   if (testFunction === 'quote' || !testFunction) {
@@ -400,37 +401,37 @@ if (require.main === module) {
     getQuote(inToken, outToken)
       .then((result) => {
         if (result.success) {
-          console.log(JSON.stringify(result.data, null, 2));
+          logger.info(JSON.stringify(result.data, null, 2));
         } else {
-          console.error('Error fetching quote:', result.error);
+          logger.error('Error fetching quote:', result.error);
         }
       })
-      .catch((error) => console.error('Error during OpenOcean API test:', error));
+      .catch((error) => logger.error('Error during OpenOcean API test:', error));
   }
 
   if (testFunction === 'balance' || !testFunction) {
     const walletAddress = '0xA7E4EF0a9e15bDEf215E2ed87AE050f974ECD60b'; // Replace with your wallet address
     getWalletTokenBalance(walletAddress)
       .then((result) => {
-        console.log(JSON.stringify(result, null, 2));
+        logger.info(JSON.stringify(result, null, 2));
       })
-      .catch((error) => console.error('Error during wallet token balance test:', error));
+      .catch((error) => logger.error('Error during wallet token balance test:', error));
   }
 
   if (testFunction === 'tokenList' || !testFunction) {
     // Default to BSC chain for token list
     const chain = process.argv[3] || 'bsc';
-    console.log(`Getting token list for chain: ${chain}`);
+    logger.info(`Getting token list for chain: ${chain}`);
 
     getTokenList(chain)
       .then((result) => {
         if (result.success) {
-          console.log(JSON.stringify(result.data, null, 2));
+          logger.info(JSON.stringify(result.data, null, 2));
         } else {
-          console.error('Error fetching token list:', result.error);
+          logger.error('Error fetching token list:', result.error);
         }
       })
-      .catch((error) => console.error('Error during token list test:', error));
+      .catch((error) => logger.error('Error during token list test:', error));
   }
 
   if (testFunction === 'transaction' || !testFunction) {
@@ -440,12 +441,12 @@ if (require.main === module) {
     getTransaction(txHash)
       .then((result) => {
         if (result.success) {
-          console.log(JSON.stringify(result.data, null, 2));
+          logger.info(JSON.stringify(result.data, null, 2));
         } else {
-          console.error('Error fetching transaction details:', result.error);
+          logger.error('Error fetching transaction details:', result.error);
         }
       })
-      .catch((error) => console.error('Error during transaction details test:', error));
+      .catch((error) => logger.error('Error during transaction details test:', error));
   }
 
   if (testFunction === 'swap' || !testFunction) {
@@ -458,16 +459,16 @@ if (require.main === module) {
     const account = '0x2FF855378Cd29f120CDF9d675E959cb5422ec5f2'; // Example wallet
     const referrer = '0xD4eb4cbB1ECbf96a1F0C67D958Ff6fBbB7B037BB'; // Optional referrer
 
-    console.log('Getting swap transaction data...');
+    logger.info('Getting swap transaction data...');
     getSwap(inToken, outToken, amount, gasPrice, slippage, account, referrer)
       .then((result) => {
         if (result.success) {
-          console.log(JSON.stringify(result.data, null, 2));
+          logger.info(JSON.stringify(result.data, null, 2));
         } else {
-          console.error('Error fetching swap transaction:', result.error);
+          logger.error('Error fetching swap transaction:', result.error);
         }
       })
-      .catch((error) => console.error('Error during swap transaction test:', error));
+      .catch((error) => logger.error('Error during swap transaction test:', error));
   }
 
   if (
@@ -483,7 +484,7 @@ if (require.main === module) {
       undefined,
     ].includes(testFunction)
   ) {
-    console.log(
+    logger.error(
       'Unknown test function. Use "connection" or "gas" or "quote" or "mev" or "balance" or "tokenList" or "transaction" or "swap"'
     );
   }

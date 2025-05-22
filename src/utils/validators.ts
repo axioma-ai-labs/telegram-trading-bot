@@ -1,4 +1,5 @@
 import { isAddress } from 'viem';
+import logger from '@/config/logger';
 
 /**
  * Validate if a string is a valid Ethereum address
@@ -41,7 +42,7 @@ export function hasEnoughBalance(
     // For ETH transfers, we need to check if balance >= amount + gas
     return balanceBigInt >= amountBigInt + gasEstimateBigInt;
   } catch (error) {
-    console.error('Error checking balance:', error);
+    logger.error('Error checking balance:', error);
     return false;
   }
 }

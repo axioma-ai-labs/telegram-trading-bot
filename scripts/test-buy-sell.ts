@@ -1,4 +1,5 @@
 import { NeuroDexApi } from '../src/services/engine/neurodex';
+import logger from '../src/config/logger';
 
 // Test wallet configuration
 const TEST_WALLET = {
@@ -13,7 +14,7 @@ const TEST_TOKENS = {
 };
 
 async function testBuy(): Promise<void> {
-  console.log('Testing buy functionality...');
+  logger.info('Testing buy functionality...');
 
   const neurodex = new NeuroDexApi();
 
@@ -30,21 +31,21 @@ async function testBuy(): Promise<void> {
     });
 
     if (buyResult.success) {
-      console.log('Buy successful!');
-      console.log('Transaction hash:', buyResult.data?.txHash);
-      console.log('Input amount:', buyResult.data?.inAmount);
-      console.log('Output amount:', buyResult.data?.outAmount);
-      console.log('Price impact:', buyResult.data?.price_impact);
+      logger.info('Buy successful!');
+      logger.info('Transaction hash:', buyResult.data?.txHash);
+      logger.info('Input amount:', buyResult.data?.inAmount);
+      logger.info('Output amount:', buyResult.data?.outAmount);
+      logger.info('Price impact:', buyResult.data?.price_impact);
     } else {
-      console.error('Buy failed:', buyResult.error);
+      logger.error('Buy failed:', buyResult.error);
     }
   } catch (error) {
-    console.error('Error during buy test:', error);
+    logger.error('Error during buy test:', error);
   }
 }
 
 async function testSell(): Promise<void> {
-  console.log('Testing sell functionality...');
+  logger.info('Testing sell functionality...');
 
   const neurodex = new NeuroDexApi();
 
@@ -61,28 +62,28 @@ async function testSell(): Promise<void> {
     });
 
     if (sellResult.success) {
-      console.log('Sell successful!');
-      console.log('Transaction hash:', sellResult.data?.txHash);
-      console.log('Input amount:', sellResult.data?.inAmount);
-      console.log('Output amount:', sellResult.data?.outAmount);
-      console.log('Price impact:', sellResult.data?.price_impact);
+      logger.info('Sell successful!');
+      logger.info('Transaction hash:', sellResult.data?.txHash);
+      logger.info('Input amount:', sellResult.data?.inAmount);
+      logger.info('Output amount:', sellResult.data?.outAmount);
+      logger.info('Price impact:', sellResult.data?.price_impact);
     } else {
-      console.error('Sell failed:', sellResult.error);
+      logger.error('Sell failed:', sellResult.error);
     }
   } catch (error) {
-    console.error('Error during sell test:', error);
+    logger.error('Error during sell test:', error);
   }
 }
 
 async function main(): Promise<void> {
   // Check if wallet is configured
   if (TEST_WALLET.address === '0x...' || TEST_WALLET.privateKey === '0x...') {
-    console.error('Please configure your test wallet address and private key in the script');
+    logger.error('Please configure your test wallet address and private key in the script');
     process.exit(1);
   }
 
   // Run tests
-  console.log('Starting NeuroDex API tests...');
+  logger.info('Starting NeuroDex API tests...');
 
   // Test buy functionality
   await testBuy();
@@ -93,8 +94,8 @@ async function main(): Promise<void> {
   // Test sell functionality
   await testSell();
 
-  console.log('Tests completed!');
+  logger.info('Tests completed!');
 }
 
 // Run the tests
-main().catch(console.error);
+main().catch(logger.error);
