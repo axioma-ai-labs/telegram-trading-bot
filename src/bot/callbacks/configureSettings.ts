@@ -15,6 +15,7 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   if (!telegramId) return;
 
   const user = await UserService.getUserByTelegramId(telegramId);
+  const settings = user?.settings;
 
   if (!user) {
     await ctx.editMessageText('User not found. Please try again later.', {
@@ -22,8 +23,6 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
     });
     return;
   }
-
-  const settings = await SettingsService.getUserSettingsByUserId(user.id);
 
   const message = settingsMessage(
     getSlippageName(settings?.slippage || '1'),
@@ -72,9 +71,8 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
   if (!telegramId) return;
 
   const user = await UserService.getUserByTelegramId(telegramId);
+  const settings = user?.settings;
   if (!user) return;
-
-  const settings = await SettingsService.getUserSettingsByUserId(user.id);
   if (!settings) return;
 
   await SettingsService.updateSlippage(user.id, slippage);
@@ -98,9 +96,8 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
   if (!telegramId) return;
 
   const user = await UserService.getUserByTelegramId(telegramId);
+  const settings = user?.settings;
   if (!user) return;
-
-  const settings = await SettingsService.getUserSettingsByUserId(user.id);
   if (!settings) return;
 
   await SettingsService.updateGasPriority(user.id, gasPriority);
@@ -124,9 +121,8 @@ export const updateLanguage = async (ctx: BotContext, language: string): Promise
   if (!telegramId) return;
 
   const user = await UserService.getUserByTelegramId(telegramId);
+  const settings = user?.settings;
   if (!user) return;
-
-  const settings = await SettingsService.getUserSettingsByUserId(user.id);
   if (!settings) return;
 
   await SettingsService.updateLanguage(user.id, language);

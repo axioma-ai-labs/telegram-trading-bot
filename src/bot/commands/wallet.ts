@@ -1,8 +1,6 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { hasWallet } from '@/utils/checkUser';
-import { WalletService } from '@/services/db/wallet.service';
 import { UserService } from '@/services/db/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 
@@ -33,9 +31,7 @@ export const walletMessage = (
   ethBalance: string
 ): string => `*💰 Wallet:* \`${walletAddress}\`
 
-*Balance:*
-
-ETH: ${ethBalance}
+*Balance:*: ${ethBalance} ETH
 
 To deposit funds, please send your coins to the wallet address above.`;
 
@@ -64,37 +60,30 @@ export const walletCommandHandler: CommandHandler = {
   command: 'wallet',
   description: 'Manage your wallet',
   handler: async (ctx: BotContext): Promise<void> => {
-    if (!ctx.from?.id) {
-      return;
-    }
+    const telegramId = ctx.from?.id?.toString();
+    if (!telegramId) return;
 
-    const telegramId = ctx.from.id.toString();
-    const USER_HAS_WALLET = await hasWallet(telegramId);
+    const user = await UserService.getUserByTelegramId(telegramId);
+    if (!user) return;
 
-    // If user has wallet, show wallet message
-    if (USER_HAS_WALLET) {
-      const user = await UserService.getUserByTelegramId(telegramId);
-      if (!user) {
-        return;
-      }
-      const wallets = await WalletService.getWalletsByUserId(user.id);
-      console.log('Wallets:', wallets);
-
-      // fetch data
-      const api = new NeuroDexApi();
-      const ethBalance = await api.getEthBalance(wallets[0].address);
-      const existingWalletMessage = walletMessage(wallets[0].address, ethBalance.data || '0');
-
-      await ctx.reply(existingWalletMessage, {
-        parse_mode: 'Markdown',
-        reply_markup: walletKeyboard,
-      });
-    } else {
-      // If user doesn't have wallet, show create wallet message
+    // Check if user has a wallet
+    if (!user.wallets || user.wallets.length === 0) {
       await ctx.reply(createWalletMessage, {
         parse_mode: 'Markdown',
         reply_markup: createWalletKeyboard,
       });
+      return;
     }
+
+    // User has wallet, show wallet details
+    const api = new NeuroDexApi();
+    const ethBalance = await api.getEthBalance(user.wallets[0].address);
+
+    const existingWalletMessage = walletMessage(user.wallets[0].address, ethBalance.data || '0');
+
+    await ctx.reply(existingWalletMessage, {
+      parse_mode: 'Markdown',
+      reply_markup: walletKeyboard,
+    });
   },
 };

@@ -1,6 +1,18 @@
 import { prisma } from '@/services/db/prisma';
 import { Settings, User, Wallet } from '@prisma/client/edge';
 
+interface ReferralStats {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  feeRate: number;
+  totalReferrals: number;
+  totalTrades: number;
+  totalVolume: number;
+  totalEarned: number;
+}
+
 export class UserService {
   /**
    * Create or update a user from Telegram data
@@ -34,9 +46,19 @@ export class UserService {
   }
 
   /**
-   * Get user by Telegram ID
+   * Get user by Telegram ID.
+   *
+   * @param telegramId - Telegram user ID
+   * @returns User with included wallets, settings and referral stats, or null if not found
    */
-  static async getUserByTelegramId(telegramId: string): Promise<User | null> {
+  static async getUserByTelegramId(telegramId: string): Promise<
+    | (User & {
+        wallets: Wallet[];
+        settings: Settings | null;
+        referralStats: ReferralStats | null;
+      })
+    | null
+  > {
     return prisma.user.findUnique({
       where: { telegramId },
       include: {
