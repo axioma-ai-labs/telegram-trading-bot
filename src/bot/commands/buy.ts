@@ -1,9 +1,34 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
-import { hasWallet } from '@/utils/checkUser';
+import { UserService } from '@/services/db/user.service';
+import { InlineKeyboard } from 'grammy';
+import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 
-export const buyTokenMessage = `Enter a token symbol or address to buy:`;
+export const buyTokenMessage = `Enter token contract address to buy:`;
+
+export const tokenFoundMessage = (tokenData: NeuroDexResponse<TokenData>): string => `
+✅ *Token Found*
+
+Symbol: *$${tokenData.data?.symbol}*
+Name: *${tokenData.data?.name || 'Unknown'}*
+Price: $${tokenData.data?.price || 'Unknown'}
+Chain: ${tokenData.data?.chain || 'Unknown'}
+
+Please select how much ETH you want to spend on ${tokenData.data?.symbol}.
+
+Go to /settings to adjust slippage and gas if the transaction fails.
+`;
+
+export const buyTokenKeyboard = new InlineKeyboard()
+  .text('0.1 ETH', 'amount_0.1')
+  .text('0.2 ETH', 'amount_0.2')
+  .text('1 ETH', 'amount_1')
+  .row()
+  .text('2 ETH', 'amount_2')
+  .text('5 ETH', 'amount_5')
+  .row()
+  .text('Custom', 'amount_custom');
 
 export const buyCommandHandler: CommandHandler = {
   command: 'buy',
@@ -14,7 +39,8 @@ export const buyCommandHandler: CommandHandler = {
     }
 
     const telegramId = ctx.from.id.toString();
-    const USER_HAS_WALLET = await hasWallet(telegramId);
+    const user = await UserService.getUserByTelegramId(telegramId);
+    const USER_HAS_WALLET = user?.wallets && user.wallets.length > 0;
 
     if (!USER_HAS_WALLET) {
       await ctx.reply(createWalletMessage, {
@@ -25,6 +51,7 @@ export const buyCommandHandler: CommandHandler = {
       await ctx.reply(buyTokenMessage, {
         parse_mode: 'Markdown',
       });
+      ctx.session.waitingForToken = true; // Waiting for token input from the user
     }
   },
 };

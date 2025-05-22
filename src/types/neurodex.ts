@@ -118,6 +118,24 @@ export interface TokenInfo {
 }
 
 /**
+ * Extended token data with additional information
+ */
+export interface TokenData extends TokenInfo {
+  /** Token name */
+  name: string;
+  /** Current price in USD */
+  price?: number;
+  /** Total supply */
+  totalSupply?: number;
+  /** Market cap */
+  marketCap?: number;
+  /** Token logo URL */
+  logo?: string;
+  /** Chain ID */
+  chain: string;
+}
+
+/**
  * Swap response data
  */
 export interface SwapResult {

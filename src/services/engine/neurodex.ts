@@ -25,6 +25,18 @@ import { GasPriority } from '@/types/config';
 import { erc20Abi } from '@/utils/abis';
 import Web3 from 'web3';
 
+interface TokenData {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  price?: number;
+  totalSupply?: number;
+  marketCap?: number;
+  logo?: string;
+  chain: string;
+}
+
 /**
  * NeuroDex API service for handling trading operations
  * Wraps OpenOcean functionality and provides high-level trading methods
@@ -486,6 +498,92 @@ export class NeuroDexApi {
       web3.eth.accounts.wallet.add(account);
       this.openOceanClient.initializeSdk(chainId, web3 as Web3, account.address);
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+   * Gets token data from DexScreener API for a given token address.
+   *
+   * @param tokenAddress - The contract address of the token
+   * @param _network - The blockchain network name (unused but kept for interface compatibility)
+   * @returns Token data response with metadata
+   */
+  async getTokenDataByContractAddress(
+    tokenAddress: string,
+    _network: string // Prefix with underscore to indicate intentionally unused
+  ): Promise<NeuroDexResponse<TokenData>> {
+    try {
+      const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Token not found');
+      }
+
+      const data = await response.json();
+      const pair = data.pairs[0]; // get first pair based on dexscreener api docs
+
+      if (!pair) {
+        throw new Error('No trading pairs found for token');
+      }
+
+      return {
+        success: true,
+        data: {
+          address: tokenAddress,
+          name: pair.baseToken.name,
+          symbol: pair.baseToken.symbol,
+          decimals: 18,
+          price: Number(pair.priceUsd) || undefined,
+          totalSupply: undefined,
+          marketCap: undefined,
+          logo: pair.baseToken.logoURI,
+          chain: pair.chainId,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to fetch token data',
+      };
+    }
+  }
+
+  // /**
+  //  * Create a DCA (Dollar Cost Averaging) order
+  //  * @param params - DCA parameters
+  //  * @param chain - Target blockchain network
+  //  * @returns DCA order data
+  //  */
+  // async createDca(
+  //   params: DcaParams,
+  //   chain: OpenOceanChain = 'base'
+  // ): Promise<NeuroDexResponse<DcaOrderResponse>> {
+  //   try {
+  //     const response = await this.openOceanClient.createDca(
+  //       {
+  //         inTokenAddress: this.nativeTokenAddress[chain],
+  //         outTokenAddress: params.tokenAddress,
+  //         totalAmount: params.totalAmount,
+  //         intervals: params.intervals,
+  //         intervalDuration: params.intervalDuration,
+  //         account: params.walletAddress,
+  //         slippage: params.slippage?.toString(),
+  //       },
+  //       chain
+  //     );
+
+  //     if (!response.success || !response.data) {
+  //       throw new Error('Failed to create DCA order');
+  //     }
+
+  //     return {
+  //       success: true,
+  //       data: response.data,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       error: error instanceof Error ? error.message : 'Unknown error',
+  //     };
+  //   }
+  // }
 
       const result = await this.openOceanClient.createLimitOrder(
         {

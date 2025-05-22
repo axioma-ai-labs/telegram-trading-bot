@@ -1,21 +1,21 @@
 import { BotContext } from '@/types/config';
 import { UserService } from '@/services/db/user.service';
-import { hasWallet } from '@/utils/checkUser';
 import { startMessage, startKeyboard } from '@/bot/commands/start';
 import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
 
 export async function acceptTermsConditions(ctx: BotContext): Promise<void> {
-  if (!ctx.from?.id) return;
-  const telegramId = ctx.from.id.toString();
+  const telegramId = ctx.from?.id?.toString();
+  if (!telegramId) return;
 
   const user = await UserService.getUserByTelegramId(telegramId);
-  if (!user?.id) return;
+  if (!user) return;
 
-  const USER_HAS_WALLET = await hasWallet(telegramId);
+  // Update terms accepted status
   await UserService.updateTermsAccepted(user.id, true);
   console.log('User accepted terms conditions:', telegramId);
 
-  if (USER_HAS_WALLET) {
+  // Check if user has a wallet using included relation
+  if (user.wallets && user.wallets.length > 0) {
     // If user has wallet --> show start message
     await ctx.editMessageText(startMessage, {
       parse_mode: 'Markdown',

@@ -71,24 +71,38 @@ export const settingsCommandHandler: CommandHandler = {
     const user = await UserService.getUserByTelegramId(telegramId);
     if (!user) return;
 
-    const settings = await SettingsService.getUserSettingsByUserId(user.id);
-    if (!settings) {
+    // If user has no settings, create default settings
+    if (!user.settings) {
       await SettingsService.upsertSettings(user.id, {
         language: 'en',
         gasPriority: 'medium',
         slippage: '0.5',
       });
-    } else {
+
+      // After creating settings, send the message with default values
       const message = settingsMessage(
-        getSlippageName(settings?.slippage || '1'),
-        getLanguageName(settings?.language || 'en'),
-        getGasPriorityName(settings?.gasPriority || 'medium')
+        getSlippageName('0.5'),
+        getLanguageName('en'),
+        getGasPriorityName('medium')
       );
 
       await ctx.reply(message, {
         parse_mode: 'Markdown',
         reply_markup: settingsKeyboard,
       });
+      return;
     }
+
+    // User has settings, use them directly
+    const message = settingsMessage(
+      getSlippageName(user.settings.slippage || '1'),
+      getLanguageName(user.settings.language || 'en'),
+      getGasPriorityName(user.settings.gasPriority || 'medium')
+    );
+
+    await ctx.reply(message, {
+      parse_mode: 'Markdown',
+      reply_markup: settingsKeyboard,
+    });
   },
 };
