@@ -1,15 +1,17 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { createWalletKeyboard } from '@/bot/commands/wallet';
-import { UserService } from '@/services/db/user.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ViemService } from '@/services/engine/viem.service';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
-export const depositMessage = `📥 *Deposit ETH or Tokens*
+export const depositMessage = (
+  walletAddress: string,
+  ethBalance: string
+): string => `📥 *Deposit ETH or Tokens*
 
-ETH: {ethBalance}    
+ETH: ${ethBalance}    
 
-Send ETH or any ERC-20 token to your wallet: \`{walletAddress}\`
+Send ETH or any ERC-20 token to your wallet: \`${walletAddress}\`
 
 *Important*:
 - Only send assets on the Base Network
@@ -24,27 +26,14 @@ export const depositCommandHandler: CommandHandler = {
   command: 'deposit',
   description: 'Display your wallet address for deposits',
   handler: async (ctx: BotContext): Promise<void> => {
-    const telegramId = ctx.from?.id?.toString();
-    if (!telegramId) return;
+    // validate user
+    const { isValid, user } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
 
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user) return;
-
-    // Check if user has a wallet
-    if (!user.wallets || user.wallets.length === 0) {
-      await ctx.reply("⚠️ You don't have a wallet yet.\n\nYou need to create a new wallet first:", {
-        parse_mode: 'Markdown',
-        reply_markup: createWalletKeyboard,
-      });
-      return;
-    }
-
-    const neurodex = new NeuroDexApi();
-    const balance = await neurodex.getEthBalance(telegramId);
-
-    const message = depositMessage
-      .replace('{ethBalance}', balance.data || '0.000')
-      .replace('{walletAddress}', user.wallets[0].address);
+    const viemService = new ViemService();
+    const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+    const ethBalance = balance || '0.000';
+    const message = depositMessage(user.wallets[0].address, ethBalance);
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

@@ -13,9 +13,9 @@ export function getLanguageName(code: string): string {
 
 export function getGasPriorityName(priority: string): string {
   const priorities: Record<string, string> = {
-    low: '🐢 Low',
-    medium: '⚡ Medium',
-    high: '🚀 High',
+    fast: '🐢 Fast',
+    standard: '⚡ Standard',
+    instant: '🚀 Instant',
   };
 
   return priorities[priority] || priority;

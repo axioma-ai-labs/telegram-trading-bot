@@ -1,8 +1,8 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { UserService } from '@/services/db/user.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { validateUserAndWallet } from '@/utils/userValidation';
+import { ViemService } from '@/services/engine/viem.service';
 
 export const walletCreationOKMessage = (walletAddress: string, privateKey: string): string => `
 ✅ *Your wallet has been created successfully*
@@ -31,7 +31,7 @@ export const walletMessage = (
   ethBalance: string
 ): string => `*💰 Wallet:* \`${walletAddress}\`
 
-*Balance:*: ${ethBalance} ETH
+*Balance:* ${ethBalance} ETH
 
 To deposit funds, please send your coins to the wallet address above.`;
 
@@ -60,28 +60,19 @@ export const walletCommandHandler: CommandHandler = {
   command: 'wallet',
   description: 'Manage your wallet',
   handler: async (ctx: BotContext): Promise<void> => {
-    const telegramId = ctx.from?.id?.toString();
-    if (!telegramId) return;
+    // validate user
+    const { isValid, user } = await validateUserAndWallet(ctx);
+    if (!isValid || !user?.wallets?.[0]) return;
 
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user) return;
+    // get eth balance
+    const viemService = new ViemService();
+    const walletAddress = user.wallets[0].address as `0x${string}`;
+    const ethBalance = await viemService.getNativeBalance(walletAddress);
+    const balance = ethBalance || '0.000';
 
-    // Check if user has a wallet
-    if (!user.wallets || user.wallets.length === 0) {
-      await ctx.reply(createWalletMessage, {
-        parse_mode: 'Markdown',
-        reply_markup: createWalletKeyboard,
-      });
-      return;
-    }
+    const message = walletMessage(walletAddress, balance);
 
-    // User has wallet, show wallet details
-    const api = new NeuroDexApi();
-    const ethBalance = await api.getEthBalance(user.wallets[0].address);
-
-    const existingWalletMessage = walletMessage(user.wallets[0].address, ethBalance.data || '0');
-
-    await ctx.reply(existingWalletMessage, {
+    await ctx.reply(message, {
       parse_mode: 'Markdown',
       reply_markup: walletKeyboard,
     });

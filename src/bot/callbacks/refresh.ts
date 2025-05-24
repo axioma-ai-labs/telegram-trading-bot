@@ -2,7 +2,7 @@ import { BotContext } from '@/types/config';
 import { depositMessage, depositKeyboard } from '@/bot/commands/deposit';
 import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { UserService } from '@/services/db/user.service';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ViemService } from '@/services/engine/viem.service';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
   const callbackData = ctx.callbackQuery?.data;
@@ -13,17 +13,15 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
   if (!user?.wallets?.length) return;
 
   const walletAddress = user.wallets[0].address;
-  const neurodex = new NeuroDexApi();
+  const viemService = new ViemService();
 
   try {
-    const balance = await neurodex.getEthBalance(telegramId);
-    const ethBalance = balance.success && balance.data ? balance.data : '0.000';
+    const balance = await viemService.getNativeBalance(walletAddress as `0x${string}`);
+    const ethBalance = balance || '0.000';
 
     // Refresh deposit
     if (callbackData === 'refresh_deposit') {
-      const message = depositMessage
-        .replace('{ethBalance}', ethBalance)
-        .replace('{walletAddress}', walletAddress);
+      const message = depositMessage(walletAddress, ethBalance);
 
       await ctx.editMessageText(message, {
         parse_mode: 'Markdown',

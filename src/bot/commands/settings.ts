@@ -2,8 +2,8 @@ import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { SettingsService } from '@/services/db/settings.service';
-import { UserService } from '@/services/db/user.service';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const settingsMessage = (
   slippage?: string,
@@ -54,10 +54,10 @@ export const languageKeyboard = new InlineKeyboard()
   .text('← Back', 'back_settings');
 
 export const gasKeyboard = new InlineKeyboard()
-  .text('🐢 Low', 'gas_low')
-  .text('⚡ Medium', 'gas_medium')
+  .text('🐢 Fast', 'gas_fast')
+  .text('⚡ Standard', 'gas_standard')
   .row()
-  .text('🚀 High', 'gas_high')
+  .text('🚀 Instant', 'gas_instant')
   .row()
   .text('← Back', 'back_settings');
 
@@ -65,17 +65,15 @@ export const settingsCommandHandler: CommandHandler = {
   command: 'settings',
   description: 'Configure bot settings',
   handler: async (ctx: BotContext): Promise<void> => {
-    const telegramId = ctx.from?.id?.toString();
-    if (!telegramId) return;
-
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user) return;
+    // validate user
+    const { isValid, user } = await validateUserAndWallet(ctx);
+    if (!isValid || !user) return;
 
     // If user has no settings, create default settings
     if (!user.settings) {
       await SettingsService.upsertSettings(user.id, {
         language: 'en',
-        gasPriority: 'medium',
+        gasPriority: 'standard',
         slippage: '0.5',
       });
 
@@ -83,7 +81,7 @@ export const settingsCommandHandler: CommandHandler = {
       const message = settingsMessage(
         getSlippageName('0.5'),
         getLanguageName('en'),
-        getGasPriorityName('medium')
+        getGasPriorityName('standard')
       );
 
       await ctx.reply(message, {
@@ -97,7 +95,7 @@ export const settingsCommandHandler: CommandHandler = {
     const message = settingsMessage(
       getSlippageName(user.settings.slippage || '1'),
       getLanguageName(user.settings.language || 'en'),
-      getGasPriorityName(user.settings.gasPriority || 'medium')
+      getGasPriorityName(user.settings.gasPriority || 'standard')
     );
 
     await ctx.reply(message, {

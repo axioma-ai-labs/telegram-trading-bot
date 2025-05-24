@@ -4,6 +4,8 @@ import { walletMessage, walletCreationOKMessage, walletKeyboard } from '@/bot/co
 import { WalletService } from '@/services/db/wallet.service';
 import { UserService } from '@/services/db/user.service';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ViemService } from '@/services/engine/viem.service';
+import { invalidateUserCache } from '@/utils/userValidation';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
   try {
@@ -14,11 +16,12 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
     if (!user) return;
 
     const neurodex = new NeuroDexApi();
+    const viemService = new ViemService();
 
     // Check if user already has a wallet
     if (user.wallets && user.wallets.length > 0) {
-      const balance = await neurodex.getEthBalance(telegramId);
-      const ethBalance = balance.success && balance.data ? balance.data : '0.000';
+      const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+      const ethBalance = balance || '0.000';
 
       const existingWalletMessage = walletMessage(user.wallets[0].address, ethBalance);
 
@@ -38,7 +41,11 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       chain: 'ethereum',
       userId: user.id,
       type: 'generated',
+      encryptedPrivateKey: wallet.privateKey,
     });
+
+    // Invalidate user cache since wallet was added
+    invalidateUserCache(ctx);
 
     // Success msg
     const editedMessage = await ctx.editMessageText(

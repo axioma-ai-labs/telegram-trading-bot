@@ -17,9 +17,9 @@ datasource db {
 model User {
   id            String         @id @default(uuid())
   telegramId    String         @unique
-  username      String? /// @encrypted
-  firstName     String? /// @encrypted
-  lastName      String? /// @encrypted
+  username      String?
+  firstName     String?
+  lastName      String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   wallets       Wallet[]
@@ -51,7 +51,7 @@ model Wallet {
   address             String   @unique
   chain               String
   type                String   @default("generated")
-  encryptedPrivateKey String? /// @encrypted
+  encryptedPrivateKey String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   user                User     @relation(fields: [userId], references: [id])

@@ -1,6 +1,7 @@
 import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/config';
 import { CommandHandler } from '@/types/commands';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const helpMessage = `
 *Help & Support*
@@ -50,7 +51,9 @@ export const helpCommandHandler: CommandHandler = {
   command: 'help',
   description: 'Get help',
   handler: async (ctx: BotContext): Promise<void> => {
-    ctx.session.lastInteractionTime = Date.now();
+    // validate user
+    const { isValid } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
 
     await ctx.reply(helpMessage, {
       parse_mode: 'Markdown',
