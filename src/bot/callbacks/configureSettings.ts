@@ -15,12 +15,10 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   const { isValid, user } = await validateUserAndWallet(ctx);
   if (!isValid) return;
 
-  const settings = user?.settings;
-
   const message = settingsMessage(
-    getSlippageName(settings?.slippage || '1'),
-    getLanguageName(settings?.language || 'en'),
-    getGasPriorityName(settings?.gasPriority || 'medium')
+    getSlippageName(user?.settings?.slippage || '1'),
+    getLanguageName(user?.settings?.language || 'en'),
+    getGasPriorityName(user?.settings?.gasPriority || 'standard')
   );
 
   await ctx.editMessageText(message, {
@@ -62,15 +60,15 @@ export async function handleSetGas(ctx: BotContext): Promise<void> {
 export const updateSlippage = async (ctx: BotContext, slippage: string): Promise<void> => {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
   await SettingsService.updateSlippage(user.id, slippage);
   await ctx.answerCallbackQuery(`Slippage set to ${getSlippageName(slippage)}`);
   await ctx.editMessageText(
     settingsMessage(
       getSlippageName(slippage),
-      getLanguageName(user.settings?.language),
-      getGasPriorityName(user.settings?.gasPriority)
+      getLanguageName(user.settings?.language || 'en'),
+      getGasPriorityName(user.settings?.gasPriority || 'standard')
     ),
     {
       parse_mode: 'Markdown',
@@ -83,14 +81,14 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
 export const updateGasPriority = async (ctx: BotContext, gasPriority: string): Promise<void> => {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
   await SettingsService.updateGasPriority(user.id, gasPriority);
   await ctx.answerCallbackQuery(`Gas priority set to ${getGasPriorityName(gasPriority)}`);
   await ctx.editMessageText(
     settingsMessage(
-      getSlippageName(user.settings?.slippage),
-      getLanguageName(user.settings?.language),
+      getSlippageName(user.settings?.slippage || '1'),
+      getLanguageName(user.settings?.language || 'en'),
       getGasPriorityName(gasPriority)
     ),
     {
@@ -104,15 +102,15 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
 export const updateLanguage = async (ctx: BotContext, language: string): Promise<void> => {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
   await SettingsService.updateLanguage(user.id, language);
   await ctx.answerCallbackQuery(`Language set to ${getLanguageName(language)}`);
   await ctx.editMessageText(
     settingsMessage(
-      getSlippageName(user.settings?.slippage),
+      getSlippageName(user.settings?.slippage || '1'),
       getLanguageName(language),
-      getGasPriorityName(user.settings?.gasPriority)
+      getGasPriorityName(user.settings?.gasPriority || 'standard')
     ),
     {
       parse_mode: 'Markdown',

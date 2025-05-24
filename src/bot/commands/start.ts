@@ -94,7 +94,7 @@ export const startCommandHandler: CommandHandler = {
           language: 'en',
           autoTrade: false,
           proMode: false,
-          gasPriority: 'medium',
+          gasPriority: 'standard',
           slippage: '0.5',
         });
         console.log('New user created with referral:', telegramId);
@@ -119,7 +119,7 @@ export const startCommandHandler: CommandHandler = {
         language: 'en',
         autoTrade: false,
         proMode: false,
-        gasPriority: 'medium',
+        gasPriority: 'standard',
         slippage: '0.5',
       });
       console.log('New user created:', telegramId);

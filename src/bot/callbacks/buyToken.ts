@@ -9,6 +9,8 @@ import {
   insufficient_funds_message,
   invalid_token_message,
   custom_amount_prompt,
+  confirmBuyMessage,
+  confirmBuyKeyboard,
 } from '@/bot/commands/buy';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
@@ -20,9 +22,6 @@ const transaction_success_message = (amount: number, token: string, txHash: stri
   `• Transaction: https://basescan.org/tx/${txHash}`;
 
 export async function buyToken(ctx: BotContext): Promise<void> {
-  if (!ctx.from?.id) {
-    return;
-  }
   // validate user
   const { isValid } = await validateUserAndWallet(ctx);
   if (!isValid) return;
@@ -38,13 +37,9 @@ export async function buyToken(ctx: BotContext): Promise<void> {
 }
 
 export async function performBuy(ctx: BotContext, amount: string): Promise<void> {
-  if (!ctx.from?.id) return;
-
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
-
-  const settings = user?.settings;
+  const { isValid } = await validateUserAndWallet(ctx);
+  if (!isValid) return;
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token) {
@@ -68,11 +63,44 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     return;
   }
 
+  // Store the amount in the session for confirmation
+  ctx.session.currentOperation = {
+    ...currentOperation,
+    amount: parsedAmount,
+  };
+
+  // Show confirmation dialog
+  const confirmMessage = confirmBuyMessage(
+    currentOperation.token,
+    currentOperation.tokenSymbol || '',
+    currentOperation.tokenName || '',
+    parsedAmount
+  );
+
+  await ctx.reply(confirmMessage, {
+    parse_mode: 'Markdown',
+    reply_markup: confirmBuyKeyboard,
+  });
+}
+
+export async function buyConfirm(ctx: BotContext): Promise<void> {
+  // validate user
+  const { isValid, user } = await validateUserAndWallet(ctx);
+  if (!isValid || !user?.wallets?.[0]) return;
+
+  const { currentOperation } = ctx.session;
+
+  if (!currentOperation?.token || !currentOperation?.amount) {
+    const message = await ctx.reply('❌ Invalid buy operation. Please try again.');
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const params: BuyParams = {
       toTokenAddress: currentOperation.token,
-      fromAmount: parsedAmount,
-      slippage: Number(settings?.slippage || '1'),
+      fromAmount: currentOperation.amount,
+      slippage: Number(user?.settings?.slippage),
       gasPriority: 'standard',
       walletAddress: user.wallets[0].address,
       privateKey: user.wallets[0].encryptedPrivateKey || '',
@@ -80,12 +108,13 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     };
 
     const neurodex = new NeuroDexApi();
-    const buyResult = await neurodex.buy(params);
+    const buyResult = await neurodex.buy(params, 'base');
+    console.log('BUY RESULT:', buyResult);
 
     // if success
     if (buyResult.success && buyResult.data?.txHash) {
       const message = transaction_success_message(
-        parsedAmount,
+        currentOperation.amount,
         currentOperation.token,
         buyResult.data.txHash
       );
@@ -116,5 +145,18 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
       const message = await ctx.reply(error_message);
       await deleteBotMessage(ctx, message.message_id, 10000);
     }
+    // reset
+    ctx.session.currentOperation = null;
   }
+}
+
+export async function buyCancel(ctx: BotContext): Promise<void> {
+  // validate user
+  const { isValid } = await validateUserAndWallet(ctx);
+  if (!isValid) return;
+
+  // reset operation
+  ctx.session.currentOperation = null;
+  const message = await ctx.reply('✅ Buy order has been successfully cancelled!');
+  await deleteBotMessage(ctx, message.message_id, 5000);
 }

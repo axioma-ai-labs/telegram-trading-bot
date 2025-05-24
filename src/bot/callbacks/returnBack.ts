@@ -6,7 +6,6 @@ import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
 import { referralKeyboard, referralMessage } from '../commands/referrals';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
-import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
@@ -22,20 +21,24 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     keyboard: startKeyboard,
   },
   back_settings: {
-    message: settingsMessage(
-      getSlippageName('0.5'),
-      getLanguageName('en'),
-      getGasPriorityName('medium')
-    ),
+    message: async (ctx: BotContext) => {
+      const { isValid, user } = await validateUserAndWallet(ctx);
+      if (!isValid) return '';
+
+      return settingsMessage(
+        getSlippageName(user?.settings?.slippage || '1'),
+        getLanguageName(user?.settings?.language || 'en'),
+        getGasPriorityName(user?.settings?.gasPriority || 'standard')
+      );
+    },
     keyboard: settingsKeyboard,
   },
   back_referrals: {
     message: async (ctx: BotContext) => {
       const { isValid, user } = await validateUserAndWallet(ctx);
-      if (!isValid) return '';
+      if (!isValid || !user) return '';
 
-      const neurodex = new NeuroDexApi();
-      const referralLink = await neurodex.generateReferralLink(user.id, user.username);
+      const referralLink = user.referralCode || '';
       return referralMessage(referralLink);
     },
     keyboard: referralKeyboard,
@@ -43,7 +46,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   back_wallet: {
     message: async (ctx: BotContext) => {
       const { isValid, user } = await validateUserAndWallet(ctx);
-      if (!isValid) return '';
+      if (!isValid || !user) return '';
 
       const viemService = new ViemService();
       const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);

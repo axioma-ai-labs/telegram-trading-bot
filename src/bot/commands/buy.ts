@@ -27,6 +27,21 @@ Please select how much ETH you want to spend on ${tokenData.data?.symbol}.
 Go to /settings to adjust slippage and gas if the transaction fails.
 `;
 
+export const confirmBuyMessage = (
+  tokenAddress: string,
+  tokenSymbol: string,
+  tokenName: string,
+  amount: number
+): string => `
+🔍 *Confirm Buy Order*
+
+Token: *${tokenSymbol}* | ${tokenName}
+CA: \`${tokenAddress}\`
+Amount: *${amount} ETH*
+
+Are you sure you want to proceed with this purchase?
+`;
+
 export const buyTokenKeyboard = new InlineKeyboard()
   .text('0.1 ETH', 'buy_amount_0.1')
   .text('0.2 ETH', 'buy_amount_0.2')
@@ -36,6 +51,10 @@ export const buyTokenKeyboard = new InlineKeyboard()
   .text('5 ETH', 'buy_amount_5')
   .row()
   .text('Custom', 'buy_amount_custom');
+
+export const confirmBuyKeyboard = new InlineKeyboard()
+  .text('✅ Confirm', 'buy_confirm')
+  .text('❌ Cancel', 'buy_cancel');
 
 export const buyCommandHandler: CommandHandler = {
   command: 'buy',

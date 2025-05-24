@@ -1,5 +1,4 @@
 import { BotContext } from '../../types/config';
-import { NeuroDexApi } from '../../services/engine/neurodex';
 import {
   referralMessage,
   referralKeyboard,
@@ -12,10 +11,9 @@ import { validateUserAndWallet } from '@/utils/userValidation';
 export async function getReferralLink(ctx: BotContext): Promise<void> {
   //validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
-  const neurodex = new NeuroDexApi();
-  const referralLink = await neurodex.generateReferralLink(user.id, user.username);
+  const referralLink = user.referralCode || '';
   await ReferralService.initializeReferralStats(user.id);
 
   await ctx.editMessageText(referralMessage(referralLink), {
@@ -30,7 +28,7 @@ export async function getReferralLink(ctx: BotContext): Promise<void> {
 export async function getReferralStats(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
   const referralStatistics = await ReferralService.getReferralStats(user.id);
   if (!referralStatistics) return;

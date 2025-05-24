@@ -1,4 +1,4 @@
-import { Address, createPublicClient, formatEther, http } from 'viem';
+import { Address } from 'viem';
 import { base, bsc, mainnet } from 'viem/chains';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
@@ -147,27 +147,6 @@ export class NeuroDexApi {
       address
     );
     return response.data;
-  }
-
-  // To be deprecated!
-  async getEthBalance(address: string): Promise<NeuroDexResponse<string>> {
-    try {
-      const client = createPublicClient({
-        transport: http(config.node.baseMainnetRpc),
-      });
-
-      const balance = await client.getBalance({ address: address as `0x${string}` });
-
-      return {
-        success: true,
-        data: formatEther(balance), // returns balance in ETH as string
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-    }
   }
 
   /**

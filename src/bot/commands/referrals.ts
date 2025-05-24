@@ -1,6 +1,5 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { NeuroDexApi } from '@/services/engine/neurodex';
 import { InlineKeyboard } from 'grammy';
 import { ReferralService } from '@/services/db/referrals';
 import { validateUserAndWallet } from '@/utils/userValidation';
@@ -54,10 +53,9 @@ export const referralCommandHandler: CommandHandler = {
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
     const { isValid, user } = await validateUserAndWallet(ctx);
-    if (!isValid) return;
+    if (!isValid || !user) return;
 
-    const neurodex = new NeuroDexApi();
-    const referralLink = await neurodex.generateReferralLink(user.id, user.username);
+    const referralLink = user.referralCode || '';
 
     // init referral stats
     await ReferralService.initializeReferralStats(user.id);

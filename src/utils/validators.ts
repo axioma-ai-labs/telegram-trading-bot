@@ -56,8 +56,8 @@ export function isValidSlippage(slippage: number): boolean {
 /**
  * Validate gas priority value
  */
-export function isValidGasPriority(priority: string): priority is 'low' | 'medium' | 'high' {
-  return ['low', 'medium', 'high'].includes(priority);
+export function isValidGasPriority(priority: string): priority is 'fast' | 'standard' | 'instant' {
+  return ['fast', 'standard', 'instant'].includes(priority);
 }
 
 export function isValidDcaInterval(interval: number): boolean {

@@ -8,8 +8,8 @@ import { walletCommandHandler } from '@/bot/commands/wallet';
 import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
 import { handleGetHelp } from '@/bot/callbacks/getHelp';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
-import { buyToken, performBuy } from '@/bot/callbacks/buyToken';
-import { sellToken } from '@/bot/callbacks/sellToken';
+import { buyToken, performBuy, buyConfirm, buyCancel } from '@/bot/callbacks/buyToken';
+import { sellToken, performSell, sellConfirm, sellCancel } from '@/bot/callbacks/sellToken';
 import { handleRefresh } from '@/bot/callbacks/refresh';
 import {
   handleConfigureSettings,
@@ -31,7 +31,7 @@ import {
   buyTokenFoundMessage,
   invalid_amount_message,
 } from '@/bot/commands/buy';
-import { sellCommandHandler } from '@/bot/commands/sell';
+import { sellCommandHandler, sellTokenFoundMessage, sellTokenKeyboard } from '@/bot/commands/sell';
 import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import { referralCommandHandler } from '@/bot/commands/referrals';
@@ -138,6 +138,10 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
   get_dca_orders: getDcaOrders,
   dca_confirm: dcaConfirm,
   dca_cancel: dcaCancel,
+  buy_confirm: buyConfirm,
+  buy_cancel: buyCancel,
+  sell_confirm: sellConfirm,
+  sell_cancel: sellCancel,
 };
 
 // Parameterized handlers
@@ -153,6 +157,9 @@ const PARAMETERIZED_HANDLERS: Record<string, (ctx: BotContext, param: string) =>
   },
   buy_amount: async (ctx, param) => {
     await performBuy(ctx, param);
+  },
+  sell_amount: async (ctx, param) => {
+    await performSell(ctx, param);
   },
   dca_amount: async (ctx, param) => {
     await retrieveDcaAmount(ctx, param);
@@ -230,8 +237,6 @@ bot.on('message:text', async (ctx) => {
   const { currentOperation } = ctx.session;
   const userInput = ctx.message.text;
   if (!userInput) return;
-
-  console.log('🟧 OPERATION:', ctx.session.currentOperation);
   if (!currentOperation) return;
 
   switch (currentOperation.type) {
@@ -245,6 +250,9 @@ bot.on('message:text', async (ctx) => {
           ctx.session.currentOperation = {
             type: 'buy',
             token: userInput,
+            tokenSymbol: tokenData.data?.symbol,
+            tokenName: tokenData.data?.name,
+            tokenChain: tokenData.data?.chain,
           };
 
           await ctx.reply(buyTokenFoundMessage(tokenData), {
@@ -270,7 +278,47 @@ bot.on('message:text', async (ctx) => {
           return;
         }
         await performBuy(ctx, parsedAmount.toString());
-        ctx.session.currentOperation = null;
+      }
+      break;
+
+    case 'sell':
+      if (!currentOperation.token) {
+        // Handle token input
+        try {
+          const neurodex = new NeuroDexApi();
+          const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+
+          ctx.session.currentOperation = {
+            type: 'sell',
+            token: userInput,
+            tokenSymbol: tokenData.data?.symbol,
+            tokenName: tokenData.data?.name,
+            tokenChain: tokenData.data?.chain,
+          };
+
+          await ctx.reply(sellTokenFoundMessage(tokenData), {
+            parse_mode: 'Markdown',
+            reply_markup: sellTokenKeyboard,
+          });
+        } catch (error) {
+          await ctx.reply(
+            '❌ Token not found. Please check the token contract address and try again.',
+            {
+              parse_mode: 'Markdown',
+            }
+          );
+        }
+      } else if (!currentOperation.amount) {
+        // Handle amount input
+        const parsedAmount = parseFloat(userInput);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+          const invalid_amount_message = await ctx.reply(
+            '❌ Invalid amount. Please enter a valid number greater than 0.'
+          );
+          await deleteBotMessage(ctx, invalid_amount_message.message_id);
+          return;
+        }
+        await performSell(ctx, parsedAmount.toString());
       }
       break;
 
@@ -365,6 +413,8 @@ bot.on('message:text', async (ctx) => {
         });
       }
   }
+
+  console.log('🟧 OPERATION:', ctx.session.currentOperation);
 });
 
 // Error handling
