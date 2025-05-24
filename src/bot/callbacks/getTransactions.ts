@@ -5,8 +5,13 @@ import {
   transactionsMessage,
   transactionsKeyboard,
 } from '@/bot/commands/transactions';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function viewTransactions(ctx: BotContext): Promise<void> {
+  // validate user
+  const { isValid } = await validateUserAndWallet(ctx);
+  if (!isValid) return;
+
   // TODO: Fetch actual transactions from database
   await ctx.editMessageText(transactionsMessage, {
     parse_mode: 'Markdown',

@@ -146,7 +146,6 @@ export class NeuroDexApi {
       chain as Chain,
       address
     );
-
     return response.data;
   }
 

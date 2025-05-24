@@ -15,5 +15,6 @@ export const formatInterval = (seconds: number): string => {
   if (seconds < 3600) return `${seconds} seconds`;
   if (seconds < 86400) return `${seconds / 3600} hours`;
   if (seconds < 604800) return `${seconds / 86400} days`;
-  return `${seconds / 604800} weeks`;
+  if (seconds < 2592000) return `${seconds / 604800} weeks`;
+  return `${seconds / 2592000} months`;
 };

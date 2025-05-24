@@ -1,9 +1,8 @@
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
-import { UserService } from '@/services/db/user.service';
 import { InlineKeyboard } from 'grammy';
 import { NeuroDexResponse, TokenData } from '@/types/neurodex';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const buyTokenMessage = `Enter token contract address to buy:`;
 export const error_message = '❌ Transaction failed. Please try again later.';
@@ -42,28 +41,14 @@ export const buyCommandHandler: CommandHandler = {
   command: 'buy',
   description: 'Buy a token',
   handler: async (ctx: BotContext): Promise<void> => {
-    if (!ctx.from?.id) {
-      return;
-    }
+    // validate user
+    const { isValid } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
 
-    const telegramId = ctx.from.id.toString();
-    const user = await UserService.getUserByTelegramId(telegramId);
-    const USER_HAS_WALLET = user?.wallets && user.wallets.length > 0;
+    ctx.session.currentOperation = { type: 'buy' };
 
-    if (!USER_HAS_WALLET) {
-      await ctx.reply(createWalletMessage, {
-        parse_mode: 'Markdown',
-        reply_markup: createWalletKeyboard,
-      });
-    } else {
-      // Initialize buy operation
-      ctx.session.currentOperation = {
-        type: 'buy',
-      };
-
-      await ctx.reply(buyTokenMessage, {
-        parse_mode: 'Markdown',
-      });
-    }
+    await ctx.reply(buyTokenMessage, {
+      parse_mode: 'Markdown',
+    });
   },
 };

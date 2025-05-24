@@ -1,15 +1,14 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
-import { IS_NEW_USER, USER_HAS_WALLET } from '@/config/mock';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
-import { deleteBotMessage } from '@/utils/deleteMessage';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import { validateUserAndWallet } from '@/utils/userValidation';
+import { ViemService } from '@/services/engine/viem.service';
 
-export let withdrawMessage = `📤 *Withdraw ETH or other tokens*
+export const withdrawMessage = (ethBalance: string): string => `📤 *Withdraw ETH or other tokens*
 
 Your balance: 
-- ETH: {ethBalance}
+- ETH: ${ethBalance}
 
 *Important*:
 - Double check the receiving address
@@ -22,7 +21,11 @@ export const withdrawCommandHandler: CommandHandler = {
   command: 'withdraw',
   description: 'Withdraw tokens',
   handler: async (ctx: BotContext): Promise<void> => {
-    if (IS_NEW_USER || !USER_HAS_WALLET) {
+    // validate user
+    const { isValid, user } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
+
+    if (!user.wallets || user.wallets.length === 0) {
       await ctx.reply("⚠️ You don't have a wallet yet.\n\nYou need to create a new wallet first:", {
         parse_mode: 'Markdown',
         reply_markup: createWalletKeyboard,
@@ -30,18 +33,16 @@ export const withdrawCommandHandler: CommandHandler = {
       return;
     }
 
-    const api = new NeuroDexApi();
-    const ethBalance = await api.getEthBalance(ctx.from?.id.toString() || '');
-    withdrawMessage = withdrawMessage.replace('{ethBalance}', ethBalance.data || '0');
+    const viemService = new ViemService();
+    const ethBalance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+    const message = withdrawMessage(ethBalance || '0.000');
 
-    const message = await ctx.reply(withdrawMessage, {
+    await ctx.reply(message, {
       parse_mode: 'Markdown',
       reply_markup: withdrawKeyboard,
       link_preview_options: {
         is_disabled: true,
       },
     });
-
-    await deleteBotMessage(ctx, message.message_id, 30000);
   },
 };

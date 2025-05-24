@@ -9,6 +9,7 @@ export class WalletService {
     address: string;
     chain: string;
     userId: string;
+    encryptedPrivateKey: string;
     type?: string;
   }): Promise<Wallet> {
     return prisma.wallet.create({
@@ -16,6 +17,7 @@ export class WalletService {
         address: data.address,
         chain: data.chain,
         userId: data.userId,
+        encryptedPrivateKey: data.encryptedPrivateKey,
         type: data.type,
       },
     });

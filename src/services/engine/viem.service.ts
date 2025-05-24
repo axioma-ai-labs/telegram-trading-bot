@@ -11,6 +11,7 @@ import {
   PublicClient,
   SendTransactionParameters,
   Abi,
+  formatEther,
 } from 'viem';
 import { base } from 'viem/chains';
 import { config } from '@/config/config';
@@ -280,6 +281,22 @@ export class ViemService {
       return balance.toString();
     } catch (error) {
       console.error('Error fetching token balance:', error);
+      return '0';
+    }
+  }
+
+  /**
+   * Get native balance (ETH/BNB/BASE) for a wallet in readable format
+   * @param address Wallet address
+   * @returns Balance in ETH as string (e.g., "0.123")
+   */
+  async getNativeBalance(address: Address): Promise<string> {
+    try {
+      const publicClient = this.createPublicClient();
+      const balance = await publicClient.getBalance({ address });
+      return formatEther(balance);
+    } catch (error) {
+      console.error('Error fetching native balance:', error);
       return '0';
     }
   }

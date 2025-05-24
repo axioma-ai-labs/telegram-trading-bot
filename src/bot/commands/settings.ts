@@ -2,8 +2,8 @@ import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
 import { SettingsService } from '@/services/db/settings.service';
-import { UserService } from '@/services/db/user.service';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const settingsMessage = (
   slippage?: string,
@@ -65,11 +65,9 @@ export const settingsCommandHandler: CommandHandler = {
   command: 'settings',
   description: 'Configure bot settings',
   handler: async (ctx: BotContext): Promise<void> => {
-    const telegramId = ctx.from?.id?.toString();
-    if (!telegramId) return;
-
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user) return;
+    // validate user
+    const { isValid, user } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
 
     // If user has no settings, create default settings
     if (!user.settings) {

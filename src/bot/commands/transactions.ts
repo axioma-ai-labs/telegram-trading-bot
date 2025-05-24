@@ -1,6 +1,7 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/config';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const transactionsMessage = `
 *📈 Transaction History*
@@ -41,6 +42,10 @@ export const transactionsCommandHandler: CommandHandler = {
   command: 'transactions',
   description: 'View transaction history',
   handler: async (ctx: BotContext): Promise<void> => {
+    // validate user
+    const { isValid } = await validateUserAndWallet(ctx);
+    if (!isValid) return;
+
     await ctx.reply(transactionsMessage, {
       parse_mode: 'Markdown',
       reply_markup: transactionsKeyboard,

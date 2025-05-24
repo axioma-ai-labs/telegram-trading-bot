@@ -28,7 +28,6 @@ export const startKeyboard = new InlineKeyboard()
   .text('Sell', 'sell')
   .row()
   .text('DCA', 'dca')
-  .text('Limit orders', 'limit_orders')
   .row()
   .text('Wallet', 'create_wallet')
   .text('Withdraw', 'withdraw')
@@ -43,12 +42,12 @@ export const startKeyboard = new InlineKeyboard()
 // New User
 ////////////////////////////////////////////////////////////
 
-export const acceptTermsConditionsMessage = `*💸 Neurodex*
+export const acceptTermsConditionsMessage = `*💸 Welcome to Neurodex*
 
-Before we get started, please review and accept our terms of service and privacy policy.
+Before we get started, please review and accept our terms of service & privacy policy.
 
-\\- [Terms of Service](https://docs.neurodex.xyz/terms-of-service)
-\\- [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)`;
+• [Terms of Service](https://docs.neurodex.xyz/terms-of-service)
+• [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)`;
 
 export const acceptTermsConditionsKeyboard = new InlineKeyboard().text(
   '✅ Accept',
@@ -62,7 +61,6 @@ export const startCommandHandler: CommandHandler = {
     if (!ctx.from?.id) {
       return;
     }
-
     const neurodex = new NeuroDexApi();
     const telegramId = ctx.from.id.toString();
     const payload = ctx.match?.toString() || ''; // Payload from referral link

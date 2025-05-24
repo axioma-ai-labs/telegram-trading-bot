@@ -6,9 +6,12 @@ import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
 import { referralKeyboard, referralMessage } from '../commands/referrals';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ViemService } from '@/services/engine/viem.service';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 interface BackHandlerConfig {
-  message: string;
+  message: string | ((ctx: BotContext) => Promise<string>);
   keyboard: InlineKeyboard;
 }
 
@@ -27,11 +30,27 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     keyboard: settingsKeyboard,
   },
   back_referrals: {
-    message: referralMessage('referralLink'),
+    message: async (ctx: BotContext) => {
+      const { isValid, user } = await validateUserAndWallet(ctx);
+      if (!isValid) return '';
+
+      const neurodex = new NeuroDexApi();
+      const referralLink = await neurodex.generateReferralLink(user.id, user.username);
+      return referralMessage(referralLink);
+    },
     keyboard: referralKeyboard,
   },
   back_wallet: {
-    message: walletMessage('walletAddress', 'ethBalance'),
+    message: async (ctx: BotContext) => {
+      const { isValid, user } = await validateUserAndWallet(ctx);
+      if (!isValid) return '';
+
+      const viemService = new ViemService();
+      const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+      const ethBalance = balance || '0.000';
+
+      return walletMessage(user.wallets[0].address, ethBalance);
+    },
     keyboard: walletKeyboard,
   },
   back_transactions: {
@@ -43,10 +62,12 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
 // Return back (logic)
 export async function returnBack(
   ctx: BotContext,
-  message: string,
+  message: string | ((ctx: BotContext) => Promise<string>),
   keyboard: InlineKeyboard
 ): Promise<void> {
-  await ctx.editMessageText(message, {
+  const finalMessage = typeof message === 'function' ? await message(ctx) : message;
+
+  await ctx.editMessageText(finalMessage, {
     parse_mode: 'Markdown',
     reply_markup: keyboard,
     link_preview_options: {

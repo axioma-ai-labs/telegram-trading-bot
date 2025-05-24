@@ -7,19 +7,15 @@ import {
   referralStatsKeyboard,
 } from '../commands/referrals';
 import { ReferralService } from '../../services/db/referrals';
-import { UserService } from '../../services/db/user.service';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function getReferralLink(ctx: BotContext): Promise<void> {
-  const userId = ctx.from?.id;
-  const username = ctx.from?.username || `id${userId}`;
-  if (!userId) return;
+  //validate user
+  const { isValid, user } = await validateUserAndWallet(ctx);
+  if (!isValid) return;
 
   const neurodex = new NeuroDexApi();
-  const referralLink = await neurodex.generateReferralLink(userId, username);
-
-  const user = await UserService.getUserByTelegramId(userId.toString());
-  if (!user) return;
-
+  const referralLink = await neurodex.generateReferralLink(user.id, user.username);
   await ReferralService.initializeReferralStats(user.id);
 
   await ctx.editMessageText(referralMessage(referralLink), {
@@ -32,11 +28,9 @@ export async function getReferralLink(ctx: BotContext): Promise<void> {
 }
 
 export async function getReferralStats(ctx: BotContext): Promise<void> {
-  const userId = ctx.from?.id;
-  if (!userId) return;
-
-  const user = await UserService.getUserByTelegramId(userId.toString());
-  if (!user) return;
+  // validate user
+  const { isValid, user } = await validateUserAndWallet(ctx);
+  if (!isValid) return;
 
   const referralStatistics = await ReferralService.getReferralStats(user.id);
   if (!referralStatistics) return;

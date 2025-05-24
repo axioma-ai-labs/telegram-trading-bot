@@ -25,7 +25,12 @@ import { transactionsCommandHandler } from '@/bot/commands/transactions';
 import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
 import depositCommandHandler from '@/bot/commands/deposit';
 import { depositFunds } from '@/bot/callbacks/depositFunds';
-import { buyCommandHandler, buyTokenKeyboard, buyTokenFoundMessage } from '@/bot/commands/buy';
+import {
+  buyCommandHandler,
+  buyTokenKeyboard,
+  buyTokenFoundMessage,
+  invalid_amount_message,
+} from '@/bot/commands/buy';
 import { sellCommandHandler } from '@/bot/commands/sell';
 import { withdrawCommandHandler } from '@/bot/commands/withdraw';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
@@ -35,15 +40,30 @@ import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
 import { limit } from '@grammyjs/ratelimiter';
 import { NeuroDexApi } from './services/engine/neurodex';
 import { deleteBotMessage } from './utils/deleteMessage';
-import { dcaCommandHandler, dcaTokenFoundMessage, dcaTokenKeyboard } from './bot/commands/dca';
+import {
+  dcaCommandHandler,
+  confirmDcaKeyboard,
+  invalid_interval_message,
+  dcaTokenFoundMessage,
+  dcaTokenKeyboard,
+  intervalKeyboard,
+  intervalMessage,
+  timesMessage,
+  timesKeyboard,
+  invalid_times_message,
+  confirmDcaMessage,
+  dcaOrdersCommandHandler,
+} from './bot/commands/dca';
 import {
   dcaToken,
   retrieveDcaAmount,
   retrieveDcaInterval,
   retrieveDcaTimes,
+  dcaConfirm,
+  dcaCancel,
+  getDcaOrders,
 } from './bot/callbacks/handleDCA';
-import { InlineKeyboard } from 'grammy';
-import { formatInterval } from './utils/formatters';
+import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
@@ -115,6 +135,9 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
   get_referral_stats: getReferralStats,
   accept_terms_conditions: acceptTermsConditions,
   dca: dcaToken,
+  get_dca_orders: getDcaOrders,
+  dca_confirm: dcaConfirm,
+  dca_cancel: dcaCancel,
 };
 
 // Parameterized handlers
@@ -182,6 +205,7 @@ bot.command(sellCommandHandler.command, sellCommandHandler.handler); // /sell
 bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // /withdraw
 bot.command(referralCommandHandler.command, referralCommandHandler.handler); // /referrals
 bot.command(dcaCommandHandler.command, dcaCommandHandler.handler); // /dca
+bot.command(dcaOrdersCommandHandler.command, dcaOrdersCommandHandler.handler); // /get_dca_orders
 
 // Set commands (quick access)
 bot.api.setMyCommands([
@@ -204,20 +228,11 @@ bot.api.setMyCommands([
 // Handle token input for buy command
 bot.on('message:text', async (ctx) => {
   const { currentOperation } = ctx.session;
-  console.log('Current Operation/d: ', currentOperation);
-  console.log(
-    'Parameterized Handlers: ',
-    currentOperation?.type,
-    currentOperation?.token,
-    currentOperation?.amount,
-    currentOperation?.interval,
-    currentOperation?.times,
-    currentOperation?.customInterval
-  );
-  if (!currentOperation) return;
-
   const userInput = ctx.message.text;
   if (!userInput) return;
+
+  console.log('🟧 OPERATION:', ctx.session.currentOperation);
+  if (!currentOperation) return;
 
   switch (currentOperation.type) {
     case 'buy':
@@ -261,7 +276,6 @@ bot.on('message:text', async (ctx) => {
 
     case 'dca':
       if (!currentOperation.token) {
-        // Handle DCA token input
         try {
           const neurodex = new NeuroDexApi();
           const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
@@ -269,6 +283,9 @@ bot.on('message:text', async (ctx) => {
           ctx.session.currentOperation = {
             type: 'dca',
             token: userInput,
+            tokenSymbol: tokenData.data?.symbol,
+            tokenName: tokenData.data?.name,
+            tokenChain: tokenData.data?.chain,
           };
 
           await ctx.reply(dcaTokenFoundMessage(tokenData), {
@@ -284,88 +301,69 @@ bot.on('message:text', async (ctx) => {
           );
         }
       } else if (!currentOperation.amount) {
-        // Handle DCA amount input
         const parsedAmount = parseFloat(userInput);
-        if (isNaN(parsedAmount) || parsedAmount <= 0) {
-          const invalid_amount_message = await ctx.reply(
-            '❌ Invalid amount. Please enter a valid number greater than 0.'
-          );
-          await deleteBotMessage(ctx, invalid_amount_message.message_id);
+        if (!isValidDcaAmount(parsedAmount)) {
+          const message = await ctx.reply(invalid_amount_message);
+          await deleteBotMessage(ctx, message.message_id);
           return;
         }
 
-        // Update operation state
         ctx.session.currentOperation = {
           ...currentOperation,
           amount: parsedAmount,
         };
 
-        // Show interval selection keyboard
-        const keyboard = new InlineKeyboard()
-          .text('1 Hour', 'dca_interval_3600')
-          .text('1 Day', 'dca_interval_86400')
-          .row()
-          .text('1 Week', 'dca_interval_604800')
-          .text('Custom', 'dca_interval_custom');
-
-        await ctx.reply('Please select the interval time for your DCA order:', {
-          reply_markup: keyboard,
+        await ctx.reply(intervalMessage, {
+          reply_markup: intervalKeyboard,
         });
-      } else if (currentOperation.customInterval) {
-        // Handle custom interval input
-        const intervalHours = parseFloat(userInput);
-        if (isNaN(intervalHours) || intervalHours <= 0) {
-          const message = await ctx.reply(
-            '❌ Invalid interval. Please enter a valid number of hours.'
-          );
-          await deleteBotMessage(ctx, message.message_id, 10000);
+      } else if (!currentOperation.interval) {
+        // interval input
+        const parsedInterval = parseInt(userInput);
+        if (!isValidDcaInterval(parsedInterval)) {
+          const message = await ctx.reply(invalid_interval_message);
+          await deleteBotMessage(ctx, message.message_id);
           return;
         }
 
-        // Update operation state
         ctx.session.currentOperation = {
           ...currentOperation,
-          interval: intervalHours * 3600, // Convert to seconds
-          customInterval: false,
+          interval: parsedInterval,
         };
 
-        await ctx.reply(
-          'Please enter the number of intervals (1-100):\n\n' +
-            'This will determine how many times the order will be executed.'
-        );
+        // send times message
+        await ctx.reply(timesMessage, {
+          reply_markup: timesKeyboard,
+          parse_mode: 'Markdown',
+        });
       } else if (!currentOperation.times) {
-        // Handle DCA times input
-        const times = parseInt(userInput);
-        if (isNaN(times) || times < 1 || times > 100) {
-          const message = await ctx.reply(
-            '❌ Invalid number of intervals. Please enter a number between 1 and 100.'
-          );
-          await deleteBotMessage(ctx, message.message_id, 10000);
+        // times input
+        const parsedTimes = parseInt(userInput);
+        if (isNaN(parsedTimes) || parsedTimes < 1 || parsedTimes > 100) {
+          const message = await ctx.reply(invalid_times_message);
+          await deleteBotMessage(ctx, message.message_id);
           return;
         }
 
-        // Update operation state
         ctx.session.currentOperation = {
           ...currentOperation,
-          times,
+          times: parsedTimes,
         };
 
-        // Show summary and confirmation keyboard
-        const keyboard = new InlineKeyboard()
-          .text('✅ Confirm', 'dca_confirm')
-          .text('❌ Cancel', 'dca_cancel');
-
-        await ctx.reply(
-          `📊 DCA Order Summary:\n\n` +
-            `Token: ${currentOperation.token}\n` +
-            `Amount: ${currentOperation.amount}\n` +
-            `Interval: ${formatInterval(currentOperation.interval || 0)}\n` +
-            `Times: ${times}\n\n` +
-            `Please confirm to create the DCA order:`,
-          { reply_markup: keyboard }
+        // send confirmation message
+        const message = confirmDcaMessage(
+          currentOperation.token,
+          currentOperation.tokenSymbol || '',
+          currentOperation.tokenName || '',
+          currentOperation.amount,
+          currentOperation.interval,
+          parsedTimes
         );
+
+        await ctx.reply(message, {
+          parse_mode: 'Markdown',
+          reply_markup: confirmDcaKeyboard,
+        });
       }
-      break;
   }
 });
 

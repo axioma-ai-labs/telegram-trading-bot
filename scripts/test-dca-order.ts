@@ -6,8 +6,8 @@ dotenv.config();
 
 // Test wallet configuration
 const TEST_WALLET = {
-  address: process.env.TEST_WALLET_ADDRESS || '0x...',
-  privateKey: process.env.TEST_WALLET_PRIVATE_KEY || '0x...',
+  address: '0xd08EB3DF731C151f2ABC33b19e450Cd3f1Eb9f20',
+  privateKey: '0xdcffd7f29aa6686dc0ac7bfed114762a033323f69b810673a3b46590730b94a9',
 };
 
 // Test token addresses on Base
