@@ -26,9 +26,9 @@ export const dcaTokenFoundMessage = (tokenData: NeuroDexResponse<TokenData>): st
 ✅ *Token Found*
 
 Symbol: *$${tokenData.data?.symbol}*
-Name: *${tokenData.data?.name || 'Unknown'}*
-Price: $${tokenData.data?.price || 'Unknown'}
-Chain: ${tokenData.data?.chain || 'Unknown'}
+Name: *${tokenData.data?.name}*
+Price: $${tokenData.data?.price}
+Chain: ${tokenData.data?.chain}
 
 Please select how much ETH you want to spend on $${tokenData.data?.symbol} for your DCA order.
 
@@ -74,7 +74,7 @@ export const confirmDcaMessage = (
   interval: number,
   times: number
 ): string => `
-⚡️ *DCA Order Summary:*
+🔍 *Confirm DCA Order*
 
 *Token:* ${tokenSymbol} | ${tokenName}
 *CA:* \`${token}\`
