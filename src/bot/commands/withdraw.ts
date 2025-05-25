@@ -23,7 +23,7 @@ export const withdrawCommandHandler: CommandHandler = {
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
     const { isValid, user } = await validateUserAndWallet(ctx);
-    if (!isValid) return;
+    if (!isValid || !user) return;
 
     if (!user.wallets || user.wallets.length === 0) {
       await ctx.reply("⚠️ You don't have a wallet yet.\n\nYou need to create a new wallet first:", {

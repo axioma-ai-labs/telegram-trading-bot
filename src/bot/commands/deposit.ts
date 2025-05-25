@@ -28,7 +28,7 @@ export const depositCommandHandler: CommandHandler = {
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
     const { isValid, user } = await validateUserAndWallet(ctx);
-    if (!isValid) return;
+    if (!isValid || !user) return;
 
     const viemService = new ViemService();
     const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);

@@ -1,5 +1,62 @@
-name: English
-help: |
-  <b>This bot</b> allows you to see how Telegram bots can be built.
-language: Please, select the language.
-language_selected: <b>This bot</b> now speaks English.
+# start
+start_msg: "💸 *Neurodex* \n\nNeurodex is your lightning fast crypto trading bot \n\nBuy and sell crypto with ease using Neurodex. \n\n/buy - Buy any crypto token on Base, BSC & Ethereum \n/sell - Sell any crypto token on Base, BSC & Ethereum \n/dca - Dollar Cost Averaging (DCA) \n/limit - Create limit orders \n/wallet - Manage your wallet \n/settings - Configure your bot settings \n/help - Get help and support \n\nPowered by [Neurobro](https://neurobro.ai) and [Docs](https://docs.neurodex.xyz)"
+accept_terms_conditions_msg: "💸 *Welcome to Neurodex* \n\nBefore we get started, please review and accept our terms of service & privacy policy. \n\n• [Terms of Service](https://docs.neurodex.xyz/terms-of-service) \n• [Privacy Policy](https://docs.neurodex.xyz/privacy-policy)"
+
+
+# wallet
+wallet_success_msg: "✅ *Your wallet has been created successfully* \n\n*Wallet Address:* \`${walletAddress}\` \n\n*Private Key:* \`${privateKey}\` \n\n⚠️ *IMPORTANT:* Keep your private key safe and secure \n• Do not share it with anyone \n• Do not store it digitally or online \n• Write it down and store it safely \n\n⏰ This message will be deleted in 5 minutes for security \n\nTo start trading, use the /start command."
+wallet_fail_msg: "❌ *Wallet Creation Failed* \n\nSomething went wrong. Please try again or go to /help."
+wallet_msg: "💰 *Wallet:* \`${walletAddress}\` \n\n*Balance:* ${ethBalance} ETH \n\nTo deposit funds, please send your coins to the wallet address above."
+wallet_create_msg: "💸 *Neurodex* \n\nNeurodex is your lightning fast crypto trading bot \n\nTo be able to /buy, /sell or do any other actions, you have to create a wallet first. Create one now by clicking the button below. \n\nFor any help setting up please refer to [this guide](https://docs.neurodex.xyz/getting-started/setup) or get /help."
+
+# general
+but_token_msg: "Enter token contract address to buy:"
+error_msg: "❌ Transaction failed. Please try again later."
+invalid_amount_msg: "⚠️ Invalid amount selected. Please try selecting a different amount."
+insufficient_funds_msg: "⚠️ Insufficient funds to complete the transaction.\n\nPlease ensure you have enough ETH to cover:\n• The transaction amount\n• Gas fees"
+invalid_token_msg: "❌ No token selected. Please select a token first."
+
+# dca
+dca_times_msg: "Please select the number of times for your DCA order:"
+dca_interval_msg: "Please select the interval time for your DCA order:"
+dca_custom_amount_msg: "Please enter the amount of ETH you want to spend on your DCA order:"
+dca_custom_interval_msg: "Please enter the interval in hours for your DCA order:"
+dca_custom_times_msg: "Please enter the number of times (1-100) for your DCA order:"
+dca_invalid_interval_msg: "⚠️ Invalid interval selected. Please select a different interval."
+dca_invalid_times_msg: "⚠️ Invalid number of times. Please enter a number between 1 and 100."
+dca_confirm_msg: "🔍 *Confirm DCA Order* \n\n *Token:* ${tokenSymbol} | ${tokenName} \n*CA:* \`${token}\` \n*Amount:* ${amount} ETH \n*Interval:* ${interval} \n*Times:* ${times} \n\nPlease confirm to create the DCA order:"
+dca_token_found_msg: "✅ *Token Found* \n\n *Symbol:* *$${tokenData.data?.symbol}* \n*Name:* *${tokenData.data?.name}* \n*Price:* *$${tokenData.data?.price}* \n*Chain:* ${tokenData.data?.chain} \n\nPlease select how much ETH you want to spend on $${tokenData.data?.symbol} for your DCA order. \n\nGo to /settings to adjust slippage and gas if the transaction fails."
+
+
+# limit orders
+
+
+# validation
+no_registration_msg: "❌ You are not registered.\n\nPlease use /start to begin."
+no_wallet_msg: "❌ You don't have a wallet.\n\nPlease use /wallet to create one."
+
+
+# buy
+
+
+
+
+# sell
+sell_token_msg: "Enter token contract address of a token you want to sell:"
+sell_token_found_msg: "✅ *Token Found* \n\n *Symbol:* *$${tokenData.data?.symbol}* \n*Name:* *${tokenData.data?.name}* \n*Price:* *$${tokenData.data?.price}* \n*Chain:* ${tokenData.data?.chain} \n\nPlease select how much ${tokenData.data?.symbol} you want to sell. \n\nGo to /settings to adjust slippage and gas if the transaction fails."
+sell_confirm_msg: "🔍 *Confirm Sell Order* \n\n *Token:* *${tokenSymbol}* | ${tokenName} \n*CA:* \`${tokenAddress}\` \n*Amount:* *${amount} ${tokenSymbol}* \n\nAre you sure you want to proceed with this sale?"
+
+
+# help
+help_msg: " *Help & Support* \n\n *Quick Start:* \n• /start - Start the bot \n• /wallet - Manage your wallet \n• /buy - Buy crypto tokens \n• /sell - Sell crypto tokens \n• /settings - Configure bot settings \n\n *How do I use Neurodex?* \nCheck out our [documentation](https://docs.neurodex.xyz) where we explain everything in detail. Join our support chat for additional resources. \n\n *💰 Where can I find my referral code?* \nOpen the /referrals menu to view your unique referral code. Share it with friends to earn rewards! \n\n *What are the fees?* \n• Trading fee: 1% per successful transaction \n• No subscription fees \n• No hidden charges \n• All features are free to use \n\n *🔒 Security Tips:* \n• NEVER share your private keys or seed phrases \n• Admins will NEVER DM you first \n• Use only official links from our website \n• We never store your private keys or seed phrases. When generating a new wallet - store your private key somewhere safe. \n\n *💡 Trading Tips:* \nCommon issues and solutions: \n• Slippage Exceeded: Increase slippage or trade in smaller amounts \n• Insufficient balance: Add more funds or reduce transaction amount \n• Transaction timeout: Increase gas tip during high network load \n\n *Need more help?* \nContact our support team by clicking the button below. \n\n"
+
+
+# referrals
+referral_msg: "💎 *Referral Program* \n\n *How it works:* \n1. Share your referral link below with your friends & family \n2. When they sign up using your link, you earn 10% of their trading fees \n3. You can earn unlimited rewards! \n\n *Your Referral Link:* \n\`${referralLink}\` \n\n Learn more about rewards and tiers in our official [docs](https://docs.neurodex.xyz/referral-program)"
+referral_stats_msg: "📊 *Referral Stats* \n\n *Referred Users:* ${totalReferrals} users \n *Referred Trades:* ${totalTrades} trades \n *Referred Volume:* $${totalVolume.toFixed(4)} \n *Total Referral Earnings:* $${totalEarned.toFixed(4)} \n\n Keep spreading the word and watch your earnings grow! 🚀"
+
+# settings
+settings_msg: "⚙️ *Settings* \n\n *Current Settings:* \n• Slippage: ${slippage} \n• Language: ${language} \n• Gas Priority: ${gasPriority} \n\n *Best Practices:* \n- Increase *slippage* to 1% for less liquid tokens \n- Set *gas priority* to high for fast transactions \n\nPlease set your desired settings below."
+
+
+
