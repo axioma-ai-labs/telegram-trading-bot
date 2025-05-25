@@ -5,6 +5,7 @@ import { InlineKeyboard } from 'grammy';
 import { formatInterval } from '@/utils/formatters';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { getDcaOrders } from '@/bot/callbacks/handleDCA';
+import logger from '@/config/logger';
 
 export const dcaTokenMessage = 'Please send contract address of the token you want to DCA:';
 export const error_message = '❌ Transaction failed. Please try again later.';
@@ -96,6 +97,8 @@ export const dcaCommandHandler: CommandHandler = {
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'dca' };
+
+    logger.info('DCA token message:', dcaTokenMessage);
 
     await ctx.reply(dcaTokenMessage, {
       parse_mode: 'Markdown',

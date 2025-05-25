@@ -9,6 +9,7 @@ import {
 } from '@/bot/commands/settings';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   // validate user
@@ -63,6 +64,7 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
   if (!isValid || !user) return;
 
   await SettingsService.updateSlippage(user.id, slippage);
+  logger.info(`Slippage set to ${getSlippageName(slippage)}`);
   await ctx.answerCallbackQuery(`Slippage set to ${getSlippageName(slippage)}`);
   await ctx.editMessageText(
     settingsMessage(

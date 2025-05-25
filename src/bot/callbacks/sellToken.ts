@@ -14,6 +14,7 @@ import {
 } from '@/bot/commands/sell';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import logger from '@/config/logger';
 
 const transaction_success_message = (
   amount: number,
@@ -142,7 +143,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
       reply_markup: confirmSellKeyboard,
     });
   } catch (error) {
-    console.error('Error during sell preparation:', error);
+    logger.error('Error during sell preparation:', error);
     const message = await ctx.reply(error_message);
     await deleteBotMessage(ctx, message.message_id, 10000);
   }
@@ -181,7 +182,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
     const neurodex = new NeuroDexApi();
     const sellResult = await neurodex.sell(params, 'base');
-    console.log('SELL RESULT:', sellResult);
+    logger.info('SELL RESULT:', sellResult);
 
     // if success
     if (sellResult.success && sellResult.data?.txHash) {
@@ -209,7 +210,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       ctx.session.currentOperation = null;
     }
   } catch (error) {
-    console.error('Error during sell transaction:', error);
+    logger.error('Error during sell transaction:', error);
     const message = error instanceof Error ? error.message.toLowerCase() : '';
     if (message.includes('insufficient') || message.includes('balance')) {
       const message = await ctx.reply(insufficient_funds_message);

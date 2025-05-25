@@ -33,6 +33,8 @@ const envSchema = z.object({
   MASTER_ENCRYPTION_PASSWORD: z
     .string()
     .min(32, 'MASTER_ENCRYPTION_PASSWORD must be at least 32 characters'),
+  BETTERSTACK_SOURCE_TOKEN: z.string().min(1, 'BETTERSTACK_SOURCE_TOKEN is required'),
+  BETTERSTACK_ENDPOINT: z.string().url('BETTERSTACK_ENDPOINT must be a valid URL'),
 });
 
 /**
@@ -100,6 +102,12 @@ const createConfig = (): AppConfig => {
     // Encryption Settings
     encryption: {
       masterPassword: env.MASTER_ENCRYPTION_PASSWORD,
+    },
+
+    // BetterStack Logging
+    betterstack: {
+      sourceToken: env.BETTERSTACK_SOURCE_TOKEN,
+      endpoint: env.BETTERSTACK_ENDPOINT,
     },
 
     // Constants

@@ -24,6 +24,7 @@ import {
 } from '@/bot/commands/dca';
 import { DcaParams } from '@/types/neurodex';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import logger from '@/config/logger';
 
 const dca_success_message = (
   amount: number,
@@ -84,7 +85,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
     amount: parsedAmount,
   };
 
-  console.log('🟧 OPERATION:', ctx.session.currentOperation);
+  logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 
   await ctx.reply(intervalMessage, {
     reply_markup: intervalKeyboard,
@@ -115,7 +116,7 @@ export async function retrieveDcaInterval(ctx: BotContext, interval: string): Pr
     interval: parsedInterval,
   };
 
-  console.log('🟧 OPERATION:', ctx.session.currentOperation);
+  logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 
   await ctx.reply(timesMessage, {
     reply_markup: timesKeyboard,
@@ -164,7 +165,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
     reply_markup: confirmDcaKeyboard,
   });
 
-  console.log('🟧 OPERATION:', ctx.session.currentOperation);
+  logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 }
 
 export async function dcaConfirm(ctx: BotContext): Promise<void> {
@@ -245,7 +246,7 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error creating DCA order:', error);
+    logger.error('Error creating DCA order:', error);
     const message = await ctx.reply(error_dca_message);
     await deleteBotMessage(ctx, message.message_id, 5000);
   }
@@ -342,7 +343,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
       throw new Error(cancelResult.error || 'Failed to cancel DCA order');
     }
   } catch (error) {
-    console.error('Error cancelling DCA order:', error);
+    logger.error('Error cancelling DCA order:', error);
     const message = await ctx.reply('❌ Failed to cancel DCA order. Please try again later.');
     await deleteBotMessage(ctx, message.message_id, 5000);
   }

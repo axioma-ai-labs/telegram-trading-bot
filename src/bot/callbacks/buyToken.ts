@@ -14,6 +14,7 @@ import {
 } from '@/bot/commands/buy';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import logger from '@/config/logger';
 
 const transaction_success_message = (amount: number, token: string, txHash: string): string =>
   `✅ Buy order for ${amount} ETH on ${token} was successful!\n\n` +
@@ -117,7 +118,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
 
     const neurodex = new NeuroDexApi();
     const buyResult = await neurodex.buy(params, 'base');
-    console.log('BUY RESULT:', buyResult);
+    logger.info('BUY RESULT:', buyResult);
 
     // if success
     if (buyResult.success && buyResult.data?.txHash) {
@@ -144,7 +145,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
       ctx.session.currentOperation = null;
     }
   } catch (error) {
-    console.error('Error during buy transaction:', error);
+    logger.error('Error during buy transaction:', error);
     const message = error instanceof Error ? error.message.toLowerCase() : '';
     if (message.includes('insufficient funds')) {
       const message = await ctx.reply(insufficient_funds_message);

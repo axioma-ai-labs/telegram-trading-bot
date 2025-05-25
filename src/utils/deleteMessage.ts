@@ -1,4 +1,5 @@
 import { BotContext } from '@/types/telegram';
+import logger from '@/config/logger';
 
 /**
  * Deletes a bot message after an optional delay.
@@ -14,7 +15,7 @@ export const deleteBotMessage = async (
   delayMs = 10000
 ): Promise<boolean> => {
   if (!ctx.chat?.id) {
-    console.error('Cannot delete message: chat ID not available');
+    logger.error('Cannot delete message: chat ID not available');
     return false;
   }
 
@@ -24,7 +25,7 @@ export const deleteBotMessage = async (
         await ctx.api.deleteMessage(ctx.chat!.id, messageId);
         resolve(true);
       } catch (error) {
-        console.error('Error deleting message:', error);
+        logger.error('Error deleting message:', error);
         resolve(false);
       }
     }, delayMs);

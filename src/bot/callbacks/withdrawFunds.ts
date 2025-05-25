@@ -2,6 +2,7 @@ import { BotContext } from '@/types/telegram';
 import { withdrawMessage, withdrawKeyboard } from '@/bot/commands/withdraw';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { ViemService } from '@/services/engine/viem.service';
+import logger from '@/config/logger';
 
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   // validate user
@@ -11,6 +12,8 @@ export async function withdrawFunds(ctx: BotContext): Promise<void> {
   const viemService = new ViemService();
   const ethBalance = await viemService.getNativeBalance(user?.wallets[0].address as `0x${string}`);
   const message = withdrawMessage(ethBalance || '0.000');
+
+  logger.info('Withdraw funds message:', message);
 
   await ctx.editMessageText(message, {
     parse_mode: 'Markdown',

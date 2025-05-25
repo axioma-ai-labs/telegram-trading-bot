@@ -44,6 +44,11 @@ export interface NativeTokenAddress {
   bsc: string;
 }
 
+export interface BetterstackConfig {
+  sourceToken: string;
+  endpoint: string;
+}
+
 export interface AppConfig {
   projectName: string;
   environment: Environment;
@@ -56,6 +61,7 @@ export interface AppConfig {
   database: DatabaseConfig;
   node: NodeConfig;
   covalenthqApiKey: string;
+  betterstack: BetterstackConfig;
   // Constants
   MAX_UINT256: string;
 }

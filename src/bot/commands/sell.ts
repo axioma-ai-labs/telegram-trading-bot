@@ -3,6 +3,7 @@ import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
 import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const sellTokenMessage = `Enter token contract address to sell:`;
 export const error_message = '❌ Transaction failed. Please try again later.';
@@ -64,6 +65,8 @@ export const sellCommandHandler: CommandHandler = {
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'sell' };
+
+    logger.info('Sell token message:', sellTokenMessage);
 
     await ctx.reply(sellTokenMessage, {
       parse_mode: 'Markdown',

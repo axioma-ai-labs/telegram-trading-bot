@@ -1,6 +1,7 @@
 import { supabaseService } from '@/services/supabase/client';
 import { EncryptionService } from '@/utils/encryption';
 import { config } from '@/config/config';
+import logger from '@/config/logger';
 
 /**
  * Service for securely storing and retrieving private keys
@@ -31,7 +32,7 @@ export class PrivateStorageService {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Error storing private key:', error);
+      logger.error('Error storing private key:', error);
       return false;
     }
   }
@@ -59,7 +60,7 @@ export class PrivateStorageService {
 
       return decrypted.toString();
     } catch (error) {
-      console.error('Error retrieving private key:', error);
+      logger.error('Error retrieving private key:', error);
       return null;
     }
   }
@@ -79,7 +80,7 @@ export class PrivateStorageService {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Error deleting private key:', error);
+      logger.error('Error deleting private key:', error);
       return false;
     }
   }

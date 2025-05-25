@@ -4,6 +4,7 @@ import { BotContext } from '@/types/telegram';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { ViemService } from '@/services/engine/viem.service';
+import logger from '@/config/logger';
 
 export const withdrawMessage = (ethBalance: string): string => `📤 *Withdraw ETH or other tokens*
 
@@ -36,6 +37,8 @@ export const withdrawCommandHandler: CommandHandler = {
     const viemService = new ViemService();
     const ethBalance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
     const message = withdrawMessage(ethBalance || '0.000');
+
+    logger.info('Withdraw message:', message);
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

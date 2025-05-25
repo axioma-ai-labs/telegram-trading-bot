@@ -2,6 +2,7 @@ import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const transactionsMessage = `
 *📈 Transaction History*
@@ -45,6 +46,8 @@ export const transactionsCommandHandler: CommandHandler = {
     // validate user
     const { isValid } = await validateUserAndWallet(ctx);
     if (!isValid) return;
+
+    logger.info('Transactions message:', transactionsMessage);
 
     await ctx.reply(transactionsMessage, {
       parse_mode: 'Markdown',

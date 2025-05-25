@@ -3,6 +3,7 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const depositMessage = (
   walletAddress: string,
@@ -34,6 +35,8 @@ export const depositCommandHandler: CommandHandler = {
     const balance = await viemService.getNativeBalance(user?.wallets[0].address as `0x${string}`);
     const ethBalance = balance || '0.000';
     const message = depositMessage(user.wallets[0].address, ethBalance);
+
+    logger.info('Deposit message:', message);
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',
