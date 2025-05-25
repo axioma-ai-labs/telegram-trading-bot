@@ -1,8 +1,8 @@
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { walletMessage, walletCreationOKMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { WalletService } from '@/services/db/wallet.service';
-import { UserService } from '@/services/db/user.service';
+import { WalletService } from '@/services/prisma/wallet';
+import { UserService } from '@/services/prisma/user';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem.service';
 import { invalidateUserCache } from '@/utils/userValidation';
@@ -41,7 +41,6 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       chain: 'ethereum',
       userId: user.id,
       type: 'generated',
-      encryptedPrivateKey: wallet.privateKey,
     });
 
     // Invalidate user cache since wallet was added

@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
@@ -28,10 +28,10 @@ export const depositCommandHandler: CommandHandler = {
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
     const { isValid, user } = await validateUserAndWallet(ctx);
-    if (!isValid) return;
+    if (!isValid || !user) return;
 
     const viemService = new ViemService();
-    const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+    const balance = await viemService.getNativeBalance(user?.wallets[0].address as `0x${string}`);
     const ethBalance = balance || '0.000';
     const message = depositMessage(user.wallets[0].address, ethBalance);
 

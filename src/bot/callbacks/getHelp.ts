@@ -1,4 +1,4 @@
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { helpKeyboard, helpMessage } from '@/bot/commands/help';
 import { validateUserAndWallet } from '@/utils/userValidation';
 

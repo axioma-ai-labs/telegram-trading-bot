@@ -1,4 +1,4 @@
-import { prisma } from '@/services/db/prisma';
+import { prisma } from '@/services/prisma/client';
 import { Wallet } from '@prisma/client/edge';
 
 export class WalletService {
@@ -9,7 +9,6 @@ export class WalletService {
     address: string;
     chain: string;
     userId: string;
-    encryptedPrivateKey: string;
     type?: string;
   }): Promise<Wallet> {
     return prisma.wallet.create({
@@ -17,7 +16,6 @@ export class WalletService {
         address: data.address,
         chain: data.chain,
         userId: data.userId,
-        encryptedPrivateKey: data.encryptedPrivateKey,
         type: data.type,
       },
     });

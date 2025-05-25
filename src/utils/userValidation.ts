@@ -1,5 +1,5 @@
-import { BotContext } from '@/types/config';
-import { UserService } from '@/services/db/user.service';
+import { BotContext } from '@/types/telegram';
+import { UserService } from '@/services/prisma/user';
 import { not_registered_message } from '@/bot/commands/dca';
 import { acceptTermsConditionsKeyboard, acceptTermsConditionsMessage } from '@/bot/commands/start';
 import { createWalletKeyboard, createWalletMessage } from '@/bot/commands/wallet';

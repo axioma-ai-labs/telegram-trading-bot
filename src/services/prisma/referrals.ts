@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { prisma } from '@/services/prisma/client';
 import { ReferralStats, User } from '@prisma/client/edge';
 
 export class ReferralService {
