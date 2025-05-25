@@ -65,6 +65,26 @@ import {
 } from './bot/callbacks/handleDCA';
 import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
 import logger from '@/config/logger';
+import {
+  limitToken,
+  retrieveLimitAmount,
+  retrieveLimitPrice,
+  retrieveLimitExpiry,
+  limitConfirm,
+  limitCancel,
+  getLimitOrders,
+  cancelLimitOrder,
+} from './bot/callbacks/handleLimitOrders';
+import {
+  limitCommandHandler,
+  limitOrdersCommandHandler,
+  limitTokenFoundMessage,
+  limitAmountKeyboard,
+  invalid_amount_message as limitInvalidAmountMessage,
+  limitPriceMessage,
+  invalidPriceMessage,
+  invalidExpiryMessage,
+} from './bot/commands/limit';
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
@@ -143,6 +163,11 @@ const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
   buy_cancel: buyCancel,
   sell_confirm: sellConfirm,
   sell_cancel: sellCancel,
+  limit: limitToken,
+  get_limit_orders: getLimitOrders,
+  limit_confirm: limitConfirm,
+  limit_cancel: limitCancel,
+  refresh_limit_orders: getLimitOrders,
 };
 
 // Parameterized handlers
@@ -170,6 +195,15 @@ const PARAMETERIZED_HANDLERS: Record<string, (ctx: BotContext, param: string) =>
   },
   dca_times: async (ctx, param) => {
     await retrieveDcaTimes(ctx, param);
+  },
+  limit_amount: async (ctx, param) => {
+    await retrieveLimitAmount(ctx, param);
+  },
+  limit_expiry: async (ctx, param) => {
+    await retrieveLimitExpiry(ctx, param);
+  },
+  cancel_limit: async (ctx, param) => {
+    await cancelLimitOrder(ctx, param);
   },
 };
 
@@ -214,6 +248,8 @@ bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // 
 bot.command(referralCommandHandler.command, referralCommandHandler.handler); // /referrals
 bot.command(dcaCommandHandler.command, dcaCommandHandler.handler); // /dca
 bot.command(dcaOrdersCommandHandler.command, dcaOrdersCommandHandler.handler); // /get_dca_orders
+bot.command(limitCommandHandler.command, limitCommandHandler.handler); // /limit
+bot.command(limitOrdersCommandHandler.command, limitOrdersCommandHandler.handler); // /limitorders
 
 // Set commands (quick access)
 bot.api.setMyCommands([
@@ -231,6 +267,11 @@ bot.api.setMyCommands([
   },
   { command: referralCommandHandler.command, description: referralCommandHandler.description },
   { command: dcaCommandHandler.command, description: dcaCommandHandler.description },
+  { command: limitCommandHandler.command, description: limitCommandHandler.description },
+  {
+    command: limitOrdersCommandHandler.command,
+    description: limitOrdersCommandHandler.description,
+  },
 ]);
 
 // Handle token input for buy command
@@ -320,6 +361,73 @@ bot.on('message:text', async (ctx) => {
           return;
         }
         await performSell(ctx, parsedAmount.toString());
+      }
+      break;
+
+    case 'limit':
+      if (!currentOperation.token) {
+        // Handle token input
+        try {
+          const neurodex = new NeuroDexApi();
+          const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+
+          ctx.session.currentOperation = {
+            type: 'limit',
+            token: userInput,
+            tokenSymbol: tokenData.data?.symbol,
+            tokenName: tokenData.data?.name,
+            tokenChain: tokenData.data?.chain,
+          };
+
+          await ctx.reply(limitTokenFoundMessage(tokenData), {
+            parse_mode: 'Markdown',
+            reply_markup: limitAmountKeyboard,
+          });
+        } catch (error) {
+          await ctx.reply(
+            '❌ Token not found. Please check the token contract address and try again.',
+            {
+              parse_mode: 'Markdown',
+            }
+          );
+        }
+      } else if (!currentOperation.amount) {
+        // Handle amount input
+        const parsedAmount = parseFloat(userInput);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) {
+          const message = await ctx.reply(limitInvalidAmountMessage);
+          await deleteBotMessage(ctx, message.message_id);
+          return;
+        }
+
+        ctx.session.currentOperation = {
+          ...currentOperation,
+          amount: parsedAmount,
+        };
+
+        await ctx.reply(limitPriceMessage, {
+          parse_mode: 'Markdown',
+        });
+      } else if (!currentOperation.price) {
+        // Handle price input
+        const parsedPrice = parseFloat(userInput);
+        if (isNaN(parsedPrice) || parsedPrice <= 0) {
+          const message = await ctx.reply(invalidPriceMessage);
+          await deleteBotMessage(ctx, message.message_id);
+          return;
+        }
+
+        await retrieveLimitPrice(ctx, parsedPrice.toString());
+      } else if (!currentOperation.expiry) {
+        // Handle expiry input
+        const expiryPattern = /^(\d+)([HDWM])$/i;
+        if (!expiryPattern.test(userInput)) {
+          const message = await ctx.reply(invalidExpiryMessage);
+          await deleteBotMessage(ctx, message.message_id);
+          return;
+        }
+
+        await retrieveLimitExpiry(ctx, userInput.toUpperCase());
       }
       break;
 

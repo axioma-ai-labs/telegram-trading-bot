@@ -28,8 +28,8 @@ async function getUserData(
   telegramId: string,
   forceRefresh = false
 ): Promise<UserWithRelations | null> {
-  if (!forceRefresh && ctx.session.user && isCacheValid(ctx.session.user)) {
-    return ctx.session.user;
+  if (!forceRefresh && ctx.session.user && isCacheValid(ctx.session.user as CachedUser)) {
+    return ctx.session.user as UserWithRelations;
   }
 
   const user = await UserService.getUserByTelegramId(telegramId);

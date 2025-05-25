@@ -23,7 +23,7 @@ const envSchema = z.object({
   DEFAULT_SLIPPAGE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE_WALLET: z.string().optional().default(''),
-  DEFAULT_GAS_PRIORITY: z.enum(['low', 'medium', 'high'] as const).default('medium'),
+  DEFAULT_GAS_PRIORITY: z.enum(['standard', 'fast', 'instant'] as const).default('standard'),
 
   COVALENTHQ_API_KEY: z.string().min(1, 'COVALENTHQ_API_KEY is required'),
 

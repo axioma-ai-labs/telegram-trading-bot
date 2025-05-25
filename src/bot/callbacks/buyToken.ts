@@ -89,7 +89,6 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
-
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token || !currentOperation?.amount) {
