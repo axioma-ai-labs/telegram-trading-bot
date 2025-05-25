@@ -1,4 +1,5 @@
-import { BotContext, GasPriority } from '@/types/config';
+import { BotContext } from '@/types/telegram';
+import { GasPriority } from '@/types/config';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { formatInterval } from '@/utils/formatters';
@@ -20,8 +21,9 @@ import {
   error_dca_message,
   error_message,
   insufficient_funds_message,
-} from '../commands/dca';
+} from '@/bot/commands/dca';
 import { DcaParams } from '@/types/neurodex';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
 
 const dca_success_message = (
   amount: number,
@@ -185,6 +187,13 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
+  if (!privateKey) {
+    const message = await ctx.reply('❌ Private key not found. Please try again.');
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const neurodex = new NeuroDexApi();
     const wallet = user.wallets[0];
@@ -200,7 +209,7 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       slippage: Number(settings?.slippage),
       gasPriority: 'standard',
       walletAddress: wallet.address,
-      privateKey: wallet.encryptedPrivateKey || '',
+      privateKey: privateKey,
       referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
     };
 
@@ -305,6 +314,13 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
       allowedSender: '',
     };
 
+    const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
+    if (!privateKey) {
+      const message = await ctx.reply('❌ Private key not found. Please try again.');
+      await deleteBotMessage(ctx, message.message_id, 5000);
+      return;
+    }
+
     // cancel DCA order
     const cancelResult = await neurodex.cancelDcaOrder(
       {
@@ -313,7 +329,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
         slippage: Number(user.settings?.slippage),
         gasPriority: user.settings?.gasPriority as GasPriority,
         walletAddress: wallet.address,
-        privateKey: wallet.encryptedPrivateKey || '',
+        privateKey: privateKey,
         referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
       },
       'base'

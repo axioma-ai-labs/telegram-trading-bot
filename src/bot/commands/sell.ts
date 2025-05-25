@@ -1,5 +1,5 @@
 import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
 import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { validateUserAndWallet } from '@/utils/userValidation';

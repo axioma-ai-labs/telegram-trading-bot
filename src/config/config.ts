@@ -20,14 +20,19 @@ const envSchema = z.object({
     .string()
     .min(32, 'PRISMA_FIELD_ENCRYPTION_KEY must be at least 32 characters'),
 
-  WALLET_ENCRYPTION_KEY: z.string().min(32, 'WALLET_ENCRYPTION_KEY must be at least 32 characters'),
-
   DEFAULT_SLIPPAGE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE: z.coerce.number().min(0).max(100).default(1),
   DEFAULT_FEE_WALLET: z.string().optional().default(''),
   DEFAULT_GAS_PRIORITY: z.enum(['low', 'medium', 'high'] as const).default('medium'),
 
   COVALENTHQ_API_KEY: z.string().min(1, 'COVALENTHQ_API_KEY is required'),
+
+  SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
+  SUPABASE_KEY: z.string().min(1, 'SUPABASE_KEY is required'),
+  SUPABASE_SERVICE_KEY: z.string().min(1, 'SUPABASE_SERVICE_KEY is required'),
+  MASTER_ENCRYPTION_PASSWORD: z
+    .string()
+    .min(32, 'MASTER_ENCRYPTION_PASSWORD must be at least 32 characters'),
 });
 
 /**
@@ -82,13 +87,20 @@ const createConfig = (): AppConfig => {
       encryptionKey: env.PRISMA_FIELD_ENCRYPTION_KEY,
     },
 
-    // Wallet Settings
-    wallet: {
-      encryptionKey: env.WALLET_ENCRYPTION_KEY,
-    },
-
     // Third Party APIs
     covalenthqApiKey: env.COVALENTHQ_API_KEY,
+
+    // Supabase Settings
+    supabase: {
+      url: env.SUPABASE_URL,
+      key: env.SUPABASE_KEY,
+      serviceKey: env.SUPABASE_SERVICE_KEY,
+    },
+
+    // Encryption Settings
+    encryption: {
+      masterPassword: env.MASTER_ENCRYPTION_PASSWORD,
+    },
 
     // Constants
     // Chain IDs can be found here:

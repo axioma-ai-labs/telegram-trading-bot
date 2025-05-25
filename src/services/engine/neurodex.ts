@@ -25,6 +25,7 @@ import { OpenOceanChain } from '@/types/openocean';
 import { GasPriority } from '@/types/config';
 import { erc20Abi } from '@/utils/abis';
 import Web3 from 'web3';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
 
 /**
  * NeuroDex API service for handling trading operations
@@ -124,10 +125,30 @@ export class NeuroDexApi {
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
 
+    // Store the encrypted private key
+    const stored = await PrivateStorageService.storePrivateKey(account.address, privateKey);
+    if (!stored) {
+      throw new Error('Failed to store private key securely');
+    }
+
     return {
       address: account.address,
       privateKey,
     };
+  }
+
+  /**
+   * Retrieves the private key for a wallet address
+   * @param walletAddress - The wallet address to get the private key for
+   * @returns The private key or null if not found
+   */
+  async getPrivateKey(walletAddress: string): Promise<string | null> {
+    try {
+      return await PrivateStorageService.getPrivateKey(walletAddress);
+    } catch (error) {
+      console.error('Error retrieving private key:', error);
+      return null;
+    }
   }
 
   /**

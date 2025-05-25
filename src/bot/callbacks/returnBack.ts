@@ -1,10 +1,10 @@
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { startMessage, startKeyboard } from '@/bot/commands/start';
 import { settingsMessage, settingsKeyboard } from '@/bot/commands/settings';
 import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
-import { referralKeyboard, referralMessage } from '../commands/referrals';
+import { referralKeyboard, referralMessage } from '@/bot/commands/referrals';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';

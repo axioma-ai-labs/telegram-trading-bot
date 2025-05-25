@@ -1,7 +1,7 @@
 import { Bot } from 'grammy';
 import { session } from 'grammy';
 import { config } from '@/config/config';
-import { BotContext, SessionData } from '@/types/config';
+import { BotContext, SessionData } from '@/types/telegram';
 import { startCommandHandler } from '@/bot/commands/start';
 import { helpCommandHandler } from '@/bot/commands/help';
 import { walletCommandHandler } from '@/bot/commands/wallet';

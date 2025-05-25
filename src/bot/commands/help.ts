@@ -1,5 +1,5 @@
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { CommandHandler } from '@/types/commands';
 import { validateUserAndWallet } from '@/utils/userValidation';
 

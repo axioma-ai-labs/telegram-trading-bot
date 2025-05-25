@@ -1,4 +1,4 @@
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { depositMessage, depositKeyboard } from '@/bot/commands/deposit';
 import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';
@@ -6,7 +6,7 @@ import { validateUserAndWallet } from '@/utils/userValidation';
 export async function depositFunds(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid, user } = await validateUserAndWallet(ctx);
-  if (!isValid) return;
+  if (!isValid || !user) return;
 
   const viemService = new ViemService();
   const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);

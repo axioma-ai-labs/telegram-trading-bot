@@ -1,4 +1,4 @@
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { buyTokenMessage } from '@/bot/commands/buy';
 import { NeuroDexApi } from '@/services/engine/neurodex';
@@ -13,6 +13,7 @@ import {
   confirmBuyKeyboard,
 } from '@/bot/commands/buy';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
 
 const transaction_success_message = (amount: number, token: string, txHash: string): string =>
   `✅ Buy order for ${amount} ETH on ${token} was successful!\n\n` +
@@ -96,6 +97,13 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
+  if (!privateKey) {
+    const message = await ctx.reply('❌ Private key not found. Please try again.');
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const params: BuyParams = {
       toTokenAddress: currentOperation.token,
@@ -103,7 +111,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
       slippage: Number(user?.settings?.slippage),
       gasPriority: 'standard',
       walletAddress: user.wallets[0].address,
-      privateKey: user.wallets[0].encryptedPrivateKey || '',
+      privateKey: privateKey,
       referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
     };
 

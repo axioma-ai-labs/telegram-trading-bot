@@ -1,4 +1,4 @@
-import { prisma } from '@/services/db/prisma';
+import { prisma } from '@/services/prisma/client';
 import { Settings } from '@prisma/client/edge';
 
 export class SettingsService {

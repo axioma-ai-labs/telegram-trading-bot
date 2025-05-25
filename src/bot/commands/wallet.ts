@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy';
 import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { ViemService } from '@/services/engine/viem.service';
 

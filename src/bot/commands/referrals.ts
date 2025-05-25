@@ -1,7 +1,7 @@
 import { CommandHandler } from '@/types/commands';
-import { BotContext } from '@/types/config';
+import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
-import { ReferralService } from '@/services/db/referrals';
+import { ReferralService } from '@/services/prisma/referrals';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const referralMessage = (referralLink: string): string => {

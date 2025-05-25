@@ -1,4 +1,4 @@
-import { prisma } from '@/services/db/prisma';
+import { prisma } from '@/services/prisma/client';
 import { Settings, User, Wallet } from '@prisma/client/edge';
 
 interface ReferralStats {
