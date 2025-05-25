@@ -1,11 +1,14 @@
 import { BotContext } from '@/types/telegram';
 import { helpKeyboard, helpMessage } from '@/bot/commands/help';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export async function handleGetHelp(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid } = await validateUserAndWallet(ctx);
   if (!isValid) return;
+
+  logger.info('Help message:', helpMessage);
 
   await ctx.editMessageText(helpMessage, {
     parse_mode: 'Markdown',

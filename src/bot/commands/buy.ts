@@ -3,6 +3,7 @@ import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
 import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const buyTokenMessage = `Enter token contract address to buy:`;
 export const error_message = '❌ Transaction failed. Please try again later.';
@@ -65,6 +66,8 @@ export const buyCommandHandler: CommandHandler = {
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'buy' };
+
+    logger.info('Buy token message:', buyTokenMessage);
 
     await ctx.reply(buyTokenMessage, {
       parse_mode: 'Markdown',

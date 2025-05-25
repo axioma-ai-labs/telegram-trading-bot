@@ -5,6 +5,7 @@ import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk'
 import { OpenOceanClient } from '@/services/engine/openocean.service';
 import { ViemService } from '@/services/engine/viem.service';
 import { config } from '@/config/config';
+import logger from '@/config/logger';
 import {
   NeuroDexResponse,
   WalletInfo,
@@ -109,7 +110,7 @@ export class NeuroDexApi {
 
       return result;
     } catch (error) {
-      console.error('Error in getTokenAmount:', error);
+      logger.error('Error in getTokenAmount:', error);
       throw new Error(
         `Failed to convert amount for token ${tokenAddress}: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -146,7 +147,7 @@ export class NeuroDexApi {
     try {
       return await PrivateStorageService.getPrivateKey(walletAddress);
     } catch (error) {
-      console.error('Error retrieving private key:', error);
+      logger.error('Error retrieving private key:', error);
       return null;
     }
   }
@@ -273,7 +274,7 @@ export class NeuroDexApi {
       // Check if approval was successful
       return receipt.status === 'success';
     } catch (error) {
-      console.error('Error checking/approving token:', error);
+      logger.error('Error checking/approving token:', error);
       throw new Error(
         `Token approval failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );

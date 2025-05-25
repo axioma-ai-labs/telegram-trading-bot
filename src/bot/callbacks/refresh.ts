@@ -3,6 +3,7 @@ import { depositMessage, depositKeyboard } from '@/bot/commands/deposit';
 import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
 import { UserService } from '@/services/prisma/user';
 import { ViemService } from '@/services/engine/viem.service';
+import logger from '@/config/logger';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
   const callbackData = ctx.callbackQuery?.data;
@@ -58,7 +59,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     }
 
     // Handle other errors
-    console.error('Error in handleRefresh:', error);
+    logger.error('Error in handleRefresh:', error);
     await ctx.answerCallbackQuery({
       text: '❌ Failed to refresh. Please try again.',
       show_alert: true,

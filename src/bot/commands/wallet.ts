@@ -3,6 +3,7 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 import { ViemService } from '@/services/engine/viem.service';
+import logger from '@/config/logger';
 
 export const walletCreationOKMessage = (walletAddress: string, privateKey: string): string => `
 ✅ *Your wallet has been created successfully*
@@ -71,6 +72,8 @@ export const walletCommandHandler: CommandHandler = {
     const balance = ethBalance || '0.000';
 
     const message = walletMessage(walletAddress, balance);
+
+    logger.info('Wallet message:', message);
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

@@ -2,6 +2,7 @@ import { InlineKeyboard } from 'grammy';
 import { BotContext } from '@/types/telegram';
 import { CommandHandler } from '@/types/commands';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const helpMessage = `
 *Help & Support*
@@ -54,6 +55,8 @@ export const helpCommandHandler: CommandHandler = {
     // validate user
     const { isValid } = await validateUserAndWallet(ctx);
     if (!isValid) return;
+
+    logger.info('Help message:', helpMessage);
 
     await ctx.reply(helpMessage, {
       parse_mode: 'Markdown',

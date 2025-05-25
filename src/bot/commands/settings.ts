@@ -4,6 +4,7 @@ import { BotContext } from '@/types/telegram';
 import { SettingsService } from '@/services/prisma/settings';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const settingsMessage = (
   slippage?: string,
@@ -97,6 +98,8 @@ export const settingsCommandHandler: CommandHandler = {
       getLanguageName(user.settings.language || 'en'),
       getGasPriorityName(user.settings.gasPriority || 'standard')
     );
+
+    logger.info('Settings message:', message);
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

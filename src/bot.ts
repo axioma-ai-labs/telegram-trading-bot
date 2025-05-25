@@ -64,6 +64,7 @@ import {
   getDcaOrders,
 } from './bot/callbacks/handleDCA';
 import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
+import logger from '@/config/logger';
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 
@@ -193,7 +194,7 @@ bot.on('callback_query', async (ctx) => {
 
   // 3) Regular callbacks
   const handler = CALLBACK_HANDLERS[callbackData];
-  console.log('callbackData: ', callbackData);
+  logger.info('🟧 CALLBACK DATA:', callbackData);
   if (handler) {
     await handler(ctx);
     return;
@@ -414,30 +415,30 @@ bot.on('message:text', async (ctx) => {
       }
   }
 
-  console.log('🟧 OPERATION:', ctx.session.currentOperation);
+  logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 });
 
 // Error handling
 bot.catch((err) => {
   const ctx = err.ctx;
-  console.error(`Error while handling update ${ctx.update.update_id}:`);
-  console.error(err.error);
+  logger.error(`Error while handling update ${ctx.update.update_id}:`);
+  logger.error(err.error);
 });
 
 // Run the bot
 const main = async (): Promise<void> => {
   try {
     if (config.environment === 'development') {
-      console.log(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
     } else {
-      console.log(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
     }
 
     // Start the bot
     await bot.start();
-    console.log('Bot started successfully!');
+    logger.info('Bot started successfully!');
   } catch (error) {
-    console.error('Failed to start bot:', error);
+    logger.error('Failed to start bot:', error);
     process.exit(1);
   }
 };

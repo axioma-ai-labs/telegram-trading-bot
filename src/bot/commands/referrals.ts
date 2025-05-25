@@ -3,6 +3,7 @@ import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
 import { ReferralService } from '@/services/prisma/referrals';
 import { validateUserAndWallet } from '@/utils/userValidation';
+import logger from '@/config/logger';
 
 export const referralMessage = (referralLink: string): string => {
   return [
@@ -64,6 +65,8 @@ export const referralCommandHandler: CommandHandler = {
     if (!user.referralCode) {
       await ReferralService.upsertReferralCode(user.id, referralLink);
     }
+
+    logger.info('Referral message:', referralMessage(referralLink));
 
     await ctx.reply(referralMessage(referralLink), {
       parse_mode: 'Markdown',
