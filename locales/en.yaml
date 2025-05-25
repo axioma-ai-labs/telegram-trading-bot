@@ -28,6 +28,10 @@ dca_confirm_msg: "🔍 *Confirm DCA Order* \n\n *Token:* ${tokenSymbol} | ${toke
 dca_token_found_msg: "✅ *Token Found* \n\n *Symbol:* *$${tokenData.data?.symbol}* \n*Name:* *${tokenData.data?.name}* \n*Price:* *$${tokenData.data?.price}* \n*Chain:* ${tokenData.data?.chain} \n\nPlease select how much ETH you want to spend on $${tokenData.data?.symbol} for your DCA order. \n\nGo to /settings to adjust slippage and gas if the transaction fails."
 
 
+# withdraw
+withdraw_msg: "📤 *Withdraw ETH or other tokens* \n\nYour balance: \n- ETH: ${ethBalance} \n\n*Important:* \n- Double check the receiving address \n- Withdrawals usually confirm within minutes \n- Never share your private key with anyone"
+
+
 # limit orders
 
 

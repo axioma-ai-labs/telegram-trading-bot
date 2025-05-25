@@ -71,4 +71,6 @@ export interface OperationState {
   amount?: number;
   interval?: number;
   times?: number;
+  price?: number;
+  expiry?: string;
 }
