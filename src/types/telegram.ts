@@ -10,6 +10,7 @@ export interface SessionData {
   startTime: number;
   lastInteractionTime: number;
   currentOperation: OperationState | null;
+  currentMessage: CurrentMessage | null;
   userLanguage?: string;
   user?: {
     id: string;
@@ -62,7 +63,7 @@ export interface SessionData {
  */
 export type BotContext = Context & SessionFlavor<SessionData> & I18nFlavor;
 
-export type OperationType = 'buy' | 'sell' | 'dca' | 'limit' | null;
+export type OperationType = 'buy' | 'sell' | 'dca' | 'limit' | 'pk_verification' | null;
 
 export interface OperationState {
   type: OperationType;
@@ -75,4 +76,13 @@ export interface OperationState {
   times?: number;
   price?: number;
   expiry?: string;
+  walletAddress?: string;
+}
+
+export type MessageType = 'verification' | 'temporary' | 'confirmation';
+
+export interface CurrentMessage {
+  messageId: number;
+  chatId: number;
+  type: MessageType;
 }

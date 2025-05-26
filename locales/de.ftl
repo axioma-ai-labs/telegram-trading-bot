@@ -52,11 +52,11 @@ wallet_msg =
 
 wallet_repeat_pk_error_msg = ❌ *Private Key Verifizierung fehlgeschlagen*
     
-    Die letzten 4 Ziffern, die Sie eingegeben haben, stimmen nicht mit Ihrem Private Key überein. Bitte versuchen Sie es unten erneut:
+    Die letzten 4 Zeichen, die Sie eingegeben haben, stimmen nicht mit Ihrem Private Key überein. Bitte versuchen Sie es unten erneut:
 
 wallet_repeat_pk_msg = ⚠️ *Private Key verifizieren* 
 
-    Bitte geben Sie die letzten 4 Ziffern Ihres Private Keys unten ein, um zu bestätigen, dass Sie ihn sich gemerkt und sicher gespeichert haben:
+    Bitte geben Sie die letzten 4 Zeichen Ihres Private Keys unten ein, um zu bestätigen, dass Sie ihn sich gemerkt und sicher gespeichert haben:
 
 wallet_repeat_pk_success_msg = ✅ *Private Key verifiziert*
 
@@ -255,6 +255,8 @@ referral_stats_msg =
     Gesamte Empfehlungseinnahmen: { $totalEarned }
 
     Verbreiten Sie weiter das Wort und sehen Sie zu, wie Ihre Einnahmen wachsen! 🚀
+
+referral_success_notification_msg = 🥳 *Boom!* Sie haben gerade einen neuen Benutzer zu Neurodex empfohlen! Sie wachsen mit uns (und mit Ihren Belohnungen)!
 
 settings_msg =
     ⚙️ *Einstellungen*

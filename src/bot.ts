@@ -17,21 +17,26 @@ import { depositFunds } from '@/bot/callbacks/depositFunds';
 import { handleGetHelp } from '@/bot/callbacks/getHelp';
 import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
 import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
-import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
+import { handleCreateWallet, handleStartTrading } from '@/bot/callbacks/handleWallet';
 import { handleRefresh } from '@/bot/callbacks/refresh';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
 import { performSell, sellCancel, sellConfirm, sellToken } from '@/bot/callbacks/sellToken';
 import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
-import { buyCommandHandler, buyTokenKeyboard } from '@/bot/commands/buy';
+import { buyCommandHandler } from '@/bot/commands/buy';
 import depositCommandHandler from '@/bot/commands/deposit';
 import { helpCommandHandler } from '@/bot/commands/help';
 import { referralCommandHandler } from '@/bot/commands/referrals';
-import { sellCommandHandler, sellTokenKeyboard } from '@/bot/commands/sell';
+import { sellCommandHandler } from '@/bot/commands/sell';
 import { settingsCommandHandler } from '@/bot/commands/settings';
 import { startCommandHandler } from '@/bot/commands/start';
 import { transactionsCommandHandler } from '@/bot/commands/transactions';
 import { walletCommandHandler } from '@/bot/commands/wallet';
 import { withdrawCommandHandler } from '@/bot/commands/withdraw';
+import { handleBuyMessages } from '@/bot/messages/buyMessages';
+import { handleDcaMessages } from '@/bot/messages/dcaMessages';
+import { handleLimitMessages } from '@/bot/messages/limitMessages';
+import { handleSellMessages } from '@/bot/messages/sellMessages';
+import { handlePkVerificationMessages } from '@/bot/messages/walletMessages';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { I18nService } from '@/services/i18n/i18n.service';
@@ -54,26 +59,11 @@ import {
   limitToken,
   retrieveLimitAmount,
   retrieveLimitExpiry,
-  retrieveLimitPrice,
 } from './bot/callbacks/handleLimitOrders';
-import {
-  confirmDcaKeyboard,
-  dcaCommandHandler,
-  dcaOrdersCommandHandler,
-  dcaTokenKeyboard,
-  intervalKeyboard,
-  timesKeyboard,
-} from './bot/commands/dca';
-import {
-  limitAmountKeyboard,
-  limitCommandHandler,
-  limitOrdersCommandHandler,
-} from './bot/commands/limit';
-import { NeuroDexApi } from './services/engine/neurodex';
-import { deleteBotMessage } from './utils/deleteMessage';
-import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
+import { dcaCommandHandler, dcaOrdersCommandHandler } from './bot/commands/dca';
+import { limitCommandHandler, limitOrdersCommandHandler } from './bot/commands/limit';
 
-const bot = new Bot<BotContext>(config.telegramBotToken);
+export const bot = new Bot<BotContext>(config.telegramBotToken);
 
 // initialize bot
 async function initializeBot(): Promise<void> {
@@ -86,6 +76,7 @@ async function initializeBot(): Promise<void> {
         startTime: Date.now(),
         lastInteractionTime: Date.now(),
         currentOperation: null,
+        currentMessage: null,
       }),
     })
   );
@@ -131,6 +122,7 @@ async function initializeBot(): Promise<void> {
 
   // Mapping of callback handlers
   const CALLBACK_HANDLERS: Record<string, (ctx: BotContext) => Promise<void>> = {
+    start_trading: handleStartTrading,
     create_wallet: handleCreateWallet,
     refresh_deposit: handleRefresh,
     refresh_wallet: handleRefresh,
@@ -162,7 +154,6 @@ async function initializeBot(): Promise<void> {
     limit_confirm: limitConfirm,
     limit_cancel: limitCancel,
     refresh_limit_orders: getLimitOrders,
-    // Language callbacks
     lang_en: (ctx) => updateLanguage(ctx, 'en'),
     lang_ru: (ctx) => updateLanguage(ctx, 'ru'),
     lang_de: (ctx) => updateLanguage(ctx, 'de'),
@@ -283,256 +274,24 @@ async function initializeBot(): Promise<void> {
 
     switch (currentOperation.type) {
       case 'buy':
-        if (!currentOperation.token) {
-          // Handle token input
-          try {
-            const neurodex = new NeuroDexApi();
-            const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
-
-            ctx.session.currentOperation = {
-              type: 'buy',
-              token: userInput,
-              tokenSymbol: tokenData.data?.symbol,
-              tokenName: tokenData.data?.name,
-              tokenChain: tokenData.data?.chain,
-            };
-
-            const message = ctx.t('buy_token_found_msg', {
-              tokenSymbol: tokenData.data?.symbol || '',
-              tokenName: tokenData.data?.name || '',
-              tokenPrice: tokenData.data?.price || 0,
-              tokenChain: tokenData.data?.chain || '',
-            });
-
-            await ctx.reply(message, {
-              parse_mode: 'Markdown',
-              reply_markup: buyTokenKeyboard,
-            });
-          } catch (error) {
-            await ctx.reply(ctx.t('token_not_found_msg'), {
-              parse_mode: 'Markdown',
-            });
-          }
-        } else if (!currentOperation.amount) {
-          // Handle amount input
-          const parsedAmount = parseFloat(userInput);
-          if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            const invalid_amount_message = await ctx.reply(ctx.t('invalid_amount_msg'));
-            await deleteBotMessage(ctx, invalid_amount_message.message_id);
-            return;
-          }
-          await performBuy(ctx, parsedAmount.toString());
-        }
+        await handleBuyMessages(ctx, userInput, currentOperation);
         break;
 
       case 'sell':
-        if (!currentOperation.token) {
-          // Handle token input
-          try {
-            const neurodex = new NeuroDexApi();
-            const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
-
-            ctx.session.currentOperation = {
-              type: 'sell',
-              token: userInput,
-              tokenSymbol: tokenData.data?.symbol,
-              tokenName: tokenData.data?.name,
-              tokenChain: tokenData.data?.chain,
-            };
-
-            const message = ctx.t('sell_token_found_msg', {
-              tokenSymbol: tokenData.data?.symbol || '',
-              tokenName: tokenData.data?.name || '',
-              tokenPrice: tokenData.data?.price || 0,
-              tokenChain: tokenData.data?.chain || '',
-            });
-
-            await ctx.reply(message, {
-              parse_mode: 'Markdown',
-              reply_markup: sellTokenKeyboard,
-            });
-          } catch (error) {
-            await ctx.reply(ctx.t('token_not_found_msg'), {
-              parse_mode: 'Markdown',
-            });
-          }
-        } else if (!currentOperation.amount) {
-          // Handle amount input
-          const parsedAmount = parseFloat(userInput);
-          if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            const invalid_amount_message = await ctx.reply(ctx.t('invalid_amount_msg'));
-            await deleteBotMessage(ctx, invalid_amount_message.message_id);
-            return;
-          }
-          await performSell(ctx, parsedAmount.toString());
-        }
+        await handleSellMessages(ctx, userInput, currentOperation);
         break;
 
       case 'limit':
-        if (!currentOperation.token) {
-          // Handle token input
-          try {
-            const neurodex = new NeuroDexApi();
-            const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
-
-            ctx.session.currentOperation = {
-              type: 'limit',
-              token: userInput,
-              tokenSymbol: tokenData.data?.symbol,
-              tokenName: tokenData.data?.name,
-              tokenChain: tokenData.data?.chain,
-            };
-
-            const message = ctx.t('limit_token_found_msg', {
-              tokenSymbol: tokenData.data?.symbol || '',
-              tokenName: tokenData.data?.name || '',
-              tokenPrice: tokenData.data?.price || 0,
-              tokenChain: tokenData.data?.chain || '',
-            });
-
-            await ctx.reply(message, {
-              parse_mode: 'Markdown',
-              reply_markup: limitAmountKeyboard,
-            });
-          } catch (error) {
-            await ctx.reply(ctx.t('token_not_found_msg'), {
-              parse_mode: 'Markdown',
-            });
-          }
-        } else if (!currentOperation.amount) {
-          // Handle amount input
-          const parsedAmount = parseFloat(userInput);
-          if (isNaN(parsedAmount) || parsedAmount <= 0) {
-            const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          ctx.session.currentOperation = {
-            ...currentOperation,
-            amount: parsedAmount,
-          };
-
-          await ctx.reply(ctx.t('limit_price_msg'), {
-            parse_mode: 'Markdown',
-          });
-        } else if (!currentOperation.price) {
-          // Handle price input
-          const parsedPrice = parseFloat(userInput);
-          if (isNaN(parsedPrice) || parsedPrice <= 0) {
-            const message = await ctx.reply(ctx.t('invalid_price_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          await retrieveLimitPrice(ctx, parsedPrice.toString());
-        } else if (!currentOperation.expiry) {
-          // Handle expiry input
-          const expiryPattern = /^(\d+)([HDWM])$/i;
-          if (!expiryPattern.test(userInput)) {
-            const message = await ctx.reply(ctx.t('limit_invalid_expiry_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          await retrieveLimitExpiry(ctx, userInput.toUpperCase());
-        }
+        await handleLimitMessages(ctx, userInput, currentOperation);
         break;
 
       case 'dca':
-        if (!currentOperation.token) {
-          try {
-            const neurodex = new NeuroDexApi();
-            const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+        await handleDcaMessages(ctx, userInput, currentOperation);
+        break;
 
-            ctx.session.currentOperation = {
-              type: 'dca',
-              token: userInput,
-              tokenSymbol: tokenData.data?.symbol,
-              tokenName: tokenData.data?.name,
-              tokenChain: tokenData.data?.chain,
-            };
-
-            const message = ctx.t('dca_token_found_msg', {
-              tokenSymbol: tokenData.data?.symbol || '',
-              tokenName: tokenData.data?.name || '',
-              tokenPrice: tokenData.data?.price || 0,
-              tokenChain: tokenData.data?.chain || '',
-            });
-
-            await ctx.reply(message, {
-              parse_mode: 'Markdown',
-              reply_markup: dcaTokenKeyboard,
-            });
-          } catch (error) {
-            await ctx.reply(ctx.t('token_not_found_msg'), {
-              parse_mode: 'Markdown',
-            });
-          }
-        } else if (!currentOperation.amount) {
-          const parsedAmount = parseFloat(userInput);
-          if (!isValidDcaAmount(parsedAmount)) {
-            const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          ctx.session.currentOperation = {
-            ...currentOperation,
-            amount: parsedAmount,
-          };
-
-          await ctx.reply(ctx.t('dca_interval_msg'), {
-            reply_markup: intervalKeyboard,
-          });
-        } else if (!currentOperation.interval) {
-          // interval input
-          const parsedInterval = parseInt(userInput);
-          if (!isValidDcaInterval(parsedInterval)) {
-            const message = await ctx.reply(ctx.t('dca_invalid_interval_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          ctx.session.currentOperation = {
-            ...currentOperation,
-            interval: parsedInterval,
-          };
-
-          // send times message
-          await ctx.reply(ctx.t('dca_times_msg'), {
-            reply_markup: timesKeyboard,
-            parse_mode: 'Markdown',
-          });
-        } else if (!currentOperation.times) {
-          // times input
-          const parsedTimes = parseInt(userInput);
-          if (isNaN(parsedTimes) || parsedTimes < 1 || parsedTimes > 100) {
-            const message = await ctx.reply(ctx.t('dca_invalid_times_msg'));
-            await deleteBotMessage(ctx, message.message_id);
-            return;
-          }
-
-          ctx.session.currentOperation = {
-            ...currentOperation,
-            times: parsedTimes,
-          };
-
-          // send confirmation message
-          const message = ctx.t('dca_confirm_msg', {
-            tokenSymbol: currentOperation.tokenSymbol || '',
-            tokenName: currentOperation.tokenName || '',
-            token: currentOperation.token,
-            amount: currentOperation.amount,
-            interval: currentOperation.interval,
-            times: parsedTimes,
-          });
-
-          await ctx.reply(message, {
-            parse_mode: 'Markdown',
-            reply_markup: confirmDcaKeyboard,
-          });
-        }
+      case 'pk_verification':
+        await handlePkVerificationMessages(ctx, userInput, currentOperation);
+        break;
     }
 
     logger.info('🟧 OPERATION:', ctx.session.currentOperation);
