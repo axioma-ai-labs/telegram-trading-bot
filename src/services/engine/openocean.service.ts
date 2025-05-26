@@ -1,4 +1,4 @@
-import { LimitOrderNodeSdk, openoceanLimitOrderSdk } from '@openocean.finance/limitorder-sdk';
+import { LimitOrderNodeSdk } from '@openocean.finance/limitorder-sdk';
 import axios, { AxiosInstance } from 'axios';
 import Web3 from 'web3';
 
@@ -35,6 +35,7 @@ export class OpenOceanClient {
   private readonly defaultChain: OpenOceanChain;
   private sdk: LimitOrderNodeSdk | null = null;
   private chainId: number | null = null;
+  private dca: boolean = false;
 
   /**
    * Creates a new OpenOcean client instance
@@ -56,10 +57,15 @@ export class OpenOceanClient {
    * @param account - Wallet address
    * @param chainId - Chain ID
    */
-  initializeSdk(chainId: number, provider: Web3, address: string): void {
+  initializeSdk(chainId: number, provider: Web3, address: string, dca: boolean = false): void {
     this.chainId = chainId;
+    this.dca = dca;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.sdk = new LimitOrderNodeSdk(chainId, provider as any, address);
+    if (this.dca) {
+      this.sdk = new LimitOrderNodeSdk(chainId, provider as any, address, 'Dca');
+    } else {
+      this.sdk = new LimitOrderNodeSdk(chainId, provider as any, address);
+    }
   }
 
   /**
@@ -241,8 +247,8 @@ export class OpenOceanClient {
       // Submit the order to the API
       const apiParams = {
         ...orderData,
-        referrer: params.referrer || '',
-        referrerFee: params.referrerFee || '',
+        referrer: params.referrer || undefined,
+        referrerFee: params.referrerFee || undefined,
       };
       const { data } = await this.axiosInstance.post(
         this.buildEndpoint(chainId.toString() as OpenOceanChain, 'limit-order', 'v1'),
@@ -407,51 +413,39 @@ export class OpenOceanClient {
     chain: OpenOceanChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
+      if (!this.sdk) {
+        throw new Error('SDK not initialized. Call initializeSdk first.');
+      }
+      if (!this.dca) {
+        throw new Error('SDK not initialized for DCA. Call initializeSdk with dca=true first.');
+      }
       // Check if chain is the same as the chain the SDK
       const chainId =
         chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
 
-      // Get provider and account from SDK
-      // const provider = (this.sdk as any).web3.currentProvider;
-      // const account = (this.sdk as any).web3.defaultAccount;
-
-      // Create order with SDK
-      const wallet = {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        provider: params.provider as any,
-        chainKey: chain,
-        account: params.address,
-        chainId: chainId!.toString(),
-        mode: 'Dca',
-      };
       const order = {
         makerTokenAddress: params.makerTokenAddress,
         makerTokenDecimals: params.makerTokenDecimals,
         takerTokenAddress: params.takerTokenAddress,
         takerTokenDecimals: params.takerTokenDecimals,
         makerAmount: params.makerAmount,
-        takerAmount: params.takerAmount || '1',
+        takerAmount: params.takerAmount,
         gasPrice: params.gasPrice,
-        expire: params.expire,
-        receiver: params.receiver || '',
-        receiverInputData: params.receiverInputData || '',
-        mode: 'Dca',
+        expire: params.expire
       };
-      // TODO: Fix this part. Now it throws an error.
-      const sdkOrder = await openoceanLimitOrderSdk.createLimitOrder(wallet, order);
+      const sdkOrder = await this.sdk.createLimitOrder(order);
 
       // Prepare API parameters
       const apiParams: DcaOrderCreateApiParams = {
         ...sdkOrder,
-        expireTime: params.time * params.times,
+        expireTime: params.time * (params.times + 1),
         time: params.time,
         times: params.times,
-        version: params.version || 'v2',
-        minPrice: params.minPrice || '',
-        maxPrice: params.maxPrice || '',
-        referrer: params.referrer || '',
-        referrerFee: params.referrerFee || '',
-        chainId: chainId!,
+        version: 'v2',
+        minPrice: params.minPrice || undefined,
+        maxPrice: params.maxPrice || undefined,
+        referrer: params.referrer || undefined,
+        referrerFee: params.referrerFee || undefined,
       };
 
       // Submit to API

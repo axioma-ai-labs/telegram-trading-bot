@@ -7,8 +7,8 @@ dotenv.config();
 
 // Test wallet configuration
 const TEST_WALLET = {
-  address: '0xd08EB3DF731C151f2ABC33b19e450Cd3f1Eb9f20',
-  privateKey: '0xdcffd7f29aa6686dc0ac7bfed114762a033323f69b810673a3b46590730b94a9',
+  address: process.env.TEST_WALLET_ADDRESS || '0x...',
+  privateKey: process.env.TEST_WALLET_PRIVATE_KEY || '0x...',
 };
 
 // Test token addresses on Base
@@ -31,11 +31,12 @@ async function testCreateDcaOrder(): Promise<void> {
         makerTokenDecimals: 6, // USDC has 6 decimals
         takerTokenAddress: TEST_TOKENS.WETH, // Token to buy (WETH)
         takerTokenDecimals: 18, // WETH has 18 decimals
-        makerAmount: '10000000', // 10 USDC with decimals
+        makerAmount: '1000000', // 10 USDC with decimals
         time: 3600, // 1 hour intervals
-        times: 5, // 5 intervals (2 USDC per interval)
-        minPrice: '0.9', // Optional: 10% below current price
-        maxPrice: '1.1', // Optional: 10% above current price
+        times: 2, // 2 intervals (5 USDC per interval)
+        expire: '1D',
+        // minPrice: '0.9', // Optional: 10% below current price
+        // maxPrice: '1.1', // Optional: 10% above current price
         slippage: 1,
         gasPriority: 'standard',
         walletAddress: TEST_WALLET.address,

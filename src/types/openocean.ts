@@ -134,7 +134,7 @@ export interface DcaOrderCreateParams {
   /** Maker amount with decimals as string */
   makerAmount: string;
   /** Taker amount with decimals as string (default "1") */
-  takerAmount?: string;
+  takerAmount: string;
   /** Gas price */
   gasPrice: number;
   /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
@@ -151,12 +151,10 @@ export interface DcaOrderCreateParams {
   minPrice?: string;
   /** Optional maximum price range */
   maxPrice?: string;
-  /** Optional version (v1 or v2) */
-  version?: string;
   /** Optional referrer address */
   referrer?: string;
   /** Optional referrer fee percentage (0-5) */
-  referrerFee?: string;
+  referrerFee?: number;
 }
 
 /**
@@ -236,7 +234,7 @@ export interface DcaOrderCreateApiParams {
   /** Optional referrer address */
   referrer?: string;
   /** Optional referrer fee percentage (0-5) */
-  referrerFee?: string;
+  referrerFee?: number;
 }
 
 /**

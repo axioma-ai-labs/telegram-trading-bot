@@ -64,6 +64,7 @@ export interface AppConfig {
   betterstack: BetterstackConfig;
   // Constants
   MAX_UINT256: string;
+  defaultReferrerFee: number;
 }
 
 export interface GasPriceInfo {

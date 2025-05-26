@@ -59,6 +59,8 @@ export interface DcaParams extends BasicTradeParams {
   minPrice?: string;
   /** Optional maximum price range */
   maxPrice?: string;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
 }
 
 /**

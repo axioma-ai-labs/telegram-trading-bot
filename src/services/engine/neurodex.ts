@@ -378,7 +378,7 @@ export class NeuroDexApi {
           slippage: params.slippage.toString(),
           account: params.walletAddress,
           referrer: params.referrer,
-          referrerFee: 1, // 1% refferer fee
+          referrerFee: config.defaultReferrerFee, // 1% refferer fee
         },
         chain
       );
@@ -467,7 +467,7 @@ export class NeuroDexApi {
           slippage: params.slippage.toString(),
           account: params.walletAddress,
           referrer: params.referrer,
-          referrerFee: 1, // 1% refferer fee
+          referrerFee: config.defaultReferrerFee, // 1% refferer fee
         },
         chain
       );
@@ -553,8 +553,8 @@ export class NeuroDexApi {
           takerAmount: params.takerAmount,
           gasPrice: gasPrice,
           expire: params.expire,
-          referrer: params.referrer || '',
-          referrerFee: 1,
+          referrer: params.referrer || undefined,
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
@@ -698,6 +698,9 @@ export class NeuroDexApi {
       const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
       web3.eth.accounts.wallet.add(account);
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+      // Initialize the SDK for DCA orders
+      const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
+      this.openOceanClient.initializeSdk(chainId, web3 as Web3, account.address, true);
 
       const result = await this.openOceanClient.createDcaOrder(
         {
@@ -708,13 +711,15 @@ export class NeuroDexApi {
           takerTokenAddress: params.takerTokenAddress,
           takerTokenDecimals: params.takerTokenDecimals,
           makerAmount: params.makerAmount,
+          takerAmount: '1',
           gasPrice: gasPrice,
-          expire: '30D', // Default to 30 days for DCA
+          expire: params.expire,
           time: params.time,
           times: params.times,
           minPrice: params.minPrice,
           maxPrice: params.maxPrice,
-          version: 'v2',
+          referrer: params.referrer || undefined,
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
