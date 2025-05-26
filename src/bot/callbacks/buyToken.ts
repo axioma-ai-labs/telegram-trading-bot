@@ -1,27 +1,12 @@
-import { buyTokenMessage } from '@/bot/commands/buy';
-import {
-  confirmBuyKeyboard,
-  confirmBuyMessage,
-  custom_amount_prompt,
-  error_message,
-  insufficient_funds_message,
-  invalid_amount_message,
-  invalid_token_message,
-} from '@/bot/commands/buy';
+import { confirmBuyKeyboard } from '@/bot/commands/buy';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { GasPriority } from '@/types/config';
 import { BuyParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-const transaction_success_message = (amount: number, token: string, txHash: string): string =>
-  `✅ Buy order for ${amount} ETH on ${token} was successful!\n\n` +
-  `Transaction details:\n` +
-  `• Amount: ${amount} ETH\n` +
-  `• Token: ${token}\n` +
-  `• Transaction: https://basescan.org/tx/${txHash}`;
 
 export async function buyToken(ctx: BotContext): Promise<void> {
   // validate user
@@ -33,7 +18,7 @@ export async function buyToken(ctx: BotContext): Promise<void> {
     type: 'buy',
   };
 
-  await ctx.reply(buyTokenMessage, {
+  await ctx.reply(ctx.t('buy_token_msg'), {
     parse_mode: 'Markdown',
   });
 }
@@ -45,14 +30,14 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token) {
-    const message = await ctx.reply(invalid_token_message);
+    const message = await ctx.reply(ctx.t('invalid_token_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
   // custom amount
   if (amount === 'custom') {
-    await ctx.reply(custom_amount_prompt, {
+    await ctx.reply(ctx.t('buy_amount_msg'), {
       parse_mode: 'Markdown',
     });
     return;
@@ -60,26 +45,26 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
 
   const parsedAmount = parseFloat(amount);
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
-    const message = await ctx.reply(invalid_amount_message);
+    const message = await ctx.reply(ctx.t('invalid_amount_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
-  // Store the amount in the session for confirmation
+  // store amount in session for confirmation
   ctx.session.currentOperation = {
     ...currentOperation,
     amount: parsedAmount,
   };
 
-  // Show confirmation dialog
-  const confirmMessage = confirmBuyMessage(
-    currentOperation.token,
-    currentOperation.tokenSymbol || '',
-    currentOperation.tokenName || '',
-    parsedAmount
-  );
+  // confirmation
+  const message = ctx.t('buy_confirm_msg', {
+    token: currentOperation.token,
+    tokenSymbol: currentOperation.tokenSymbol || '',
+    tokenName: currentOperation.tokenName || '',
+    amount: parsedAmount,
+  });
 
-  await ctx.reply(confirmMessage, {
+  await ctx.reply(message, {
     parse_mode: 'Markdown',
     reply_markup: confirmBuyKeyboard,
   });
@@ -92,14 +77,14 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token || !currentOperation?.amount) {
-    const message = await ctx.reply('❌ Invalid buy operation. Please try again.');
+    const message = await ctx.reply(ctx.t('buy_error_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
-    const message = await ctx.reply('❌ Private key not found. Please try again.');
+    const message = await ctx.reply(ctx.t('no_private_key_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
@@ -109,7 +94,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
       toTokenAddress: currentOperation.token,
       fromAmount: currentOperation.amount,
       slippage: Number(user?.settings?.slippage),
-      gasPriority: 'standard',
+      gasPriority: user?.settings?.gasPriority as GasPriority,
       walletAddress: user.wallets[0].address,
       privateKey: privateKey,
       referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
@@ -121,11 +106,11 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (buyResult.success && buyResult.data?.txHash) {
-      const message = transaction_success_message(
-        currentOperation.amount,
-        currentOperation.token,
-        buyResult.data.txHash
-      );
+      const message = ctx.t('buy_success_msg', {
+        amount: currentOperation.amount,
+        token: currentOperation.token,
+        txHash: buyResult.data.txHash,
+      });
       await ctx.reply(message, {
         parse_mode: 'Markdown',
       });
@@ -134,10 +119,10 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
       // check if no mooooooooney
       const message = buyResult.error?.toLowerCase() || '';
       if (message.includes('insufficient funds')) {
-        const message = await ctx.reply(insufficient_funds_message);
+        const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       } else {
-        const message = await ctx.reply(error_message);
+        const message = await ctx.reply(ctx.t('buy_error_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       }
       // reset
@@ -147,10 +132,10 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     logger.error('Error during buy transaction:', error);
     const message = error instanceof Error ? error.message.toLowerCase() : '';
     if (message.includes('insufficient funds')) {
-      const message = await ctx.reply(insufficient_funds_message);
+      const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
     } else {
-      const message = await ctx.reply(error_message);
+      const message = await ctx.reply(ctx.t('buy_error_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
     }
     // reset
@@ -165,6 +150,6 @@ export async function buyCancel(ctx: BotContext): Promise<void> {
 
   // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply('✅ Buy order has been successfully cancelled!');
+  const message = await ctx.reply(ctx.t('buy_cancel_msg'));
   await deleteBotMessage(ctx, message.message_id, 5000);
 }

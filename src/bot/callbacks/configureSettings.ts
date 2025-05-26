@@ -2,10 +2,10 @@ import {
   gasKeyboard,
   languageKeyboard,
   settingsKeyboard,
-  settingsMessage,
   slippageKeyboard,
 } from '@/bot/commands/settings';
 import logger from '@/config/logger';
+import { I18nService } from '@/services/i18n/i18n.service';
 import { SettingsService } from '@/services/prisma/settings';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
@@ -16,11 +16,11 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   const { isValid, user } = await validateUserAndWallet(ctx);
   if (!isValid) return;
 
-  const message = settingsMessage(
-    getSlippageName(user?.settings?.slippage || '1'),
-    getLanguageName(user?.settings?.language || 'en'),
-    getGasPriorityName(user?.settings?.gasPriority || 'standard')
-  );
+  const message = ctx.t('settings_msg', {
+    slippage: getSlippageName(user?.settings?.slippage || '1'),
+    language: getLanguageName(user?.settings?.language || 'en'),
+    gasPriority: getGasPriorityName(user?.settings?.gasPriority || 'standard'),
+  });
 
   await ctx.editMessageText(message, {
     parse_mode: 'Markdown',
@@ -30,18 +30,15 @@ export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
 
 // slippage options
 export async function handleSetSlippage(ctx: BotContext): Promise<void> {
-  await ctx.editMessageText(
-    '*📊 Set Slippage Tolerance*\n\nSelect your preferred slippage tolerance:',
-    {
-      parse_mode: 'Markdown',
-      reply_markup: slippageKeyboard,
-    }
-  );
+  await ctx.editMessageText(ctx.t('set_slippage_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: slippageKeyboard,
+  });
 }
 
 // language options
 export async function handleSetLanguage(ctx: BotContext): Promise<void> {
-  await ctx.editMessageText('*🌎 Select Language*\n\nChoose your preferred language:', {
+  await ctx.editMessageText(ctx.t('set_language_msg'), {
     parse_mode: 'Markdown',
     reply_markup: languageKeyboard,
   });
@@ -49,7 +46,7 @@ export async function handleSetLanguage(ctx: BotContext): Promise<void> {
 
 // gas options
 export async function handleSetGas(ctx: BotContext): Promise<void> {
-  await ctx.editMessageText('*⛽ Set Gas Priority*\n\nSelect your preferred gas priority:', {
+  await ctx.editMessageText(ctx.t('set_gas_msg'), {
     parse_mode: 'Markdown',
     reply_markup: gasKeyboard,
   });
@@ -65,13 +62,15 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
 
   await SettingsService.updateSlippage(user.id, slippage);
   logger.info(`Slippage set to ${getSlippageName(slippage)}`);
-  await ctx.answerCallbackQuery(`Slippage set to ${getSlippageName(slippage)}`);
+  await ctx.answerCallbackQuery(
+    ctx.t('slippage_updated_msg', { slippage: getSlippageName(slippage) })
+  );
   await ctx.editMessageText(
-    settingsMessage(
-      getSlippageName(slippage),
-      getLanguageName(user.settings?.language || 'en'),
-      getGasPriorityName(user.settings?.gasPriority || 'standard')
-    ),
+    ctx.t('settings_msg', {
+      slippage: getSlippageName(slippage),
+      language: getLanguageName(user.settings?.language || 'en'),
+      gasPriority: getGasPriorityName(user.settings?.gasPriority || 'standard'),
+    }),
     {
       parse_mode: 'Markdown',
       reply_markup: settingsKeyboard,
@@ -86,18 +85,20 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
   if (!isValid || !user) return;
 
   await SettingsService.updateGasPriority(user.id, gasPriority);
-  await ctx.answerCallbackQuery(`Gas priority set to ${getGasPriorityName(gasPriority)}`);
-  await ctx.editMessageText(
-    settingsMessage(
-      getSlippageName(user.settings?.slippage || '1'),
-      getLanguageName(user.settings?.language || 'en'),
-      getGasPriorityName(gasPriority)
-    ),
-    {
-      parse_mode: 'Markdown',
-      reply_markup: settingsKeyboard,
-    }
+  await ctx.answerCallbackQuery(
+    ctx.t('gas_priority_updated_msg', { gasPriority: getGasPriorityName(gasPriority) })
   );
+
+  const message = ctx.t('settings_msg', {
+    slippage: getSlippageName(user.settings?.slippage || '1'),
+    language: getLanguageName(user.settings?.language || 'en'),
+    gasPriority: getGasPriorityName(gasPriority),
+  });
+
+  await ctx.editMessageText(message, {
+    parse_mode: 'Markdown',
+    reply_markup: settingsKeyboard,
+  });
 };
 
 // Update language
@@ -106,17 +107,26 @@ export const updateLanguage = async (ctx: BotContext, language: string): Promise
   const { isValid, user } = await validateUserAndWallet(ctx);
   if (!isValid || !user) return;
 
+  // upd language
   await SettingsService.updateLanguage(user.id, language);
-  await ctx.answerCallbackQuery(`Language set to ${getLanguageName(language)}`);
-  await ctx.editMessageText(
-    settingsMessage(
-      getSlippageName(user.settings?.slippage || '1'),
-      getLanguageName(language),
-      getGasPriorityName(user.settings?.gasPriority || 'standard')
-    ),
-    {
-      parse_mode: 'Markdown',
-      reply_markup: settingsKeyboard,
-    }
+
+  // upd language in session
+  I18nService.updateUserLanguage(ctx, language);
+
+  // confirmation
+  await ctx.answerCallbackQuery(
+    ctx.t('language_updated_msg', { language: getLanguageName(language) })
   );
+
+  const message = ctx.t('settings_msg', {
+    slippage: getSlippageName(user.settings?.slippage || '1'),
+    language: getLanguageName(language),
+    gasPriority: getGasPriorityName(user.settings?.gasPriority || 'standard'),
+  });
+
+  // upd settings message
+  await ctx.editMessageText(message, {
+    parse_mode: 'Markdown',
+    reply_markup: settingsKeyboard,
+  });
 };

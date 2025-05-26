@@ -2,47 +2,8 @@ import { InlineKeyboard } from 'grammy';
 
 import logger from '@/config/logger';
 import { CommandHandler } from '@/types/commands';
-import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-export const sellTokenMessage = `Enter token contract address to sell:`;
-export const error_message = '❌ Transaction failed. Please try again later.';
-export const invalid_amount_message = '❌ Invalid amount selected. Please try again.';
-export const insufficient_funds_message =
-  '❌ Insufficient token balance to complete the transaction.\n\nPlease ensure you have enough tokens to sell and ETH for gas fees.';
-export const no_wallet_message = "❌ You don't have a wallet.\n\nPlease use /wallet to create one.";
-export const not_registered_message = '❌ You are not registered.\n\nPlease use /start to begin.';
-export const invalid_token_message = '❌ No token selected. Please select a token first.';
-export const custom_amount_prompt = 'Please enter the amount of tokens you want to sell:';
-
-export const sellTokenFoundMessage = (tokenData: NeuroDexResponse<TokenData>): string => `
-✅ *Token Found*
-
-Symbol: *$${tokenData.data?.symbol}*
-Name: *${tokenData.data?.name || 'Unknown'}*
-Price: $${tokenData.data?.price || 'Unknown'}
-Chain: ${tokenData.data?.chain || 'Unknown'}
-
-Please select how much ${tokenData.data?.symbol} you want to sell.
-
-Go to /settings to adjust slippage and gas if the transaction fails.
-`;
-
-export const confirmSellMessage = (
-  tokenAddress: string,
-  tokenSymbol: string,
-  tokenName: string,
-  amount: number
-): string => `
-🔍 *Confirm Sell Order*
-
-Token: *${tokenSymbol}* | ${tokenName}
-CA: \`${tokenAddress}\`
-Amount: *${amount} ${tokenSymbol}*
-
-Are you sure you want to proceed with this sale?
-`;
 
 export const sellTokenKeyboard = new InlineKeyboard()
   .text('25%', 'sell_amount_25')
@@ -67,9 +28,9 @@ export const sellCommandHandler: CommandHandler = {
 
     ctx.session.currentOperation = { type: 'sell' };
 
-    logger.info('Sell token message:', sellTokenMessage);
+    logger.info('Sell token message:', ctx.t('sell_token_msg'));
 
-    await ctx.reply(sellTokenMessage, {
+    await ctx.reply(ctx.t('sell_token_msg'), {
       parse_mode: 'Markdown',
     });
   },

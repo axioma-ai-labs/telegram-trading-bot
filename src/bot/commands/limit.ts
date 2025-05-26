@@ -6,81 +6,100 @@ import { LimitOrderInfo, NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
-export const limitTokenMessage =
-  'Please send contract address of the token you want to create a limit order for:';
-export const limitCustomAmountMessage = 'Please enter the amount of tokens you want to buy:';
-export const error_message = '❌ Transaction failed. Please try again later.';
-export const error_limit_message = '❌ Failed to create limit order. Please try again later.';
-export const invalid_amount_message = '❌ Invalid amount selected. Please try again.';
-export const insufficient_funds_message = '❌ Insufficient funds to complete the transaction.';
-export const no_wallet_message = "❌ You don't have a wallet.\n\nPlease use /wallet to create one.";
-export const not_registered_message = '❌ You are not registered.\n\nPlease use /start to begin.';
-export const invalid_token_message = '❌ No token selected. Please select a token first.';
-export const limitPriceMessage = 'Please enter the price per token (in ETH) for your limit order:';
-export const limitExpiryMessage = 'Please select the expiry time for your limit order:';
-export const invalidPriceMessage = '❌ Invalid price. Please enter a valid number greater than 0.';
-export const invalidExpiryMessage = '❌ Invalid expiry format. Please use format like 1H, 2D, 1W.';
-export const noLimitOrdersMessage =
-  "📋 *No Limit Orders*\n\nYou don't have any limit orders yet.\n\nUse /limit to create your first limit order.";
+/**
+ * Creates a limit token found message using i18n.
+ *
+ * @param ctx - Bot context with i18n support
+ * @param tokenData - Token data from API response
+ * @returns Formatted message string
+ */
+export const getLimitTokenFoundMessage = (
+  ctx: BotContext,
+  tokenData: NeuroDexResponse<TokenData>
+): string => {
+  return ctx.t('limit_token_found_msg', {
+    tokenSymbol: tokenData.data?.symbol || '',
+    tokenName: tokenData.data?.name || '',
+    tokenPrice: tokenData.data?.price || '',
+    tokenChain: tokenData.data?.chain || '',
+  });
+};
 
-export const limitTokenFoundMessage = (tokenData: NeuroDexResponse<TokenData>): string => `
-✅ *Token Found*
-
-Symbol: *$${tokenData.data?.symbol}*
-Name: *${tokenData.data?.name}*
-Price: $${tokenData.data?.price}
-Chain: ${tokenData.data?.chain}
-
-Please select how much ${tokenData.data?.symbol} you want to buy in your limit order.
-
-Go to /settings to adjust slippage and gas if the transaction fails.
-`;
-
-export const limitOrderCreatedMessage = (
+/**
+ * Creates a limit order created message using i18n.
+ *
+ * @param ctx - Bot context with i18n support
+ * @param tokenSymbol - Token symbol
+ * @param amount - Amount of tokens
+ * @param price - Price per token in ETH
+ * @param expiry - Expiry time
+ * @returns Formatted message string
+ */
+export const getLimitOrderCreatedMessage = (
+  ctx: BotContext,
   tokenSymbol: string,
   amount: number,
   price: number,
   expiry: string
-): string => `
-✅ *Limit Order Created Successfully!*
+): string => {
+  return ctx.t('limit_order_created_msg', {
+    tokenSymbol,
+    amount: amount.toString(),
+    price: price.toString(),
+    expiry,
+  });
+};
 
-*Token:* ${tokenSymbol}
-*Amount:* ${amount} ${tokenSymbol}
-*Price:* ${price} ETH per token
-*Expiry:* ${expiry}
+/**
+ * Creates a limit order cancelled message using i18n.
+ *
+ * @param ctx - Bot context with i18n support
+ * @param makerSymbol - Maker token symbol
+ * @param takerSymbol - Taker token symbol
+ * @returns Formatted message string
+ */
+export const getLimitOrderCancelledMessage = (
+  ctx: BotContext,
+  makerSymbol: string,
+  takerSymbol: string
+): string => {
+  return ctx.t('limit_order_cancel_success_msg', {
+    makerSymbol,
+    takerSymbol,
+  });
+};
 
-Your limit order has been submitted to the network. It will be executed when the market price reaches your target price.
-
-Use /orders to view all your orders.
-`;
-
-export const limitOrderCancelledMessage = (makerSymbol: string, takerSymbol: string): string => `
-✅ *Limit Order Cancelled*
-
-Your limit order for ${makerSymbol} → ${takerSymbol} has been successfully cancelled.
-
-Use /orders to view your remaining orders.
-`;
-
-export const confirmLimitMessage = (
+/**
+ * Creates a limit order confirmation message using i18n.
+ *
+ * @param ctx - Bot context with i18n support
+ * @param token - Token contract address
+ * @param tokenSymbol - Token symbol
+ * @param tokenName - Token name
+ * @param amount - Amount of tokens
+ * @param price - Price per token in ETH
+ * @param expiry - Expiry time
+ * @returns Formatted message string
+ */
+export const getLimitConfirmMessage = (
+  ctx: BotContext,
   token: string,
   tokenSymbol: string,
   tokenName: string,
   amount: number,
   price: number,
   expiry: string
-): string => `
-🔍 *Confirm Limit Order*
-
-*Token:* ${tokenSymbol} | ${tokenName}
-*CA:* \`${token}\`
-*Amount:* ${amount} ${tokenSymbol}
-*Price:* ${price} ETH per token
-*Total Value:* ${(amount * price).toFixed(6)} ETH
-*Expiry:* ${expiry}
-
-Please confirm to create the limit order:
-`;
+): string => {
+  return ctx.t('limit_confirm_msg', {
+    token,
+    tokenSymbol,
+    tokenName,
+    amount: amount.toString(),
+    price: price.toString(),
+    totalValue: (amount * price).toFixed(6),
+    expiry,
+  });
+};
 
 export const limitOrdersListMessage = (orders: LimitOrderInfo[]): string => {
   let message = '📋 *Your Limit Orders*\n\n';
@@ -135,12 +154,12 @@ export const limitCommandHandler: CommandHandler = {
       ctx.session.currentOperation = { type: 'limit' };
 
       // Send token selection message
-      await ctx.reply(limitTokenMessage, {
+      await ctx.reply(ctx.t('limit_token_msg'), {
         parse_mode: 'Markdown',
       });
     } catch (error) {
       logger.error('Error in limit command handler:', error);
-      await ctx.reply(error_message, {
+      await ctx.reply(ctx.t('error_msg'), {
         parse_mode: 'Markdown',
       });
     }
@@ -154,7 +173,7 @@ export const ordersCommandHandler: CommandHandler = {
     const { isValid } = await validateUserAndWallet(ctx);
     if (!isValid) return;
     // TODO: add retrieval of opened limit orders
-    await ctx.reply('📋 Loading your limit orders...', {
+    await ctx.reply(ctx.t('limit_loading_orders_msg'), {
       parse_mode: 'Markdown',
     });
   },
@@ -172,7 +191,7 @@ export const limitOrdersCommandHandler: CommandHandler = {
 
     // This will be handled by importing getLimitOrders in bot.ts
     // For now, show a loading message
-    await ctx.reply('📋 *Loading your limit orders...*', {
+    await ctx.reply(ctx.t('limit_loading_orders_msg'), {
       parse_mode: 'Markdown',
     });
   },

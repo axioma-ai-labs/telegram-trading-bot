@@ -1,20 +1,4 @@
-import {
-  confirmDcaKeyboard,
-  confirmDcaMessage,
-  custom_amount_message,
-  custom_interval_message,
-  custom_times_message,
-  dcaTokenMessage,
-  error_dca_message,
-  error_message,
-  insufficient_funds_message,
-  intervalKeyboard,
-  intervalMessage,
-  invalid_amount_message,
-  invalid_times_message,
-  timesKeyboard,
-  timesMessage,
-} from '@/bot/commands/dca';
+import { confirmDcaKeyboard, intervalKeyboard, timesKeyboard } from '@/bot/commands/dca';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
@@ -26,23 +10,6 @@ import { deleteBotMessage } from '@/utils/deleteMessage';
 import { formatInterval } from '@/utils/formatters';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
-const dca_success_message = (
-  amount: number,
-  token: string,
-  tokenSymbol: string,
-  tokenName: string,
-  interval: string,
-  times: number
-): string =>
-  `✅ DCA order created successfully!\n\n` +
-  `Check your DCA orders details:\n` +
-  `• Amount: ${amount} ETH\n` +
-  `• Token: ${tokenSymbol} | ${tokenName}\n` +
-  `• CA: ${token}\n` +
-  `• Interval: ${interval}\n` +
-  `• Times: ${times}\n` +
-  `You can view your open DCA orders using /orders`;
-
 export async function dcaToken(ctx: BotContext): Promise<void> {
   const { isValid } = await validateUserAndWallet(ctx);
   if (!isValid) return;
@@ -52,7 +19,7 @@ export async function dcaToken(ctx: BotContext): Promise<void> {
     type: 'dca',
   };
 
-  await ctx.reply(dcaTokenMessage, {
+  await ctx.reply(ctx.t('dca_token_msg'), {
     parse_mode: 'Markdown',
   });
 }
@@ -65,7 +32,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
 
   // custom amount
   if (amount === 'custom') {
-    await ctx.reply(custom_amount_message, {
+    await ctx.reply(ctx.t('dca_custom_amount_msg'), {
       parse_mode: 'Markdown',
     });
     return;
@@ -74,7 +41,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
   const parsedAmount = parseFloat(amount);
 
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
-    const message = await ctx.reply(invalid_amount_message);
+    const message = await ctx.reply(ctx.t('invalid_amount_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
@@ -87,7 +54,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
 
   logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 
-  await ctx.reply(intervalMessage, {
+  await ctx.reply(ctx.t('dca_interval_msg'), {
     reply_markup: intervalKeyboard,
     parse_mode: 'Markdown',
   });
@@ -101,7 +68,7 @@ export async function retrieveDcaInterval(ctx: BotContext, interval: string): Pr
 
   // custom interval
   if (interval === 'custom') {
-    await ctx.reply(custom_interval_message, {
+    await ctx.reply(ctx.t('dca_custom_interval_msg'), {
       parse_mode: 'Markdown',
     });
     return;
@@ -118,7 +85,7 @@ export async function retrieveDcaInterval(ctx: BotContext, interval: string): Pr
 
   logger.info('🟧 OPERATION:', ctx.session.currentOperation);
 
-  await ctx.reply(timesMessage, {
+  await ctx.reply(ctx.t('dca_times_msg'), {
     reply_markup: timesKeyboard,
     parse_mode: 'Markdown',
   });
@@ -131,7 +98,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
   const { currentOperation } = ctx.session;
 
   if (times === 'custom') {
-    await ctx.reply(custom_times_message, {
+    await ctx.reply(ctx.t('dca_custom_times_msg'), {
       parse_mode: 'Markdown',
     });
     return;
@@ -140,7 +107,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
   const parsedTimes = parseInt(times);
 
   if (isNaN(parsedTimes) || parsedTimes < 1 || parsedTimes > 100) {
-    const message = await ctx.reply(invalid_times_message);
+    const message = await ctx.reply(ctx.t('dca_invalid_times_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
@@ -151,14 +118,14 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
     times: parsedTimes,
   };
 
-  const message = confirmDcaMessage(
-    currentOperation?.token || '',
-    currentOperation?.tokenSymbol || '',
-    currentOperation?.tokenName || '',
-    currentOperation?.amount || 0,
-    currentOperation?.interval || 0,
-    parsedTimes
-  );
+  const message = ctx.t('dca_confirm_msg', {
+    token: currentOperation?.token || '',
+    tokenSymbol: currentOperation?.tokenSymbol || '',
+    tokenName: currentOperation?.tokenName || '',
+    amount: (currentOperation?.amount || 0).toString(),
+    interval: formatInterval(currentOperation?.interval || 0),
+    times: parsedTimes.toString(),
+  });
 
   await ctx.reply(message, {
     parse_mode: 'Markdown',
@@ -183,14 +150,14 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     !currentOperation.interval ||
     !currentOperation.times
   ) {
-    const message = await ctx.reply('❌ Invalid DCA operation. Please try again.');
+    const message = await ctx.reply(ctx.t('invalid_token_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
-    const message = await ctx.reply('❌ Private key not found. Please try again.');
+    const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
@@ -222,32 +189,32 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       // reset
       ctx.session.currentOperation = null;
 
-      const successMessage = dca_success_message(
-        currentOperation.amount,
-        currentOperation.token,
-        currentOperation.tokenSymbol || '',
-        currentOperation.tokenName || '',
-        formatInterval(currentOperation.interval),
-        currentOperation.times
-      );
+      const message = ctx.t('dca_success_msg', {
+        token: currentOperation?.token || '',
+        tokenSymbol: currentOperation?.tokenSymbol || '',
+        tokenName: currentOperation?.tokenName || '',
+        amount: (currentOperation?.amount || 0).toString(),
+        interval: formatInterval(currentOperation?.interval || 0),
+        times: (currentOperation?.times || 0).toString(),
+      });
 
-      await ctx.reply(successMessage, {
+      await ctx.reply(message, {
         parse_mode: 'Markdown',
       });
     } else {
       // check if no mooooooooney
       const message = dcaOrderResult.error?.toLowerCase() || '';
       if (message.includes('insufficient funds')) {
-        const message = await ctx.reply(insufficient_funds_message);
+        const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       } else {
-        const message = await ctx.reply(error_message);
+        const message = await ctx.reply(ctx.t('error_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       }
     }
   } catch (error) {
     logger.error('Error creating DCA order:', error);
-    const message = await ctx.reply(error_dca_message);
+    const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
   }
 }
@@ -259,7 +226,7 @@ export async function dcaCancel(ctx: BotContext): Promise<void> {
 
   // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply('✅ DCA order has been successfully cancelled!');
+  const message = await ctx.reply(ctx.t('dca_cancel_msg'));
   await deleteBotMessage(ctx, message.message_id, 5000);
 }
 
@@ -282,7 +249,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
     );
 
     if (!dcaOrders.success || !dcaOrders.data || dcaOrders.data.length === 0) {
-      const message = await ctx.reply('❌ No active DCA orders found to cancel.');
+      const message = await ctx.reply(ctx.t('dca_no_orders_msg'));
       await deleteBotMessage(ctx, message.message_id, 5000);
       return;
     }
@@ -317,7 +284,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
 
     const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
     if (!privateKey) {
-      const message = await ctx.reply('❌ Private key not found. Please try again.');
+      const message = await ctx.reply(ctx.t('error_msg'));
       await deleteBotMessage(ctx, message.message_id, 5000);
       return;
     }
@@ -337,14 +304,14 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
     );
 
     if (cancelResult.success) {
-      const message = await ctx.reply('✅ DCA order has been successfully cancelled!');
+      const message = await ctx.reply(ctx.t('dca_cancel_msg'));
       await deleteBotMessage(ctx, message.message_id, 5000);
     } else {
       throw new Error(cancelResult.error || 'Failed to cancel DCA order');
     }
   } catch (error) {
     logger.error('Error cancelling DCA order:', error);
-    const message = await ctx.reply('❌ Failed to cancel DCA order. Please try again later.');
+    const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
   }
 }
@@ -365,12 +332,12 @@ export async function getDcaOrders(ctx: BotContext): Promise<void> {
   );
 
   if (!dcaOrders.success || !dcaOrders.data || dcaOrders.data.length === 0) {
-    const message = await ctx.reply('❌ No active DCA orders found.');
+    const message = await ctx.reply(ctx.t('dca_no_orders_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   // send DCA orders
-  const message = await ctx.reply('✅ DCA orders found.');
+  const message = await ctx.reply(ctx.t('dca_orders_found_msg'));
   await deleteBotMessage(ctx, message.message_id, 5000);
 }

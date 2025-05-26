@@ -4,27 +4,7 @@ import logger from '@/config/logger';
 import { SettingsService } from '@/services/prisma/settings';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-export const settingsMessage = (
-  slippage?: string,
-  language?: string,
-  gasPriority?: string
-): string => {
-  return `*⚙️ Settings*
-
-*Current Settings:*
-• Slippage: ${slippage}
-• Language: ${language}
-• Gas Priority: ${gasPriority}
-
-*Best Practices:*
-- Increase *slippage* to 1% for less liquid tokens
-- Set *gas priority* to high for fast transactions
-
-Please set your desired settings below.`;
-};
 
 export const settingsKeyboard = new InlineKeyboard()
   .text('📊 Slippage', 'set_slippage')
@@ -45,13 +25,10 @@ export const slippageKeyboard = new InlineKeyboard()
 
 export const languageKeyboard = new InlineKeyboard()
   .text('🇬🇧 English', 'lang_en')
-  .text('🇪🇸 Spanish', 'lang_es')
+  .text('🇷🇺 Русский', 'lang_ru')
   .row()
-  .text('🇷🇺 Russian', 'lang_ru')
-  .text('🇨🇳 Chinese', 'lang_zh')
-  .row()
-  .text('🇻🇳 Vietnamese', 'lang_vi')
-  .text('🇮🇩 Indonesian', 'lang_id')
+  .text('🇪🇸 Español', 'lang_es')
+  .text('🇩🇪 Deutsch', 'lang_de')
   .row()
   .text('← Back', 'back_settings');
 
@@ -79,12 +56,11 @@ export const settingsCommandHandler: CommandHandler = {
         slippage: '0.5',
       });
 
-      // After creating settings, send the message with default values
-      const message = settingsMessage(
-        getSlippageName('0.5'),
-        getLanguageName('en'),
-        getGasPriorityName('standard')
-      );
+      const message = ctx.t('settings_msg', {
+        slippage: '0.5',
+        language: 'en',
+        gasPriority: 'standard',
+      });
 
       await ctx.reply(message, {
         parse_mode: 'Markdown',
@@ -93,12 +69,12 @@ export const settingsCommandHandler: CommandHandler = {
       return;
     }
 
-    // User has settings, use them directly
-    const message = settingsMessage(
-      getSlippageName(user.settings.slippage || '1'),
-      getLanguageName(user.settings.language || 'en'),
-      getGasPriorityName(user.settings.gasPriority || 'standard')
-    );
+    // User has settings, use them directly with i18n
+    const message = ctx.t('settings_msg', {
+      slippage: user.settings.slippage || '1',
+      language: user.settings.language || 'en',
+      gasPriority: user.settings.gasPriority || 'standard',
+    });
 
     logger.info('Settings message:', message);
 

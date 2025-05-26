@@ -1,20 +1,6 @@
 import { InlineKeyboard } from 'grammy';
 
-import {
-  confirmLimitMessage,
-  error_limit_message,
-  invalidPriceMessage,
-  invalid_amount_message,
-  invalid_token_message,
-  limitCustomAmountMessage,
-  limitExpiryMessage,
-  limitOrderCancelledMessage,
-  limitOrderCreatedMessage,
-  limitOrdersListMessage,
-  limitPriceMessage,
-  limitTokenMessage,
-  noLimitOrdersMessage,
-} from '@/bot/commands/limit';
+import { limitOrdersListMessage } from '@/bot/commands/limit';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { GasPriority } from '@/types/config';
@@ -29,12 +15,12 @@ export async function limitToken(ctx: BotContext): Promise<void> {
 
     ctx.session.currentOperation = { type: 'limit' };
 
-    await ctx.reply(limitTokenMessage, {
+    await ctx.reply(ctx.t('limit_token_msg'), {
       parse_mode: 'Markdown',
     });
   } catch (error) {
     logger.error('Error in limitToken:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -42,20 +28,20 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
   try {
     const { currentOperation } = ctx.session;
     if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.token) {
-      await ctx.reply(invalid_token_message);
+      await ctx.reply(ctx.t('invalid_token_msg'));
       return;
     }
 
     let parsedAmount: number;
     if (amount === 'custom') {
-      await ctx.reply(limitCustomAmountMessage);
+      await ctx.reply(ctx.t('limit_custom_amount_msg'));
       return;
     } else {
       parsedAmount = parseFloat(amount);
     }
 
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      await ctx.reply(invalid_amount_message);
+      await ctx.reply(ctx.t('invalid_amount_msg'));
       return;
     }
 
@@ -64,12 +50,12 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
       amount: parsedAmount,
     };
 
-    await ctx.reply(limitPriceMessage, {
+    await ctx.reply(ctx.t('limit_price_msg'), {
       parse_mode: 'Markdown',
     });
   } catch (error) {
     logger.error('Error in retrieveLimitAmount:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -77,13 +63,13 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
   try {
     const { currentOperation } = ctx.session;
     if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.amount) {
-      await ctx.reply('Please start over with /limit command.');
+      await ctx.reply(ctx.t('limit_restart_msg'));
       return;
     }
 
     const parsedPrice = parseFloat(price);
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      await ctx.reply(invalidPriceMessage);
+      await ctx.reply(ctx.t('invalid_amount_msg'));
       return;
     }
 
@@ -92,7 +78,7 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
       price: parsedPrice,
     };
 
-    await ctx.reply(limitExpiryMessage, {
+    await ctx.reply(ctx.t('limit_expiry_msg'), {
       parse_mode: 'Markdown',
       reply_markup: new InlineKeyboard()
         .text('1 Hour', 'limit_expiry_1H')
@@ -104,7 +90,7 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
     });
   } catch (error) {
     logger.error('Error in retrieveLimitPrice:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -112,13 +98,13 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
   try {
     const { currentOperation } = ctx.session;
     if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.price) {
-      await ctx.reply('Please start over with /limit command.');
+      await ctx.reply(ctx.t('limit_restart_msg'));
       return;
     }
 
     let expiryValue: string;
     if (expiry === 'custom') {
-      await ctx.reply('Please enter the expiry time (e.g., 2H, 3D, 1W):');
+      await ctx.reply(ctx.t('limit_custom_expiry_msg'));
       return;
     } else {
       expiryValue = expiry;
@@ -130,14 +116,14 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
     };
 
     // Show confirmation message
-    const message = confirmLimitMessage(
-      currentOperation.token || '',
-      currentOperation.tokenSymbol || '',
-      currentOperation.tokenName || '',
-      currentOperation.amount || 0,
-      currentOperation.price || 0,
-      expiryValue
-    );
+    const message = ctx.t('limit_confirm_msg', {
+      token: currentOperation.token || '',
+      tokenSymbol: currentOperation.tokenSymbol || '',
+      tokenName: currentOperation.tokenName || '',
+      amount: currentOperation.amount || 0,
+      price: currentOperation.price || 0,
+      expiry: expiryValue,
+    });
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',
@@ -147,7 +133,7 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
     });
   } catch (error) {
     logger.error('Error in retrieveLimitExpiry:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -155,7 +141,7 @@ export async function limitConfirm(ctx: BotContext): Promise<void> {
   try {
     const { currentOperation } = ctx.session;
     if (!currentOperation || currentOperation.type !== 'limit') {
-      await ctx.reply('No limit order to confirm.');
+      await ctx.reply(ctx.t('limit_no_order_msg'));
       return;
     }
 
@@ -168,14 +154,14 @@ export async function limitConfirm(ctx: BotContext): Promise<void> {
     // get private key
     const privateKey = await neurodex.getPrivateKey(wallet.address);
     if (!privateKey) {
-      await ctx.reply('❌ Failed to retrieve wallet private key.');
+      await ctx.reply(ctx.t('error_msg'));
       return;
     }
 
     // get token data to determine decimals
     const tokenData = await neurodex.getTokenDataByContractAddress(currentOperation.token!, 'base');
     if (!tokenData.success || !tokenData.data) {
-      await ctx.reply('❌ Failed to get token information.');
+      await ctx.reply(ctx.t('error_msg'));
       return;
     }
 
@@ -217,36 +203,34 @@ export async function limitConfirm(ctx: BotContext): Promise<void> {
     );
 
     if (result.success) {
-      await ctx.reply(
-        limitOrderCreatedMessage(
-          currentOperation.tokenSymbol || '',
-          currentOperation.amount!,
-          currentOperation.price!,
-          currentOperation.expiry!
-        ),
-        {
-          parse_mode: 'Markdown',
-        }
-      );
-    } else {
-      await ctx.reply(`❌ Failed to create limit order: ${result.error}`);
+      const message = ctx.t('limit_order_created_msg', {
+        token: currentOperation.token || '',
+        tokenSymbol: currentOperation.tokenSymbol || '',
+        amount: currentOperation.amount!,
+        price: currentOperation.price!,
+        expiry: currentOperation.expiry!,
+      });
+
+      await ctx.reply(message, {
+        parse_mode: 'Markdown',
+      });
     }
 
     // Clear current operation
     ctx.session.currentOperation = null;
   } catch (error) {
     logger.error('Error in limitConfirm:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
 export async function limitCancel(ctx: BotContext): Promise<void> {
   try {
     ctx.session.currentOperation = null;
-    await ctx.reply('❌ Limit order creation cancelled.');
+    await ctx.reply(ctx.t('limit_cancel_msg'));
   } catch (error) {
     logger.error('Error in limitCancel:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -257,7 +241,7 @@ export async function getLimitOrders(ctx: BotContext): Promise<void> {
 
     const user = await getValidatedUser(ctx);
     if (!user || !user.wallets.length) {
-      await ctx.reply('❌ No wallet found. Please create a wallet first.');
+      await ctx.reply(ctx.t('no_wallet_msg'));
       return;
     }
 
@@ -274,7 +258,7 @@ export async function getLimitOrders(ctx: BotContext): Promise<void> {
 
     if (result.success && result.data) {
       if (result.data.length === 0) {
-        await ctx.reply(noLimitOrdersMessage, {
+        await ctx.reply(ctx.t('limit_no_orders_msg'), {
           parse_mode: 'Markdown',
         });
         return;
@@ -282,7 +266,6 @@ export async function getLimitOrders(ctx: BotContext): Promise<void> {
 
       const message = limitOrdersListMessage(result.data);
 
-      // Create keyboard with cancel buttons for active orders
       const keyboard = new InlineKeyboard();
       const activeOrders = result.data.filter(
         (order) => order.status === 'unfilled' || order.status === 'pending'
@@ -303,12 +286,10 @@ export async function getLimitOrders(ctx: BotContext): Promise<void> {
         parse_mode: 'Markdown',
         reply_markup: keyboard,
       });
-    } else {
-      await ctx.reply(`❌ Failed to retrieve limit orders: ${result.error}`);
     }
   } catch (error) {
     logger.error('Error in getLimitOrders:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }
 
@@ -316,7 +297,7 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
   try {
     const user = await getValidatedUser(ctx);
     if (!user || !user.wallets.length) {
-      await ctx.reply('❌ No wallet found. Please create a wallet first.');
+      await ctx.reply(ctx.t('no_wallet_msg'));
       return;
     }
 
@@ -326,7 +307,7 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
     // Get private key
     const privateKey = await neurodex.getPrivateKey(wallet.address);
     if (!privateKey) {
-      await ctx.reply('❌ Failed to retrieve wallet private key.');
+      await ctx.reply(ctx.t('no_private_key_msg'));
       return;
     }
 
@@ -340,13 +321,13 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
     );
 
     if (!ordersResult.success || !ordersResult.data) {
-      await ctx.reply('❌ Failed to retrieve order details.');
+      await ctx.reply(ctx.t('error_msg'));
       return;
     }
 
     const orderToCancel = ordersResult.data.find((order) => order.orderHash === orderHash);
     if (!orderToCancel) {
-      await ctx.reply('❌ Order not found or already cancelled.');
+      await ctx.reply(ctx.t('error_msg'));
       return;
     }
 
@@ -366,20 +347,17 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
     );
 
     if (result.success) {
-      await ctx.reply(
-        limitOrderCancelledMessage(
-          orderToCancel.data.makerAssetSymbol,
-          orderToCancel.data.takerAssetSymbol
-        ),
-        {
-          parse_mode: 'Markdown',
-        }
-      );
-    } else {
-      await ctx.reply(`❌ Failed to cancel limit order: ${result.error}`);
+      const message = ctx.t('limit_order_cancel_success_msg', {
+        makerSymbol: orderToCancel.data.makerAssetSymbol,
+        takerSymbol: orderToCancel.data.takerAssetSymbol,
+      });
+
+      await ctx.reply(message, {
+        parse_mode: 'Markdown',
+      });
     }
   } catch (error) {
     logger.error('Error in cancelLimitOrder:', error);
-    await ctx.reply(error_limit_message);
+    await ctx.reply(ctx.t('limit_error_msg'));
   }
 }

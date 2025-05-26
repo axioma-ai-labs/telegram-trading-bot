@@ -1,46 +1,9 @@
 import { InlineKeyboard } from 'grammy';
 
-import logger from '@/config/logger';
 import { ReferralService } from '@/services/prisma/referrals';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-export const referralMessage = (referralLink: string): string => {
-  return [
-    '💎 *Referral Program*',
-    '',
-    'Share your referral link and earn rewards!',
-    '',
-    '*How it works:*',
-    '1. Share your referral link below with your friends & family',
-    '2. When they sign up using your link, you earn 10% of their trading fees',
-    '3. You can earn unlimited rewards!',
-    '',
-    '🔗 *Your Referral Link:*',
-    `\`${referralLink}\``,
-    '',
-    'Learn more about rewards and tiers in our official [docs](https://docs.neurodex.xyz/referral-program)',
-  ].join('\n');
-};
-
-export const referralStatsMessage = (
-  totalReferrals: number,
-  totalEarned: number,
-  totalTrades: number,
-  totalVolume: number
-): string => {
-  return [
-    '📊 *Referral Stats*',
-    '',
-    `Referred Users: ${totalReferrals} users`,
-    `Referred Trades: ${totalTrades} trades`,
-    `Referred Volume: $${totalVolume.toFixed(4)}`,
-    `Total Referral Earnings: $${totalEarned.toFixed(4)}`,
-    '',
-    'Keep spreading the word and watch your earnings grow! 🚀',
-  ].join('\n');
-};
 
 export const referralKeyboard = new InlineKeyboard()
   .text('📊 Referral Stats', 'get_referral_stats')
@@ -67,9 +30,7 @@ export const referralCommandHandler: CommandHandler = {
       await ReferralService.upsertReferralCode(user.id, referralLink);
     }
 
-    logger.info('Referral message:', referralMessage(referralLink));
-
-    await ctx.reply(referralMessage(referralLink), {
+    await ctx.reply(ctx.t('referral_msg', { referral_link: referralLink }), {
       parse_mode: 'Markdown',
       reply_markup: referralKeyboard,
     });
