@@ -1,8 +1,9 @@
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/telegram';
-import { CommandHandler } from '@/types/commands';
-import { validateUserAndWallet } from '@/utils/userValidation';
+
 import logger from '@/config/logger';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/telegram';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const helpMessage = `
 *Help & Support*

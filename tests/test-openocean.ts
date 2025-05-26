@@ -1,8 +1,9 @@
 import { Core } from '@quicknode/sdk';
-import { config } from '../src/config/config';
 import axios from 'axios';
-import { GasResponse, GasData } from '../src/types/config';
 import { parseUnits } from 'ethers';
+
+import { config } from '../src/config/config';
+import { GasData, GasResponse } from '../src/types/config';
 
 // STEP 1: Test connection to QuickNode RPC endpoint | ✅ WORKS!
 export async function testQuickNodeConnection(): Promise<{

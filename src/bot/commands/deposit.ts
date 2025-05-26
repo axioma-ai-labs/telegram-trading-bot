@@ -1,9 +1,10 @@
 import { InlineKeyboard } from 'grammy';
+
+import logger from '@/config/logger';
+import { ViemService } from '@/services/engine/viem.service';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { ViemService } from '@/services/engine/viem.service';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import logger from '@/config/logger';
 
 export const depositMessage = (
   walletAddress: string,

@@ -1,5 +1,5 @@
-import _sodium from 'libsodium-wrappers';
 import argon2 from 'argon2';
+import _sodium from 'libsodium-wrappers';
 
 interface EncryptedData {
   ciphertext: string;

@@ -1,12 +1,12 @@
-import { deleteBotMessage } from '@/utils/deleteMessage';
-import { BotContext } from '@/types/telegram';
-import { walletMessage, walletCreationOKMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { WalletService } from '@/services/prisma/wallet';
-import { UserService } from '@/services/prisma/user';
+import { walletCreationOKMessage, walletKeyboard, walletMessage } from '@/bot/commands/wallet';
+import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem.service';
+import { UserService } from '@/services/prisma/user';
+import { WalletService } from '@/services/prisma/wallet';
+import { BotContext } from '@/types/telegram';
+import { deleteBotMessage } from '@/utils/deleteMessage';
 import { invalidateUserCache } from '@/utils/userValidation';
-import logger from '@/config/logger';
 
 export async function handleCreateWallet(ctx: BotContext): Promise<void> {
   try {

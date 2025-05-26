@@ -1,8 +1,8 @@
-import { BotContext } from '@/types/telegram';
-import { UserService } from '@/services/prisma/user';
-import { startMessage, startKeyboard } from '@/bot/commands/start';
-import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
+import { startKeyboard, startMessage } from '@/bot/commands/start';
+import { createWalletKeyboard, createWalletMessage } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
+import { UserService } from '@/services/prisma/user';
+import { BotContext } from '@/types/telegram';
 
 export async function acceptTermsConditions(ctx: BotContext): Promise<void> {
   const telegramId = ctx.from?.id?.toString();

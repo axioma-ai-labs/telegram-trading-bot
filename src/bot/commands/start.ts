@@ -1,12 +1,13 @@
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/telegram';
-import { CommandHandler } from '@/types/commands';
-import { UserService } from '@/services/prisma/user';
-import { SettingsService } from '@/services/prisma/settings';
-import { ReferralService } from '@/services/prisma/referrals';
-import { NeuroDexApi } from '@/services/engine/neurodex';
-import { createWalletMessage, createWalletKeyboard } from '@/bot/commands/wallet';
+
+import { createWalletKeyboard, createWalletMessage } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
+import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ReferralService } from '@/services/prisma/referrals';
+import { SettingsService } from '@/services/prisma/settings';
+import { UserService } from '@/services/prisma/user';
+import { CommandHandler } from '@/types/commands';
+import { BotContext } from '@/types/telegram';
 
 export const startMessage = `*💸 Neurodex*
 

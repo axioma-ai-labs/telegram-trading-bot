@@ -1,23 +1,24 @@
 import {
-  createWalletClient,
-  http,
-  createPublicClient,
+  Abi,
   type Account,
-  type WalletClient,
   type Address,
   type Chain,
   type Hash,
-  type TransactionReceipt,
   PublicClient,
   SendTransactionParameters,
-  Abi,
+  type TransactionReceipt,
+  type WalletClient,
+  createPublicClient,
+  createWalletClient,
   formatEther,
+  http,
 } from 'viem';
 import { base } from 'viem/chains';
+
 import { config } from '@/config/config';
+import logger from '@/config/logger';
 import { TokenInfo } from '@/types/neurodex';
 import { erc20Abi } from '@/utils/abis';
-import logger from '@/config/logger';
 
 /**
  * Viem service for executing smart contract transactions

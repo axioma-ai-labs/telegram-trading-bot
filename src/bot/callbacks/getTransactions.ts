@@ -1,12 +1,12 @@
-import { BotContext } from '@/types/telegram';
 import {
-  allTransactionsMessage,
   allTransactionKeyboard,
-  transactionsMessage,
+  allTransactionsMessage,
   transactionsKeyboard,
+  transactionsMessage,
 } from '@/bot/commands/transactions';
-import { validateUserAndWallet } from '@/utils/userValidation';
 import logger from '@/config/logger';
+import { BotContext } from '@/types/telegram';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function viewTransactions(ctx: BotContext): Promise<void> {
   // validate user

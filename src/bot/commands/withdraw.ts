@@ -1,10 +1,11 @@
 import { InlineKeyboard } from 'grammy';
+
+import { createWalletKeyboard } from '@/bot/commands/wallet';
+import logger from '@/config/logger';
+import { ViemService } from '@/services/engine/viem.service';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import { ViemService } from '@/services/engine/viem.service';
-import logger from '@/config/logger';
 
 export const withdrawMessage = (ethBalance: string): string => `📤 *Withdraw ETH or other tokens*
 

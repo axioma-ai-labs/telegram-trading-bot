@@ -1,20 +1,20 @@
+import { buyTokenMessage } from '@/bot/commands/buy';
+import {
+  confirmBuyKeyboard,
+  confirmBuyMessage,
+  custom_amount_prompt,
+  error_message,
+  insufficient_funds_message,
+  invalid_amount_message,
+  invalid_token_message,
+} from '@/bot/commands/buy';
+import logger from '@/config/logger';
+import { NeuroDexApi } from '@/services/engine/neurodex';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { BuyParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { buyTokenMessage } from '@/bot/commands/buy';
-import { NeuroDexApi } from '@/services/engine/neurodex';
-import { BuyParams } from '@/types/neurodex';
-import {
-  error_message,
-  invalid_amount_message,
-  insufficient_funds_message,
-  invalid_token_message,
-  custom_amount_prompt,
-  confirmBuyMessage,
-  confirmBuyKeyboard,
-} from '@/bot/commands/buy';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import { PrivateStorageService } from '@/services/supabase/privateKeys';
-import logger from '@/config/logger';
 
 const transaction_success_message = (amount: number, token: string, txHash: string): string =>
   `✅ Buy order for ${amount} ETH on ${token} was successful!\n\n` +

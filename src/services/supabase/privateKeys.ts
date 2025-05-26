@@ -1,7 +1,7 @@
-import { supabaseService } from '@/services/supabase/client';
-import { EncryptionService } from '@/utils/encryption';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
+import { supabaseService } from '@/services/supabase/client';
+import { EncryptionService } from '@/utils/encryption';
 
 /**
  * Service for securely storing and retrieving private keys

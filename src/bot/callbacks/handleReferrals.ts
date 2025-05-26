@@ -1,13 +1,13 @@
-import { BotContext } from '@/types/telegram';
 import {
-  referralMessage,
   referralKeyboard,
-  referralStatsMessage,
+  referralMessage,
   referralStatsKeyboard,
+  referralStatsMessage,
 } from '@/bot/commands/referrals';
-import { ReferralService } from '@/services/prisma/referrals';
-import { validateUserAndWallet } from '@/utils/userValidation';
 import logger from '@/config/logger';
+import { ReferralService } from '@/services/prisma/referrals';
+import { BotContext } from '@/types/telegram';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function getReferralLink(ctx: BotContext): Promise<void> {
   //validate user

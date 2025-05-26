@@ -1,15 +1,15 @@
-import { BotContext } from '@/types/telegram';
-import { SettingsService } from '@/services/prisma/settings';
 import {
-  settingsMessage,
-  settingsKeyboard,
-  slippageKeyboard,
-  languageKeyboard,
   gasKeyboard,
+  languageKeyboard,
+  settingsKeyboard,
+  settingsMessage,
+  slippageKeyboard,
 } from '@/bot/commands/settings';
+import logger from '@/config/logger';
+import { SettingsService } from '@/services/prisma/settings';
+import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import logger from '@/config/logger';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   // validate user

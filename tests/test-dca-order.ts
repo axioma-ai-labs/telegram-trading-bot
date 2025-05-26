@@ -1,5 +1,6 @@
-import { NeuroDexApi } from '../src/services/engine/neurodex';
 import dotenv from 'dotenv';
+
+import { NeuroDexApi } from '../src/services/engine/neurodex';
 
 // Load environment variables
 dotenv.config();

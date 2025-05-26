@@ -1,6 +1,7 @@
-import winston from 'winston';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
+import winston from 'winston';
+
 import { config } from '@/config/config';
 
 const logtail = new Logtail(config.betterstack.sourceToken, {

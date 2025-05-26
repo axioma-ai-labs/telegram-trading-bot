@@ -1,25 +1,26 @@
-import { BotContext } from '@/types/telegram';
 import { InlineKeyboard } from 'grammy';
-import { NeuroDexApi } from '@/services/engine/neurodex';
-import { validateUserAndWallet, getValidatedUser } from '@/utils/userValidation';
-import logger from '@/config/logger';
+
 import {
+  confirmLimitMessage,
   error_limit_message,
+  invalidPriceMessage,
   invalid_amount_message,
   invalid_token_message,
+  limitCustomAmountMessage,
+  limitExpiryMessage,
+  limitOrderCancelledMessage,
   limitOrderCreatedMessage,
   limitOrdersListMessage,
-  confirmLimitMessage,
-  limitOrderCancelledMessage,
-  noLimitOrdersMessage,
   limitPriceMessage,
-  limitExpiryMessage,
-  invalidPriceMessage,
   limitTokenMessage,
-  limitCustomAmountMessage,
+  noLimitOrdersMessage,
 } from '@/bot/commands/limit';
+import logger from '@/config/logger';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 import { GasPriority } from '@/types/config';
 import { LimitOrderAssetData } from '@/types/openocean';
+import { BotContext } from '@/types/telegram';
+import { getValidatedUser, validateUserAndWallet } from '@/utils/userValidation';
 
 export async function limitToken(ctx: BotContext): Promise<void> {
   try {
@@ -188,13 +189,13 @@ export async function limitConfirm(ctx: BotContext): Promise<void> {
       Math.pow(10, takerTokenDecimals)
     ).toString();
 
-    console.log('Wallet address:', wallet.address);
-    console.log('Private key:', privateKey);
-    console.log('Maker token address:', currentOperation.token);
-    console.log('Maker token decimals:', makerTokenDecimals);
-    console.log('Taker token address:', '0x4200000000000000000000000000000000000006');
-    console.log('Taker token decimals:', takerTokenDecimals);
-    console.log('Maker amount:', makerAmount);
+    logger.info('Wallet address:', wallet.address);
+    logger.info('Private key:', privateKey);
+    logger.info('Maker token address:', currentOperation.token);
+    logger.info('Maker token decimals:', makerTokenDecimals);
+    logger.info('Taker token address:', '0x4200000000000000000000000000000000000006');
+    logger.info('Taker token decimals:', takerTokenDecimals);
+    logger.info('Maker amount:', makerAmount);
 
     // create limit order
     const result = await neurodex.createLimitOrder(

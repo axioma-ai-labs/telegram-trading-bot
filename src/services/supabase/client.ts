@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+
 import { config } from '@/config/config';
 
 // Regular client with anon key for normal operations

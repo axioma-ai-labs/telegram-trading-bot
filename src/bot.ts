@@ -1,90 +1,92 @@
+import { limit } from '@grammyjs/ratelimiter';
 import { Bot } from 'grammy';
 import { session } from 'grammy';
-import { config } from '@/config/config';
-import { BotContext, SessionData } from '@/types/telegram';
-import { startCommandHandler } from '@/bot/commands/start';
-import { helpCommandHandler } from '@/bot/commands/help';
-import { walletCommandHandler } from '@/bot/commands/wallet';
-import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
-import { handleGetHelp } from '@/bot/callbacks/getHelp';
-import { handleBackNavigation } from '@/bot/callbacks/returnBack';
-import { buyToken, performBuy, buyConfirm, buyCancel } from '@/bot/callbacks/buyToken';
-import { sellToken, performSell, sellConfirm, sellCancel } from '@/bot/callbacks/sellToken';
-import { handleRefresh } from '@/bot/callbacks/refresh';
+
+import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
+import { buyCancel, buyConfirm, buyToken, performBuy } from '@/bot/callbacks/buyToken';
 import {
   handleConfigureSettings,
-  handleSetSlippage,
-  handleSetLanguage,
   handleSetGas,
-  updateSlippage,
+  handleSetLanguage,
+  handleSetSlippage,
   updateGasPriority,
   updateLanguage,
+  updateSlippage,
 } from '@/bot/callbacks/configureSettings';
-import { settingsCommandHandler } from '@/bot/commands/settings';
-import { transactionsCommandHandler } from '@/bot/commands/transactions';
-import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
-import depositCommandHandler from '@/bot/commands/deposit';
 import { depositFunds } from '@/bot/callbacks/depositFunds';
+import { handleGetHelp } from '@/bot/callbacks/getHelp';
+import { viewAllTransactions, viewTransactions } from '@/bot/callbacks/getTransactions';
+import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
+import { handleCreateWallet } from '@/bot/callbacks/handleWallet';
+import { handleRefresh } from '@/bot/callbacks/refresh';
+import { handleBackNavigation } from '@/bot/callbacks/returnBack';
+import { performSell, sellCancel, sellConfirm, sellToken } from '@/bot/callbacks/sellToken';
+import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
 import {
   buyCommandHandler,
-  buyTokenKeyboard,
   buyTokenFoundMessage,
+  buyTokenKeyboard,
   invalid_amount_message,
 } from '@/bot/commands/buy';
-import { sellCommandHandler, sellTokenFoundMessage, sellTokenKeyboard } from '@/bot/commands/sell';
-import { withdrawCommandHandler } from '@/bot/commands/withdraw';
-import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
+import depositCommandHandler from '@/bot/commands/deposit';
+import { helpCommandHandler } from '@/bot/commands/help';
 import { referralCommandHandler } from '@/bot/commands/referrals';
-import { getReferralLink, getReferralStats } from '@/bot/callbacks/handleReferrals';
-import { acceptTermsConditions } from '@/bot/callbacks/acceptTermsConditions';
-import { limit } from '@grammyjs/ratelimiter';
-import { NeuroDexApi } from './services/engine/neurodex';
-import { deleteBotMessage } from './utils/deleteMessage';
+import { sellCommandHandler, sellTokenFoundMessage, sellTokenKeyboard } from '@/bot/commands/sell';
+import { settingsCommandHandler } from '@/bot/commands/settings';
+import { startCommandHandler } from '@/bot/commands/start';
+import { transactionsCommandHandler } from '@/bot/commands/transactions';
+import { walletCommandHandler } from '@/bot/commands/wallet';
+import { withdrawCommandHandler } from '@/bot/commands/withdraw';
+import { config } from '@/config/config';
+import logger from '@/config/logger';
+import { BotContext, SessionData } from '@/types/telegram';
+
 import {
-  dcaCommandHandler,
+  dcaCancel,
+  dcaConfirm,
+  dcaToken,
+  getDcaOrders,
+  retrieveDcaAmount,
+  retrieveDcaInterval,
+  retrieveDcaTimes,
+} from './bot/callbacks/handleDCA';
+import {
+  cancelLimitOrder,
+  getLimitOrders,
+  limitCancel,
+  limitConfirm,
+  limitToken,
+  retrieveLimitAmount,
+  retrieveLimitExpiry,
+  retrieveLimitPrice,
+} from './bot/callbacks/handleLimitOrders';
+import {
   confirmDcaKeyboard,
-  invalid_interval_message,
+  confirmDcaMessage,
+  dcaCommandHandler,
+  dcaOrdersCommandHandler,
   dcaTokenFoundMessage,
   dcaTokenKeyboard,
   intervalKeyboard,
   intervalMessage,
-  timesMessage,
-  timesKeyboard,
+  invalid_interval_message,
   invalid_times_message,
-  confirmDcaMessage,
-  dcaOrdersCommandHandler,
+  timesKeyboard,
+  timesMessage,
 } from './bot/commands/dca';
 import {
-  dcaToken,
-  retrieveDcaAmount,
-  retrieveDcaInterval,
-  retrieveDcaTimes,
-  dcaConfirm,
-  dcaCancel,
-  getDcaOrders,
-} from './bot/callbacks/handleDCA';
-import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
-import logger from '@/config/logger';
-import {
-  limitToken,
-  retrieveLimitAmount,
-  retrieveLimitPrice,
-  retrieveLimitExpiry,
-  limitConfirm,
-  limitCancel,
-  getLimitOrders,
-  cancelLimitOrder,
-} from './bot/callbacks/handleLimitOrders';
-import {
-  limitCommandHandler,
-  limitOrdersCommandHandler,
-  limitTokenFoundMessage,
-  limitAmountKeyboard,
-  invalid_amount_message as limitInvalidAmountMessage,
-  limitPriceMessage,
-  invalidPriceMessage,
   invalidExpiryMessage,
+  invalidPriceMessage,
+  limitAmountKeyboard,
+  limitCommandHandler,
+  invalid_amount_message as limitInvalidAmountMessage,
+  limitOrdersCommandHandler,
+  limitPriceMessage,
+  limitTokenFoundMessage,
 } from './bot/commands/limit';
+import { NeuroDexApi } from './services/engine/neurodex';
+import { deleteBotMessage } from './utils/deleteMessage';
+import { isValidDcaAmount, isValidDcaInterval } from './utils/validators';
 
 const bot = new Bot<BotContext>(config.telegramBotToken);
 

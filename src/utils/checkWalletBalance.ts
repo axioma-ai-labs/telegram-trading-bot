@@ -1,7 +1,8 @@
 /**
  * Utility function to check wallet token balances with proper BigInt handling
  */
-import { GoldRushClient, Chain, BalancesResponse } from '@covalenthq/client-sdk';
+import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
+
 import { config } from '@/config/config';
 import { NeuroDexResponse } from '@/types/neurodex';
 

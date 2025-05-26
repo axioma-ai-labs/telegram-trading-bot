@@ -1,5 +1,5 @@
-import { BotContext } from '@/types/telegram';
 import logger from '@/config/logger';
+import { BotContext } from '@/types/telegram';
 
 /**
  * Deletes a bot message after an optional delay.

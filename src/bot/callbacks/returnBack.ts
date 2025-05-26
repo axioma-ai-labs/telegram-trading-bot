@@ -1,12 +1,13 @@
 import { InlineKeyboard } from 'grammy';
-import { BotContext } from '@/types/telegram';
-import { startMessage, startKeyboard } from '@/bot/commands/start';
-import { settingsMessage, settingsKeyboard } from '@/bot/commands/settings';
-import { walletMessage, walletKeyboard } from '@/bot/commands/wallet';
-import { transactionsMessage, transactionsKeyboard } from '@/bot/commands/transactions';
+
 import { referralKeyboard, referralMessage } from '@/bot/commands/referrals';
-import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
+import { settingsKeyboard, settingsMessage } from '@/bot/commands/settings';
+import { startKeyboard, startMessage } from '@/bot/commands/start';
+import { transactionsKeyboard, transactionsMessage } from '@/bot/commands/transactions';
+import { walletKeyboard, walletMessage } from '@/bot/commands/wallet';
 import { ViemService } from '@/services/engine/viem.service';
+import { BotContext } from '@/types/telegram';
+import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
 interface BackHandlerConfig {

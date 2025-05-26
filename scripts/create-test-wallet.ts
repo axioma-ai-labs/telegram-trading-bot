@@ -1,5 +1,6 @@
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import crypto from 'crypto';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+
 import { config } from '../src/config/config';
 
 // --- Wallet creation ---

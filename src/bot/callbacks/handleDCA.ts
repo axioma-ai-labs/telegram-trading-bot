@@ -1,30 +1,30 @@
-import { BotContext } from '@/types/telegram';
-import { GasPriority } from '@/types/config';
-import { deleteBotMessage } from '@/utils/deleteMessage';
-import { NeuroDexApi } from '@/services/engine/neurodex';
-import { formatInterval } from '@/utils/formatters';
-import { DcaOrderAssetData } from '@/types/openocean';
-import { validateUserAndWallet } from '@/utils/userValidation';
 import {
-  dcaTokenMessage,
-  custom_amount_message,
-  invalid_amount_message,
-  invalid_times_message,
-  intervalMessage,
-  intervalKeyboard,
-  timesMessage,
-  timesKeyboard,
-  custom_interval_message,
-  custom_times_message,
   confirmDcaKeyboard,
   confirmDcaMessage,
+  custom_amount_message,
+  custom_interval_message,
+  custom_times_message,
+  dcaTokenMessage,
   error_dca_message,
   error_message,
   insufficient_funds_message,
+  intervalKeyboard,
+  intervalMessage,
+  invalid_amount_message,
+  invalid_times_message,
+  timesKeyboard,
+  timesMessage,
 } from '@/bot/commands/dca';
-import { DcaParams } from '@/types/neurodex';
-import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import logger from '@/config/logger';
+import { NeuroDexApi } from '@/services/engine/neurodex';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { GasPriority } from '@/types/config';
+import { DcaParams } from '@/types/neurodex';
+import { DcaOrderAssetData } from '@/types/openocean';
+import { BotContext } from '@/types/telegram';
+import { deleteBotMessage } from '@/utils/deleteMessage';
+import { formatInterval } from '@/utils/formatters';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 const dca_success_message = (
   amount: number,

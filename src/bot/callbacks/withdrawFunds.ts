@@ -1,8 +1,8 @@
-import { BotContext } from '@/types/telegram';
-import { withdrawMessage, withdrawKeyboard } from '@/bot/commands/withdraw';
-import { validateUserAndWallet } from '@/utils/userValidation';
-import { ViemService } from '@/services/engine/viem.service';
+import { withdrawKeyboard, withdrawMessage } from '@/bot/commands/withdraw';
 import logger from '@/config/logger';
+import { ViemService } from '@/services/engine/viem.service';
+import { BotContext } from '@/types/telegram';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   // validate user

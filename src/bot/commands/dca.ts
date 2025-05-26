@@ -1,11 +1,12 @@
-import { BotContext } from '@/types/telegram';
-import { CommandHandler } from '@/types/commands';
-import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { InlineKeyboard } from 'grammy';
-import { formatInterval } from '@/utils/formatters';
-import { validateUserAndWallet } from '@/utils/userValidation';
+
 import { getDcaOrders } from '@/bot/callbacks/handleDCA';
 import logger from '@/config/logger';
+import { CommandHandler } from '@/types/commands';
+import { NeuroDexResponse, TokenData } from '@/types/neurodex';
+import { BotContext } from '@/types/telegram';
+import { formatInterval } from '@/utils/formatters';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export const dcaTokenMessage = 'Please send contract address of the token you want to DCA:';
 export const error_message = '❌ Transaction failed. Please try again later.';

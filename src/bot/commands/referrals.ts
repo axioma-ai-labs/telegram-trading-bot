@@ -1,9 +1,10 @@
+import { InlineKeyboard } from 'grammy';
+
+import logger from '@/config/logger';
+import { ReferralService } from '@/services/prisma/referrals';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { InlineKeyboard } from 'grammy';
-import { ReferralService } from '@/services/prisma/referrals';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import logger from '@/config/logger';
 
 export const referralMessage = (referralLink: string): string => {
   return [

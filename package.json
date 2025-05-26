@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@prisma/ppg-tunnel": "^0.3.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/argon2": "^0.15.4",
     "@types/libsodium-wrappers": "^0.7.14",
     "@types/node": "^20.17.46",

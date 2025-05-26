@@ -1,4 +1,5 @@
 import { isAddress } from 'viem';
+
 import logger from '@/config/logger';
 
 /**

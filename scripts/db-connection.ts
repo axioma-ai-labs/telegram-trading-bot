@@ -1,6 +1,7 @@
 import 'dotenv/config';
-import { UserService } from '../src/services/prisma/user';
+
 import { PrismaClient } from '../node_modules/.prisma/client';
+import { UserService } from '../src/services/prisma/user';
 
 const prisma = new PrismaClient();
 

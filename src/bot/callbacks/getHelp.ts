@@ -1,7 +1,7 @@
-import { BotContext } from '@/types/telegram';
 import { helpKeyboard, helpMessage } from '@/bot/commands/help';
-import { validateUserAndWallet } from '@/utils/userValidation';
 import logger from '@/config/logger';
+import { BotContext } from '@/types/telegram';
+import { validateUserAndWallet } from '@/utils/userValidation';
 
 export async function handleGetHelp(ctx: BotContext): Promise<void> {
   // validate user

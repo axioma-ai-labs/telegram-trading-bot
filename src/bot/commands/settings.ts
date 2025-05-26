@@ -1,10 +1,11 @@
 import { InlineKeyboard } from 'grammy';
+
+import logger from '@/config/logger';
+import { SettingsService } from '@/services/prisma/settings';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { SettingsService } from '@/services/prisma/settings';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';
-import logger from '@/config/logger';
 
 export const settingsMessage = (
   slippage?: string,

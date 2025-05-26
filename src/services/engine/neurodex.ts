@@ -1,32 +1,33 @@
-import { Address } from 'viem';
-import { base, bsc, mainnet } from 'viem/chains';
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
-import { OpenOceanClient } from '@/services/engine/openocean.service';
-import { ViemService } from '@/services/engine/viem.service';
+import { Address } from 'viem';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { base, bsc, mainnet } from 'viem/chains';
+import Web3 from 'web3';
+
 import { config } from '@/config/config';
 import logger from '@/config/logger';
+import { OpenOceanClient } from '@/services/engine/openocean.service';
+import { ViemService } from '@/services/engine/viem.service';
+import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { GasPriority } from '@/types/config';
 import {
-  NeuroDexResponse,
-  WalletInfo,
-  SwapResult,
   BuyParams,
-  SellParams,
-  LimitOrderParams,
-  CancelLimitOrderParams,
-  LimitOrderInfo,
-  GetLimitOrdersParams,
-  DcaParams,
   CancelDcaOrderParams,
-  GetDcaOrdersParams,
+  CancelLimitOrderParams,
   DcaOrderInfo,
+  DcaParams,
+  GetDcaOrdersParams,
+  GetLimitOrdersParams,
+  LimitOrderInfo,
+  LimitOrderParams,
+  NeuroDexResponse,
+  SellParams,
+  SwapResult,
   TokenData,
+  WalletInfo,
 } from '@/types/neurodex';
 import { OpenOceanChain } from '@/types/openocean';
-import { GasPriority } from '@/types/config';
 import { erc20Abi } from '@/utils/abis';
-import Web3 from 'web3';
-import { PrivateStorageService } from '@/services/supabase/privateKeys';
 
 /**
  * NeuroDex API service for handling trading operations
