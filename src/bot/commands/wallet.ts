@@ -1,6 +1,5 @@
 import { InlineKeyboard } from 'grammy';
 
-import logger from '@/config/logger';
 import { ViemService } from '@/services/engine/viem.service';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
@@ -72,9 +71,10 @@ export const walletCommandHandler: CommandHandler = {
     const ethBalance = await viemService.getNativeBalance(walletAddress);
     const balance = ethBalance || '0.000';
 
-    const message = walletMessage(walletAddress, balance);
-
-    logger.info('Wallet message:', message);
+    const message = ctx.t('wallet_msg', {
+      walletAddress,
+      ethBalance: balance,
+    });
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

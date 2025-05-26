@@ -1,4 +1,4 @@
-import { walletCreationOKMessage, walletKeyboard, walletMessage } from '@/bot/commands/wallet';
+import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem.service';
@@ -24,7 +24,10 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
       const ethBalance = balance || '0.000';
 
-      const existingWalletMessage = walletMessage(user.wallets[0].address, ethBalance);
+      const existingWalletMessage = ctx.t('wallet_msg', {
+        walletAddress: user.wallets[0].address,
+        ethBalance,
+      });
 
       await ctx.editMessageText(existingWalletMessage, {
         parse_mode: 'Markdown',
@@ -49,7 +52,10 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
 
     // Success msg
     const editedMessage = await ctx.editMessageText(
-      walletCreationOKMessage(wallet.address, wallet.privateKey),
+      ctx.t('wallet_creation_ok_msg', {
+        walletAddress: wallet.address,
+        privateKey: wallet.privateKey,
+      }),
       {
         parse_mode: 'Markdown',
       }

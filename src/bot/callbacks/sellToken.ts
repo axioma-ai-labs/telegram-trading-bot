@@ -1,32 +1,12 @@
-import {
-  confirmSellKeyboard,
-  confirmSellMessage,
-  custom_amount_prompt,
-  error_message,
-  insufficient_funds_message,
-  invalid_amount_message,
-  invalid_token_message,
-  sellTokenMessage,
-} from '@/bot/commands/sell';
+import { confirmSellKeyboard } from '@/bot/commands/sell';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { GasPriority } from '@/types/config';
 import { SellParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-const transaction_success_message = (
-  amount: number,
-  token: string,
-  tokenSymbol: string,
-  txHash: string
-): string =>
-  `✅ Sell order for ${amount} ${tokenSymbol} was successful!\n\n` +
-  `Transaction details:\n` +
-  `• Amount: ${amount} ${tokenSymbol}\n` +
-  `• Token: ${token}\n` +
-  `• Transaction: https://basescan.org/tx/${txHash}`;
 
 export async function sellToken(ctx: BotContext): Promise<void> {
   // validate user
@@ -38,7 +18,7 @@ export async function sellToken(ctx: BotContext): Promise<void> {
     type: 'sell',
   };
 
-  await ctx.reply(sellTokenMessage, {
+  await ctx.reply(ctx.t('sell_token_msg'), {
     parse_mode: 'Markdown',
   });
 }
@@ -50,14 +30,14 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token) {
-    const message = await ctx.reply(invalid_token_message);
+    const message = await ctx.reply(ctx.t('invalid_token_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
   // custom amount
   if (amount === 'custom') {
-    await ctx.reply(custom_amount_prompt, {
+    await ctx.reply(ctx.t('sell_custom_amount_msg'), {
       parse_mode: 'Markdown',
     });
     return;
@@ -73,7 +53,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     );
 
     if (!balancesResponse || !balancesResponse.items) {
-      const message = await ctx.reply('❌ Failed to fetch wallet balance. Please try again.');
+      const message = await ctx.reply(ctx.t('error_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
@@ -85,7 +65,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     );
 
     if (!tokenBalance || !tokenBalance.balance || tokenBalance.balance === 0n) {
-      const message = await ctx.reply('❌ You have no balance of this token to sell.');
+      const message = await ctx.reply(ctx.t('sell_no_balance_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
@@ -100,7 +80,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     if (amount.endsWith('%')) {
       const percentage = parseInt(amount.replace('%', ''));
       if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
-        const message = await ctx.reply(invalid_amount_message);
+        const message = await ctx.reply(ctx.t('invalid_amount_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
         return;
       }
@@ -109,7 +89,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
       // Handle custom numeric amount
       sellAmount = parseFloat(amount);
       if (isNaN(sellAmount) || sellAmount <= 0) {
-        const message = await ctx.reply(invalid_amount_message);
+        const message = await ctx.reply(ctx.t('invalid_amount_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
         return;
       }
@@ -117,7 +97,10 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
       // Check if user has enough balance
       if (sellAmount > balanceNumber) {
         const message = await ctx.reply(
-          `❌ Insufficient balance. You only have ${balanceNumber.toFixed(6)} ${tokenBalance.contract_ticker_symbol || 'tokens'}.`
+          ctx.t('sell_insufficient_balance_msg', {
+            balance: balanceNumber.toFixed(6),
+            tokenSymbol: tokenBalance.contract_ticker_symbol || 'tokens',
+          })
         );
         await deleteBotMessage(ctx, message.message_id, 10000);
         return;
@@ -131,12 +114,12 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     };
 
     // Show confirmation dialog
-    const confirmMessage = confirmSellMessage(
-      currentOperation.token,
-      currentOperation.tokenSymbol || tokenBalance.contract_ticker_symbol || '',
-      currentOperation.tokenName || tokenBalance.contract_name || 'Unknown',
-      sellAmount
-    );
+    const confirmMessage = ctx.t('sell_confirm_msg', {
+      token: currentOperation.token,
+      tokenSymbol: currentOperation.tokenSymbol || tokenBalance.contract_ticker_symbol || '',
+      tokenName: currentOperation.tokenName || tokenBalance.contract_name || 'Unknown',
+      amount: sellAmount,
+    });
 
     await ctx.reply(confirmMessage, {
       parse_mode: 'Markdown',
@@ -144,7 +127,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     });
   } catch (error) {
     logger.error('Error during sell preparation:', error);
-    const message = await ctx.reply(error_message);
+    const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
   }
 }
@@ -157,14 +140,14 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token || !currentOperation?.amount) {
-    const message = await ctx.reply('❌ Invalid sell operation. Please try again.');
+    const message = await ctx.reply(ctx.t('sell_invalid_operation_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
-    const message = await ctx.reply('❌ Private key not found. Please try again.');
+    const message = await ctx.reply(ctx.t('no_private_key_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
@@ -174,7 +157,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       fromTokenAddress: currentOperation.token,
       fromAmount: currentOperation.amount,
       slippage: Number(user?.settings?.slippage),
-      gasPriority: 'standard',
+      gasPriority: user?.settings?.gasPriority as GasPriority,
       walletAddress: user.wallets[0].address,
       privateKey: privateKey,
       referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
@@ -186,24 +169,25 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (sellResult.success && sellResult.data?.txHash) {
-      const message = transaction_success_message(
-        currentOperation.amount,
-        currentOperation.token,
-        currentOperation.tokenSymbol || 'tokens',
-        sellResult.data.txHash
-      );
+      const message = ctx.t('sell_success_msg', {
+        amount: currentOperation.amount,
+        tokenSymbol: currentOperation.tokenSymbol || 'tokens',
+        token: currentOperation.token,
+        txHash: sellResult.data.txHash,
+      });
+
       await ctx.reply(message, {
         parse_mode: 'Markdown',
       });
       ctx.session.currentOperation = null;
     } else {
       // check if no balance or other errors
-      const message = sellResult.error?.toLowerCase() || '';
-      if (message.includes('insufficient') || message.includes('balance')) {
-        const message = await ctx.reply(insufficient_funds_message);
+      const errorMessage = sellResult.error?.toLowerCase() || '';
+      if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
+        const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       } else {
-        const message = await ctx.reply(error_message);
+        const message = await ctx.reply(ctx.t('error_msg'));
         await deleteBotMessage(ctx, message.message_id, 10000);
       }
       // reset
@@ -211,12 +195,12 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     }
   } catch (error) {
     logger.error('Error during sell transaction:', error);
-    const message = error instanceof Error ? error.message.toLowerCase() : '';
-    if (message.includes('insufficient') || message.includes('balance')) {
-      const message = await ctx.reply(insufficient_funds_message);
+    const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
+    if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
+      const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
     } else {
-      const message = await ctx.reply(error_message);
+      const message = await ctx.reply(ctx.t('error_msg'));
       await deleteBotMessage(ctx, message.message_id, 10000);
     }
     // reset
@@ -231,6 +215,6 @@ export async function sellCancel(ctx: BotContext): Promise<void> {
 
   // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply('✅ Sell order has been successfully cancelled!');
+  const message = await ctx.reply(ctx.t('sell_cancel_msg'));
   await deleteBotMessage(ctx, message.message_id, 5000);
 }

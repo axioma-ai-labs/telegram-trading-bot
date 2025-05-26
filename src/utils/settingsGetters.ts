@@ -3,9 +3,7 @@ export function getLanguageName(code: string): string {
     en: '🇺🇸 English',
     es: '🇪🇸 Spanish',
     ru: '🇷🇺 Russian',
-    zh: '🇨🇳 Chinese',
-    vi: '🇻🇳 Vietnamese',
-    id: '🇮🇩 Indonesian',
+    de: '🇩🇪 German',
   };
 
   return languages[code] || code;

@@ -1,8 +1,7 @@
 import { ReferralStats, Settings, User, Wallet } from '@prisma/client/edge';
 
-import { not_registered_message } from '@/bot/commands/dca';
-import { acceptTermsConditionsKeyboard, acceptTermsConditionsMessage } from '@/bot/commands/start';
-import { createWalletKeyboard, createWalletMessage } from '@/bot/commands/wallet';
+import { acceptTermsConditionsKeyboard } from '@/bot/commands/start';
+import { createWalletKeyboard } from '@/bot/commands/wallet';
 import { UserService } from '@/services/prisma/user';
 import { BotContext } from '@/types/telegram';
 
@@ -147,7 +146,8 @@ export async function validateUserAndWallet(
   // check registered
   if (!user) {
     if (!skipMessages) {
-      await ctx.reply(not_registered_message, {
+      const message = ctx.t('no_registration_msg');
+      await ctx.reply(message, {
         parse_mode: 'Markdown',
       });
     }
@@ -157,7 +157,8 @@ export async function validateUserAndWallet(
   // check terms accepted
   if (!user.termsAccepted) {
     if (!skipMessages) {
-      await ctx.reply(acceptTermsConditionsMessage, {
+      const message = ctx.t('accept_terms_conditions_msg');
+      await ctx.reply(message, {
         parse_mode: 'Markdown',
         reply_markup: acceptTermsConditionsKeyboard,
       });
@@ -168,7 +169,8 @@ export async function validateUserAndWallet(
   // check has wallet
   if (!user.wallets?.length) {
     if (!skipMessages) {
-      await ctx.reply(createWalletMessage, {
+      const message = ctx.t('wallet_create_msg');
+      await ctx.reply(message, {
         parse_mode: 'Markdown',
         reply_markup: createWalletKeyboard,
       });

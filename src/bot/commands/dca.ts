@@ -1,42 +1,9 @@
 import { InlineKeyboard } from 'grammy';
 
 import { getDcaOrders } from '@/bot/callbacks/handleDCA';
-import logger from '@/config/logger';
 import { CommandHandler } from '@/types/commands';
-import { NeuroDexResponse, TokenData } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
-import { formatInterval } from '@/utils/formatters';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-export const dcaTokenMessage = 'Please send contract address of the token you want to DCA:';
-export const error_message = '❌ Transaction failed. Please try again later.';
-export const error_dca_message = '❌ Failed to create DCA order. Please try again later.';
-export const invalid_amount_message = '❌ Invalid amount selected. Please try again.';
-export const insufficient_funds_message = '❌ Insufficient funds to complete the transaction.';
-export const no_wallet_message = "❌ You don't have a wallet.\n\nPlease use /wallet to create one.";
-export const not_registered_message = '❌ You are not registered.\n\nPlease use /start to begin.';
-export const invalid_token_message = '❌ No token selected. Please select a token first.';
-export const custom_amount_message = 'Please enter the amount of ETH you want to spend:';
-export const custom_interval_message = 'Please enter the interval in hours:';
-export const custom_times_message = 'Please enter the number of times (1-100) for your DCA order:';
-export const invalid_interval_message = '❌ Invalid interval selected. Please try again.';
-export const invalid_times_message =
-  '❌ Invalid number of intervals. Please enter a number between 1 and 100.';
-
-export const dcaTokenFoundMessage = (tokenData: NeuroDexResponse<TokenData>): string => `
-✅ *Token Found*
-
-Symbol: *$${tokenData.data?.symbol}*
-Name: *${tokenData.data?.name}*
-Price: $${tokenData.data?.price}
-Chain: ${tokenData.data?.chain}
-
-Please select how much ETH you want to spend on $${tokenData.data?.symbol} for your DCA order.
-
-Go to /settings to adjust slippage and gas if the transaction fails.
-`;
-
-export const intervalMessage = 'Please select the interval time for your DCA order:';
 
 export const dcaTokenKeyboard = new InlineKeyboard()
   .text('0.1 ETH', 'dca_amount_0.1')
@@ -65,26 +32,6 @@ export const timesKeyboard = new InlineKeyboard()
   .row()
   .text('Custom', 'dca_times_custom');
 
-export const timesMessage = 'Please select the number of times for your DCA order:';
-
-export const confirmDcaMessage = (
-  token: string,
-  tokenSymbol: string,
-  tokenName: string,
-  amount: number,
-  interval: number,
-  times: number
-): string => `
-🔍 *Confirm DCA Order*
-
-*Token:* ${tokenSymbol} | ${tokenName}
-*CA:* \`${token}\`
-*Amount:* ${amount} ETH
-*Interval:* ${formatInterval(interval)}
-*Times:* ${times}
-
-Please confirm to create the DCA order:`;
-
 export const confirmDcaKeyboard = new InlineKeyboard()
   .text('✅ Confirm', 'dca_confirm')
   .text('❌ Cancel', 'dca_cancel');
@@ -99,9 +46,7 @@ export const dcaCommandHandler: CommandHandler = {
 
     ctx.session.currentOperation = { type: 'dca' };
 
-    logger.info('DCA token message:', dcaTokenMessage);
-
-    await ctx.reply(dcaTokenMessage, {
+    await ctx.reply(ctx.t('dca_token_msg'), {
       parse_mode: 'Markdown',
     });
   },

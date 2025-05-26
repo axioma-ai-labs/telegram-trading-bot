@@ -1,24 +1,9 @@
 import { InlineKeyboard } from 'grammy';
 
-import logger from '@/config/logger';
 import { ViemService } from '@/services/engine/viem.service';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
-
-export const depositMessage = (
-  walletAddress: string,
-  ethBalance: string
-): string => `📥 *Deposit ETH or Tokens*
-
-ETH: ${ethBalance}    
-
-Send ETH or any ERC-20 token to your wallet: \`${walletAddress}\`
-
-*Important*:
-- Only send assets on the Base Network
-- ETH deposits usually confirm within minutes
-- Never share your private key with anyone`;
 
 export const depositKeyboard = new InlineKeyboard()
   .text('← Back', 'back_start')
@@ -35,9 +20,10 @@ export const depositCommandHandler: CommandHandler = {
     const viemService = new ViemService();
     const balance = await viemService.getNativeBalance(user?.wallets[0].address as `0x${string}`);
     const ethBalance = balance || '0.000';
-    const message = depositMessage(user.wallets[0].address, ethBalance);
-
-    logger.info('Deposit message:', message);
+    const message = ctx.t('deposit_msg', {
+      walletAddress: user.wallets[0].address,
+      ethBalance,
+    });
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',

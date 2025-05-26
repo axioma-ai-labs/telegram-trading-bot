@@ -1,10 +1,10 @@
 import { InlineKeyboard } from 'grammy';
 
-import { referralKeyboard, referralMessage } from '@/bot/commands/referrals';
-import { settingsKeyboard, settingsMessage } from '@/bot/commands/settings';
-import { startKeyboard, startMessage } from '@/bot/commands/start';
+import { referralKeyboard } from '@/bot/commands/referrals';
+import { settingsKeyboard } from '@/bot/commands/settings';
+import { startKeyboard } from '@/bot/commands/start';
 import { transactionsKeyboard, transactionsMessage } from '@/bot/commands/transactions';
-import { walletKeyboard, walletMessage } from '@/bot/commands/wallet';
+import { walletKeyboard } from '@/bot/commands/wallet';
 import { ViemService } from '@/services/engine/viem.service';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
@@ -18,7 +18,9 @@ interface BackHandlerConfig {
 // Back handlers
 export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   back_start: {
-    message: startMessage,
+    message: async (ctx: BotContext) => {
+      return ctx.t('start_msg');
+    },
     keyboard: startKeyboard,
   },
   back_settings: {
@@ -26,11 +28,13 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
       const { isValid, user } = await validateUserAndWallet(ctx);
       if (!isValid) return '';
 
-      return settingsMessage(
-        getSlippageName(user?.settings?.slippage || '1'),
-        getLanguageName(user?.settings?.language || 'en'),
-        getGasPriorityName(user?.settings?.gasPriority || 'standard')
-      );
+      const message = ctx.t('settings_msg', {
+        slippage: getSlippageName(user?.settings?.slippage || '1'),
+        language: getLanguageName(user?.settings?.language || 'en'),
+        gasPriority: getGasPriorityName(user?.settings?.gasPriority || 'standard'),
+      });
+
+      return message;
     },
     keyboard: settingsKeyboard,
   },
@@ -39,8 +43,9 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
       const { isValid, user } = await validateUserAndWallet(ctx);
       if (!isValid || !user) return '';
 
-      const referralLink = user.referralCode || '';
-      return referralMessage(referralLink);
+      const referral_link = user.referralCode || '';
+      const message = ctx.t('referral_msg', { referral_link });
+      return message;
     },
     keyboard: referralKeyboard,
   },
@@ -53,7 +58,12 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
       const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
       const ethBalance = balance || '0.000';
 
-      return walletMessage(user.wallets[0].address, ethBalance);
+      const message = ctx.t('wallet_msg', {
+        walletAddress: user.wallets[0].address,
+        ethBalance,
+      });
+
+      return message;
     },
     keyboard: walletKeyboard,
   },

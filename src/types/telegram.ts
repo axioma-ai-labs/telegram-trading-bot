@@ -1,3 +1,4 @@
+import { I18nFlavor } from '@grammyjs/i18n';
 import { Context, SessionFlavor } from 'grammy';
 
 /**
@@ -9,6 +10,7 @@ export interface SessionData {
   startTime: number;
   lastInteractionTime: number;
   currentOperation: OperationState | null;
+  userLanguage?: string;
   user?: {
     id: string;
     telegramId: string;
@@ -56,9 +58,9 @@ export interface SessionData {
 }
 
 /**
- * Custom context type with session
+ * Custom context type with session and i18n
  */
-export type BotContext = Context & SessionFlavor<SessionData>;
+export type BotContext = Context & SessionFlavor<SessionData> & I18nFlavor;
 
 export type OperationType = 'buy' | 'sell' | 'dca' | 'limit' | null;
 

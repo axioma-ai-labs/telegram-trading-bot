@@ -1,5 +1,5 @@
-import { depositKeyboard, depositMessage } from '@/bot/commands/deposit';
-import { walletKeyboard, walletMessage } from '@/bot/commands/wallet';
+import { depositKeyboard } from '@/bot/commands/deposit';
+import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { ViemService } from '@/services/engine/viem.service';
 import { UserService } from '@/services/prisma/user';
@@ -22,7 +22,10 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
 
     // Refresh deposit
     if (callbackData === 'refresh_deposit') {
-      const message = depositMessage(walletAddress, ethBalance);
+      const message = ctx.t('deposit_msg', {
+        walletAddress: walletAddress,
+        ethBalance: ethBalance,
+      });
 
       await ctx.editMessageText(message, {
         parse_mode: 'Markdown',
@@ -32,7 +35,10 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     }
     // Refresh wallet
     else if (callbackData === 'refresh_wallet') {
-      const message = walletMessage(walletAddress, ethBalance);
+      const message = ctx.t('wallet_msg', {
+        walletAddress: walletAddress,
+        ethBalance: ethBalance,
+      });
 
       await ctx.editMessageText(message, {
         parse_mode: 'Markdown',
@@ -52,7 +58,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     // Handle case when message content hasn't changed
     if (error instanceof Error && error.message?.includes('message is not modified')) {
       await ctx.answerCallbackQuery({
-        text: '✨ Already up to date!',
+        text: ctx.t('already_up_to_date_msg'),
         show_alert: false,
       });
       return;
@@ -61,7 +67,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     // Handle other errors
     logger.error('Error in handleRefresh:', error);
     await ctx.answerCallbackQuery({
-      text: '❌ Failed to refresh. Please try again.',
+      text: ctx.t('error_msg'),
       show_alert: true,
     });
   }
