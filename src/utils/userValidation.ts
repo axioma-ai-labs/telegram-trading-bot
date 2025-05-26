@@ -1,7 +1,11 @@
 import { ReferralStats, Settings, User, Wallet } from '@prisma/client/edge';
 
+import { bot } from '@/bot';
 import { acceptTermsConditionsKeyboard } from '@/bot/commands/start';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
+import logger from '@/config/logger';
+import { ReferralService } from '@/services/prisma/referrals';
+import { SettingsService } from '@/services/prisma/settings';
 import { UserService } from '@/services/prisma/user';
 import { BotContext } from '@/types/telegram';
 
@@ -179,4 +183,68 @@ export async function validateUserAndWallet(
   }
 
   return { isValid: true, user };
+}
+
+/**
+ * Creates a new user with optional referral linking and default settings.
+ *
+ * @param ctx - The bot context containing user information
+ * @param telegramId - The user's Telegram ID
+ * @param referralLink - The user's referral link
+ * @param referrer - Optional referrer user for linking referrals
+ * @returns The created user
+ */
+export async function createNewUser(
+  ctx: BotContext,
+  telegramId: string,
+  referralLink: string,
+  referrer?: User
+): Promise<UserWithRelations> {
+  // Create new user
+  const user = await UserService.upsertUser(telegramId, {
+    username: ctx.from?.username,
+    firstName: ctx.from?.first_name,
+    lastName: ctx.from?.last_name,
+    referralCode: referralLink,
+  });
+
+  // Link referral if referrer exists
+  if (referrer) {
+    await ReferralService.linkReferral(user.id, referrer.id);
+    logger.info('Referrer:', referrer.id, 'has successfully referred:', user.id);
+    await sendReferralNotification(ctx, referrer.telegramId);
+  }
+
+  // Create default settings
+  await SettingsService.upsertSettings(user.id, {
+    language: 'en',
+    autoTrade: false,
+    proMode: false,
+    gasPriority: 'standard',
+    slippage: '0.5',
+  });
+
+  // Update cache with full user data
+  const userWithRelations = await UserService.getUserByTelegramId(telegramId);
+  if (userWithRelations) {
+    ctx.session.user = { ...userWithRelations, cachedAt: Date.now() };
+    logger.info('New user created:', telegramId);
+    return userWithRelations;
+  }
+
+  logger.info('New user created:', telegramId);
+  return user as UserWithRelations;
+}
+
+export async function sendReferralNotification(ctx: BotContext, telegramId: string): Promise<void> {
+  const message = ctx.t('referral_success_notification_msg');
+
+  await bot.api.sendMessage(telegramId, message, {
+    parse_mode: 'Markdown',
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
+
+  logger.info(`Referral notification sent to user: ${telegramId}`);
 }

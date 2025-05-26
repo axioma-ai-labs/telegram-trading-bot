@@ -52,11 +52,11 @@ wallet_msg =
 
 wallet_repeat_pk_error_msg = ❌ *Verificación de Clave Privada Fallida*
     
-    Los últimos 4 dígitos que ingresaste no coinciden con tu clave privada. Por favor intenta de nuevo abajo:
+    Los últimos 4 caracteres que ingresaste no coinciden con tu clave privada. Por favor intenta de nuevo abajo:
 
 wallet_repeat_pk_msg = ⚠️ *Verificar Clave Privada* 
 
-    Por favor ingresa los últimos 4 dígitos de tu clave privada abajo para verificar que la recordaste y almacenaste de forma segura:
+    Por favor ingresa los últimos 4 caracteres de tu clave privada abajo para verificar que la recordaste y almacenaste de forma segura:
 
 wallet_repeat_pk_success_msg = ✅ *Clave Privada Verificada*
 
@@ -255,6 +255,8 @@ referral_stats_msg =
     Ganancias Totales por Referidos: { $totalEarned }
 
     ¡Sigue difundiendo la palabra y mira crecer tus ganancias! 🚀
+
+referral_success_notification_msg = 🥳 *¡Boom!* ¡Acabas de referir a un nuevo usuario a Neurodex! ¡Estás creciendo el movimiento — y tus recompensas!
 
 settings_msg =
     ⚙️ *Configuraciones*

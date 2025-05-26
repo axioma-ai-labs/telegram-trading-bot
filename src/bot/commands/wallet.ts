@@ -5,37 +5,6 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 
-export const walletCreationOKMessage = (walletAddress: string, privateKey: string): string => `
-✅ *Your wallet has been created successfully*
-
-*Wallet Address:*
-\`${walletAddress}\`
-
-*Private Key:*
-\`${privateKey}\`
-
-⚠️ *IMPORTANT:* Keep your private key safe and secure
-• Do not share it with anyone
-• Do not store it digitally or online
-• Write it down and store it safely
-
-⏰ This message will be deleted in 5 minutes for security
-
-To start trading, use the /start command.`;
-
-export const walletCreationFailMessage = `❌ *Wallet Creation Failed*
-
-Something went wrong. Please try again or go to /help.`;
-
-export const walletMessage = (
-  walletAddress: string,
-  ethBalance: string
-): string => `*💰 Wallet:* \`${walletAddress}\`
-
-*Balance:* ${ethBalance} ETH
-
-To deposit funds, please send your coins to the wallet address above.`;
-
 export const walletKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
   .text('Sell', 'sell')

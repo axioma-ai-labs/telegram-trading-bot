@@ -1,13 +1,12 @@
 import { InlineKeyboard } from 'grammy';
 
-import { createWalletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ReferralService } from '@/services/prisma/referrals';
-import { SettingsService } from '@/services/prisma/settings';
 import { UserService } from '@/services/prisma/user';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
+import { createNewUser, validateUserAndWallet } from '@/utils/userValidation';
 
 export const startKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
@@ -24,6 +23,8 @@ export const startKeyboard = new InlineKeyboard()
   .text('⚙️ Settings', 'open_settings')
   .text('💬 Help', 'get_help');
 
+export const startTradingKeyboard = new InlineKeyboard().text('Start Trading 🚀', 'start_trading');
+
 export const acceptTermsConditionsKeyboard = new InlineKeyboard().text(
   '✅ Accept',
   'accept_terms_conditions'
@@ -36,89 +37,43 @@ export const startCommandHandler: CommandHandler = {
     if (!ctx.from?.id) {
       return;
     }
+
     const neurodex = new NeuroDexApi();
     const telegramId = ctx.from.id.toString();
     const payload = ctx.match?.toString() || ''; // Payload from referral link
-
-    const user = await UserService.getUserByTelegramId(telegramId);
-    const USER_HAS_WALLET = user?.wallets && user.wallets.length > 0;
-    const IS_ACCEPTED_TERMS_CONDITIONS = user?.termsAccepted ?? false;
-    const IS_REGISTERED = user !== null;
     const referralLink = await neurodex.generateReferralLink(ctx.from.id, ctx.from.username || '');
 
-    // Referred user
-    if (payload && payload.startsWith('r-')) {
-      // TODO: optimize this logic for parsing the referral code
-      const referralCode = 'https://t.me/neuro_bro_test_bot?start=' + payload.trim();
-      const referrer = await ReferralService.getUserByReferralCode(referralCode);
+    // Check if user exists
+    const existingUser = await UserService.getUserByTelegramId(telegramId);
 
-      if (!IS_REGISTERED && referrer) {
-        // Create new user with referral
-        const user = await UserService.upsertUser(telegramId, {
-          username: ctx.from.username,
-          firstName: ctx.from.first_name,
-          lastName: ctx.from.last_name,
-          referralCode: referralLink,
-        });
+    // Handle new users (with or without referral)
+    if (!existingUser) {
+      let referrer = null;
 
-        // Link the referral
-        await ReferralService.linkReferral(user.id, referrer.id);
-        logger.info('Referrer:', referrer.id, 'has successfully referred:', user.id);
-
-        await SettingsService.upsertSettings(user.id, {
-          language: 'en',
-          autoTrade: false,
-          proMode: false,
-          gasPriority: 'standard',
-          slippage: '0.5',
-        });
-        logger.info('New user created with referral:', telegramId);
-        const message = ctx.t('accept_terms_conditions_msg');
-        await ctx.reply(message, {
-          parse_mode: 'Markdown',
-          reply_markup: acceptTermsConditionsKeyboard,
-        });
-        return;
+      // Handle referral if payload exists
+      if (payload && payload.startsWith('r-')) {
+        const referralCode = 'https://t.me/neuro_bro_test_bot?start=' + payload.trim();
+        referrer = await ReferralService.getUserByReferralCode(referralCode);
       }
+
+      // Create new user
+      await createNewUser(ctx, telegramId, referralLink, referrer || undefined);
+
+      const message = ctx.t('accept_terms_conditions_msg');
+      await ctx.reply(message, {
+        parse_mode: 'Markdown',
+        reply_markup: acceptTermsConditionsKeyboard,
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
+      return;
     }
 
-    // New user (no referral)
-    if (!IS_REGISTERED) {
-      // New user without wallet
-      const user = await UserService.upsertUser(telegramId, {
-        username: ctx.from.username,
-        firstName: ctx.from.first_name,
-        lastName: ctx.from.last_name,
-        referralCode: referralLink,
-      });
-      await SettingsService.upsertSettings(user.id, {
-        language: 'en',
-        autoTrade: false,
-        proMode: false,
-        gasPriority: 'standard',
-        slippage: '0.5',
-      });
-      logger.info('New user created:', telegramId);
-      const message = ctx.t('accept_terms_conditions_msg');
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: acceptTermsConditionsKeyboard,
-      });
-    } else if (!IS_ACCEPTED_TERMS_CONDITIONS) {
-      logger.info('User not accepted terms conditions:', telegramId);
-      const message = ctx.t('accept_terms_conditions_msg');
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: acceptTermsConditionsKeyboard,
-      });
-    } else if (!USER_HAS_WALLET) {
-      logger.info('User does not have a wallet:', telegramId);
-      const message = ctx.t('create_wallet_msg');
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: createWalletKeyboard,
-      });
-    } else {
+    // For existing users, use validateUserAndWallet
+    const { isValid } = await validateUserAndWallet(ctx, { skipMessages: true });
+
+    if (isValid) {
       // Existing user with wallet & accepted terms conditions
       logger.info('Existing user:', telegramId);
       const message = ctx.t('start_msg');
@@ -129,6 +84,9 @@ export const startCommandHandler: CommandHandler = {
           is_disabled: true,
         },
       });
+    } else {
+      // validate user and wallet (existing user)
+      await validateUserAndWallet(ctx);
     }
   },
 };

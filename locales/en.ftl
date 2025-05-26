@@ -2,19 +2,22 @@
 start_msg =
     💸 *Neurodex*
 
-    Neurodex is your lightning fast crypto trading bot
+    Neurodex is your lightning fast crypto trading bot.
 
-    Buy and sell crypto with ease using Neurodex.
+    Buy and sell crypto, create DCA orders, set up limit orders with ease using Neurodex.
 
-    /buy - Buy any crypto token on Base, BSC & Ethereum
-    /sell - Sell any crypto token on Base, BSC & Ethereum
-    /dca - Dollar Cost Averaging (DCA)
-    /limit - Create limit orders
+    Neurodex currently supports trading on *Base*, *BSC* & *Ethereum*.
+
+    /buy - Buy crypto tokens
+    /sell - Sell crypto tokens
+    /dca - Create DCA order
+    /limit - Create limit order
+    /orders - View your orders
     /wallet - Manage your wallet
-    /settings - Configure your bot settings
-    /help - Get help and support
+    /settings - Personalize your bot settings
+    /help - Get help & support
 
-    Powered by [Neurobro](https://neurobro.ai) and [Docs](https://docs.neurodex.xyz)
+    ⚡ Powered by [Neurobro](https://neurobro.ai) and [Docs](https://docs.neurodex.xyz)
 
 # terms & conditions
 accept_terms_conditions_msg =
@@ -44,7 +47,7 @@ wallet_fail_msg =
     Something went wrong. Please try again or go to /help.
 
 wallet_msg =
-    💰 *Wallet:* { $walletAddress }
+    💰 *Wallet:* `{ $walletAddress }`
 
     Balance: { $ethBalance } ETH
 
@@ -52,11 +55,11 @@ wallet_msg =
 
 wallet_repeat_pk_error_msg = ❌ *Private Key Verification Failed*
     
-    The last 4 digits you entered do not match your private key. Please try again below:
+    The last 4 characters you entered do not match your private key. Please try again below:
 
 wallet_repeat_pk_msg = ⚠️ *Verify Private Key* 
 
-    Please enter the last 4 digits of your private key below to verify you remembered & stored it securely:
+    Please enter the last 4 characters of your private key below to verify you remembered & stored it securely:
 
 wallet_repeat_pk_success_msg = ✅ *Private Key Verified*
 
@@ -68,8 +71,9 @@ wallet_repeat_pk_success_msg = ✅ *Private Key Verified*
 wallet_success_msg =
     ✅ *Your wallet has been created successfully*
 
-    Wallet Address: { $walletAddress }
-    Private Key: { $privateKey }
+    • *Wallet Address:* `{ $walletAddress }`
+
+    • *Private Key:* `{ $privateKey }`
 
     ⚠️ *IMPORTANT:* Keep your private key safe and secure
     • Do not share it with anyone
@@ -91,6 +95,7 @@ insufficient_funds_msg =
     • Gas fees
 invalid_amount_msg = ⚠️ Invalid amount selected. Please try selecting a different amount.
 invalid_token_msg = ⚠️ No token selected. Please select a token first.
+invalid_price_msg = ⚠️ Invalid price selected. Please select a different price
 no_wallet_msg = ⚠️ You don't have a wallet. Please create one using /wallet or click the button below:
 no_private_key_msg = ⚠️ Private key not found. Please try again or contact support.
 already_up_to_date_msg = ✨ Already up to date!
@@ -288,6 +293,8 @@ referral_stats_msg =
 
     Keep spreading the word and watch your earnings grow! 🚀
 
+referral_success_notification_msg = 🥳 *Boom!* You just referred a new user to Neurodex! You're growing the movement — and your rewards!
+
 
 # settings
 gas_priority_updated_msg = Gas priority set to { $gasPriority }
@@ -340,7 +347,7 @@ limit_confirm_msg =
 limit_custom_amount_msg = Please enter the amount of tokens you want to buy:
 limit_custom_expiry_msg = Please enter the expiry time (e.g., 2H, 3D, 1W):
 limit_error_msg = ❌ Something went wrong during the limit order creation. Please try again.
-
+limit_invalid_expiry_msg = ⚠️ Invalid expiry time. Please enter a valid expiry time (e.g., 2H, 3D, 1W)
 limit_expiry_msg = Please select the expiry time for your limit order:
 limit_loading_orders_msg = 📋 Loading your limit orders...
 limit_no_order_msg = No limit order to confirm.
