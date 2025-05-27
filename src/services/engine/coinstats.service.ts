@@ -180,7 +180,7 @@ export class CoinStatsService {
    * @param decimals - Token decimals (optional)
    * @returns string - Formatted amount
    */
-  private formatAmount(amount: number, decimals?: number): string {
+  private formatAmount(amount: number, _decimals?: number): string {
     if (amount === 0) return '0';
 
     // For very small amounts, show more decimal places

@@ -60,7 +60,7 @@ import {
   retrieveLimitAmount,
   retrieveLimitExpiry,
 } from './bot/callbacks/handleLimitOrders';
-import { dcaCommandHandler, dcaOrdersCommandHandler } from './bot/commands/dca';
+import { dcaCommandHandler } from './bot/commands/dca';
 import { limitCommandHandler } from './bot/commands/limit';
 import { ordersCommandHandler } from './bot/commands/orders';
 

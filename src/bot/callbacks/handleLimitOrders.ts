@@ -7,7 +7,7 @@ import { GasPriority } from '@/types/config';
 import { LimitOrderParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { getValidatedUser, validateUserAndWallet } from '@/utils/userValidation';
+import { validateUserAndWallet } from '@/utils/userValidation';
 import { validatePK } from '@/utils/validators';
 
 // limit token callback
@@ -111,15 +111,17 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
   };
 
   // Calculate total value for confirmation
-  const totalValue = (currentOperation.amount! * currentOperation.price!).toFixed(6);
+  const amount = currentOperation.amount ?? 0;
+  const price = currentOperation.price ?? 0;
+  const totalValue = (amount * price).toFixed(6);
 
   // Show confirmation message
   const message = ctx.t('limit_confirm_msg', {
     token: currentOperation.token || '',
     tokenSymbol: currentOperation.tokenSymbol || '',
     tokenName: currentOperation.tokenName || '',
-    amount: currentOperation.amount || 0,
-    price: currentOperation.price || 0,
+    amount: amount,
+    price: price,
     totalValue: totalValue,
     expiry: expiryValue,
   });
@@ -141,15 +143,26 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey || !(await validatePK(ctx, privateKey))) return;
 
+  if (
+    !currentOperation?.amount ||
+    !currentOperation?.price ||
+    !currentOperation?.token ||
+    !currentOperation?.expiry
+  ) {
+    const message = await ctx.reply(ctx.t('error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 10000);
+    return;
+  }
+
   // Calculate the amount of WETH to receive based on price
-  const toAmount = currentOperation?.amount! * currentOperation?.price!;
+  const toAmount = currentOperation.amount * currentOperation.price;
 
   const params: LimitOrderParams = {
-    fromTokenAddress: currentOperation?.token!, // Token to sell
+    fromTokenAddress: currentOperation.token, // Token to sell
     toTokenAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
-    fromAmount: currentOperation?.amount!,
+    fromAmount: currentOperation.amount,
     toAmount: toAmount,
-    expire: currentOperation?.expiry!,
+    expire: currentOperation.expiry,
     slippage: Number(user?.settings?.slippage) || 1,
     gasPriority: (user?.settings?.gasPriority as GasPriority) || 'standard',
     walletAddress: user.wallets[0].address,
@@ -164,9 +177,9 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   if (result.success) {
     const message = ctx.t('limit_order_created_msg', {
       tokenSymbol: currentOperation?.tokenSymbol || '',
-      amount: currentOperation?.amount!,
-      price: currentOperation?.price!,
-      expiry: currentOperation?.expiry!,
+      amount: currentOperation.amount,
+      price: currentOperation.price,
+      expiry: currentOperation.expiry,
     });
 
     await ctx.reply(message, {
@@ -227,10 +240,10 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
   }
 
   // Cancel the order
-  const result = await neurodex.cancelLimitOrder(
+  const result = await neurodx.cancelLimitOrder(
     {
       orderHash: orderHash,
-      orderData: {} as any, // Empty object since API cancellation doesn't use it
+      orderData: {}, // Empty object since API cancellation doesn't use it
       slippage: Number(user?.settings?.slippage) || 1,
       gasPriority: (user?.settings?.gasPriority as GasPriority) || 'standard',
       walletAddress: user.wallets[0].address,

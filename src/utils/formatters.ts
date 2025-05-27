@@ -38,7 +38,7 @@ export function getOrderStatusEmoji(status: string): string {
 export function formatLimitOrder(
   order: LimitOrderInfo,
   index: number,
-  t: (key: string, params?: Record<string, any>) => string
+  t: (key: string, params?: Record<string, unknown>) => string
 ): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.data.createDateTime).toLocaleDateString();
@@ -64,7 +64,7 @@ export function formatLimitOrder(
 export function formatDcaOrder(
   order: DcaOrderInfo,
   index: number,
-  t: (key: string, params?: Record<string, any>) => string
+  t: (key: string, params?: Record<string, unknown>) => string
 ): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.createDateTime).toLocaleDateString();
