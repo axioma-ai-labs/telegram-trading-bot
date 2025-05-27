@@ -165,16 +165,45 @@ deposit_msg =
     - ETH deposits usually confirm within minutes
     - Never share your private key with anyone
 
-withdraw_msg =
-    📤 *Withdraw ETH or other tokens*
+withdraw_select_amount_msg =
+    📤 *Withdraw ETH*
 
-    Your balance:
-    - ETH: { $ethBalance }
+    Your balance: { $ethBalance } ETH
+
+    Please select how much ETH you want to withdraw:
 
     Important:
     - Double check the receiving address
     - Withdrawals usually confirm within minutes
     - Never share your private key with anyone
+
+withdraw_custom_amount_msg = Please enter the amount of ETH you want to withdraw:
+withdraw_recipient_address_msg = Please enter the recipient wallet address (0x...):
+withdraw_insufficient_balance_msg = ⚠️ Insufficient balance. You only have { $balance } ETH but want to withdraw { $amount } ETH.
+withdraw_invalid_operation_msg = ⚠️ Invalid withdrawal operation. Please try again.
+withdraw_error_msg = ❌ Something went wrong during the withdrawal. Please try again.
+withdraw_cancel_msg = ⭕ Withdrawal has been cancelled.
+invalid_address_msg = ⚠️ Invalid address format. Please enter a valid Ethereum address starting with 0x.
+invalid_input_msg = ⚠️ Invalid input. Please try again.
+
+withdraw_confirm_msg =
+    🔍 *Confirm Withdrawal*
+
+    Amount: *{ $amount } ETH*
+    To Address: `{ $recipientAddress }`
+
+    Are you sure you want to proceed with this withdrawal?
+
+withdraw_success_msg =
+    🎊 *Withdrawal Successful!*
+
+    Amount: { $amount } ETH
+    To Address: `{ $recipientAddress }`
+    Transaction: https://basescan.org/tx/{ $txHash }
+
+    Your withdrawal has been submitted to the network and should confirm within minutes.
+
+    Check your transaction on [BaseScan](https://basescan.org/tx/{ $txHash })
 
 # sell
 sell_cancel_msg = ⭕ Sell order has been successfully cancelled!

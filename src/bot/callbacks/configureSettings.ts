@@ -5,7 +5,7 @@ import {
   slippageKeyboard,
 } from '@/bot/commands/settings';
 import logger from '@/config/logger';
-import { I18nService } from '@/services/i18n/i18n.service';
+import { I18nService } from '@/services/i18n/i18n';
 import { SettingsService } from '@/services/prisma/settings';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';

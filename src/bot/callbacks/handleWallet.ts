@@ -1,7 +1,7 @@
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
-import { ViemService } from '@/services/engine/viem.service';
+import { ViemService } from '@/services/engine/viem';
 import { UserService } from '@/services/prisma/user';
 import { WalletService } from '@/services/prisma/wallet';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';

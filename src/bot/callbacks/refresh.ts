@@ -1,7 +1,7 @@
 import { depositKeyboard } from '@/bot/commands/deposit';
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
-import { ViemService } from '@/services/engine/viem.service';
+import { ViemService } from '@/services/engine/viem';
 import { UserService } from '@/services/prisma/user';
 import { BotContext } from '@/types/telegram';
 
