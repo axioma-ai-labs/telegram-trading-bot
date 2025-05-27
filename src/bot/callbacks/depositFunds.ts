@@ -1,5 +1,5 @@
 import { depositKeyboard } from '@/bot/commands/deposit';
-import { ViemService } from '@/services/engine/viem.service';
+import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 

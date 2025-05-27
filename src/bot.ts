@@ -45,7 +45,7 @@ import { handlePkVerificationMessages } from '@/bot/messages/walletMessages';
 import { handleWithdrawMessages } from '@/bot/messages/withdrawMessages';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
-import { I18nService } from '@/services/i18n/i18n.service';
+import { I18nService } from '@/services/i18n/i18n';
 import { BotContext, SessionData } from '@/types/telegram';
 
 import {

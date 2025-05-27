@@ -1,7 +1,7 @@
 import { confirmWithdrawKeyboard, withdrawAmountKeyboard } from '@/bot/commands/withdraw';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
-import { ViemService } from '@/services/engine/viem.service';
+import { ViemService } from '@/services/engine/viem';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { WithdrawParams } from '@/types/neurodex';

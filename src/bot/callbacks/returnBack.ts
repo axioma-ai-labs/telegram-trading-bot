@@ -5,7 +5,7 @@ import { settingsKeyboard } from '@/bot/commands/settings';
 import { startKeyboard } from '@/bot/commands/start';
 import { transactionsKeyboard, transactionsMessage } from '@/bot/commands/transactions';
 import { walletKeyboard } from '@/bot/commands/wallet';
-import { ViemService } from '@/services/engine/viem.service';
+import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
 import { validateUserAndWallet } from '@/utils/userValidation';

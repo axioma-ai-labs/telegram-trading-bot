@@ -5,8 +5,8 @@ import Web3 from 'web3';
 
 import { config } from '@/config/config';
 import logger from '@/config/logger';
-import { OpenOceanClient } from '@/services/engine/openocean.service';
-import { ViemService } from '@/services/engine/viem.service';
+import { OpenOceanClient } from '@/services/engine/openocean';
+import { ViemService } from '@/services/engine/viem';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import {
