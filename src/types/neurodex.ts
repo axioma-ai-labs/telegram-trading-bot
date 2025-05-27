@@ -1,5 +1,39 @@
+import { Chain } from 'viem';
+import { base, bsc, mainnet } from 'viem/chains';
+
 import { GasPriority } from '@/types/config';
 import { DcaOrderAssetData, LimitOrderAssetData } from '@/types/openocean';
+
+// ------------------------------------------------------------
+// Definitions
+// ------------------------------------------------------------
+
+/**
+ * Supported blockchain networks for OpenOcean integration
+ */
+export type NeuroDexChain = 'base' | 'ethereum' | 'bsc';
+
+/**
+ * Mapping of NeuroDexChain to OpenOcean chain IDs
+ */
+export const NeuroDexChainToOpenOceanChain: Record<NeuroDexChain, number> = {
+  base: 8453,
+  ethereum: 1,
+  bsc: 56,
+};
+
+/**
+ * Mapping of NeuroDexChain to Viem chain
+ */
+export const NeuroDexChainToViemChain: Record<NeuroDexChain, Chain> = {
+  base: base,
+  ethereum: mainnet,
+  bsc: bsc,
+};
+
+// ------------------------------------------------------------
+// Parameters
+// ------------------------------------------------------------
 
 /**
  * Basic trading parameters for trading operations
@@ -41,20 +75,16 @@ export interface SellParams extends BasicTradeParams {
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
 export interface DcaParams extends BasicTradeParams {
-  /** Maker token address (token to sell) */
-  makerTokenAddress: string;
-  /** Maker token decimals */
-  makerTokenDecimals: number;
-  /** Taker token address (token to buy) */
-  takerTokenAddress: string;
-  /** Taker token decimals */
-  takerTokenDecimals: number;
-  /** Total amount to invest with decimals */
-  makerAmount: string;
+  /** Token address to buy */
+  toTokenAddress: string;
+  /** Amount of native token to spend (e.g., 0.1 for 0.1 ETH) */
+  fromAmount: number;
   /** Interval time in seconds */
   time: number;
   /** Number of intervals */
   times: number;
+  /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
+  expire: string;
   /** Optional minimum price range */
   minPrice?: string;
   /** Optional maximum price range */
@@ -65,18 +95,14 @@ export interface DcaParams extends BasicTradeParams {
  * Parameters for limit orders
  */
 export interface LimitOrderParams extends BasicTradeParams {
-  /** Maker token address (token to sell) */
-  makerTokenAddress: string;
-  /** Maker token decimals */
-  makerTokenDecimals: number;
-  /** Taker token address (token to buy) */
-  takerTokenAddress: string;
-  /** Taker token decimals */
-  takerTokenDecimals: number;
-  /** Amount of maker token with decimals */
-  makerAmount: string;
-  /** Amount of taker token with decimals */
-  takerAmount: string;
+  /** Token address to sell */
+  fromTokenAddress: string;
+  /** Token address to buy */
+  toTokenAddress: string;
+  /** Amount of token to sell (in human-readable format, e.g., 1.5) */
+  fromAmount: number;
+  /** Amount of token to buy (in human-readable format, e.g., 0.001) */
+  toAmount: number;
   /** Expiration time (format: "10M", "1H", "1D", "7D", etc.) */
   expire: string;
 }

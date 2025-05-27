@@ -1,7 +1,6 @@
 import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
 import { Address } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { base, bsc, mainnet } from 'viem/chains';
 import Web3 from 'web3';
 
 import { config } from '@/config/config';
@@ -26,7 +25,11 @@ import {
   TokenData,
   WalletInfo,
 } from '@/types/neurodex';
-import { OpenOceanChain } from '@/types/openocean';
+import {
+  NeuroDexChain,
+  NeuroDexChainToOpenOceanChain,
+  NeuroDexChainToViemChain,
+} from '@/types/neurodex';
 import { erc20Abi } from '@/utils/abis';
 
 /**
@@ -36,18 +39,48 @@ import { erc20Abi } from '@/utils/abis';
 export class NeuroDexApi {
   private readonly openOceanClient: OpenOceanClient;
   private readonly viemService: ViemService;
-  private readonly nativeTokenAddress: Record<OpenOceanChain, string> = {
+  private readonly nativeTokenAddress: Record<NeuroDexChain, string> = {
     base: config.nativeTokenAddress.base,
     ethereum: config.nativeTokenAddress.ethereum,
     bsc: config.nativeTokenAddress.bsc,
   };
-  private readonly chain: OpenOceanChain;
+  private readonly chain: NeuroDexChain;
 
-  constructor(chain: OpenOceanChain = 'base', rpcUrl: string = config.node.baseMainnetRpc) {
+  constructor(chain: NeuroDexChain = 'base', rpcUrl: string = config.node.baseMainnetRpc) {
     this.chain = chain;
     this.openOceanClient = new OpenOceanClient(chain);
-    const viemChain = chain === 'base' ? base : chain === 'ethereum' ? mainnet : bsc;
+    const viemChain = NeuroDexChainToViemChain[chain];
     this.viemService = new ViemService(viemChain, rpcUrl);
+  }
+
+  /**
+   * Get token decimals for a given token address
+   * @param tokenAddress - Token address to get decimals for
+   * @param chain - Chain name
+   * @returns Number of decimals for the token
+   */
+  private async getTokenDecimals(
+    tokenAddress: string,
+    chain: NeuroDexChain = 'base'
+  ): Promise<number> {
+    try {
+      // Assert that chain of the token is the same as the chain of viem service
+      if (chain !== this.chain) {
+        throw new Error('Chain mismatch between token and NeuroDexApi instance.');
+      }
+
+      // Get token info to determine decimals
+      const tokenInfo = await this.viemService.getTokenInfo(tokenAddress as Address);
+      if (!tokenInfo) throw new Error('Failed to get token info to get decimals');
+
+      return tokenInfo.decimals;
+    } catch (error) {
+      logger.error('Error in getTokenDecimals:', error);
+      throw new Error(
+        `Failed to get decimals for token ${tokenAddress}: ` +
+          `${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 
   /**
@@ -58,12 +91,14 @@ export class NeuroDexApi {
    * @param amount - Human-readable amount without decimals (e.g., 1.5)
    * @param tokenAddress - Token address to get decimals for
    * @param chain - Chain name
-   * @returns Amount in token base units with appropriate decimals (e.g., 1.5 ETH -> 1500000000000000000)
+   * @returns Amount in token base units with appropriate decimals
+   *          (e.g., 1.5 ETH -> 1500000000000000000)
+   *          (e.g., 1.5 USDC -> 1500000)
    */
   private async getTokenAmount(
     amount: number,
     tokenAddress: string,
-    chain: OpenOceanChain = 'base'
+    chain: NeuroDexChain = 'base'
   ): Promise<string> {
     try {
       // Assert that chain of the token is the same as the chain of viem service
@@ -127,7 +162,6 @@ export class NeuroDexApi {
     const privateKey = generatePrivateKey();
     const account = privateKeyToAccount(privateKey);
 
-    // Store the encrypted private key
     const stored = await PrivateStorageService.storePrivateKey(account.address, privateKey);
     if (!stored) {
       throw new Error('Failed to store private key securely');
@@ -185,32 +219,6 @@ export class NeuroDexApi {
     return referralLink;
   }
 
-  // private async encryptPrivateKey(privateKey: string): Promise<string> {
-  //   const iv = crypto.randomBytes(12); // GCM recommends 12 bytes
-  //   const key = crypto.createHash('sha256').update(config.wallet.encryptionKey).digest();
-  //   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-
-  //   const encrypted = Buffer.concat([cipher.update(privateKey, 'utf8'), cipher.final()]);
-  //   const authTag = cipher.getAuthTag();
-
-  //   return [iv.toString('hex'), authTag.toString('hex'), encrypted.toString('hex')].join(':');
-  // }
-
-  // private async decryptPrivateKey(encrypted: string): Promise<string> {
-  //   const [ivHex, tagHex, dataHex] = encrypted.split(':');
-  //   const iv = Buffer.from(ivHex, 'hex');
-  //   const tag = Buffer.from(tagHex, 'hex');
-  //   const data = Buffer.from(dataHex, 'hex');
-  //   const key = crypto.createHash('sha256').update(config.wallet.encryptionKey).digest();
-
-  //   const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
-  //   decipher.setAuthTag(tag);
-
-  //   const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
-
-  //   return decrypted.toString('utf8');
-  // }
-
   /**
    * Get gas price for a given chain. Uses OpenOcean API.
    *
@@ -219,7 +227,7 @@ export class NeuroDexApi {
    * @returns Gas price
    */
   private async getGasPrice(
-    chain: OpenOceanChain = 'base',
+    chain: NeuroDexChain = 'base',
     gasPriority: GasPriority = 'standard'
   ): Promise<number> {
     const response = await this.openOceanClient.getGasPrice(chain);
@@ -291,7 +299,7 @@ export class NeuroDexApi {
    */
   async getTokenDataByContractAddress(
     tokenAddress: string,
-    _network: string // Prefix with underscore to indicate intentionally unused
+    _network: string
   ): Promise<NeuroDexResponse<TokenData>> {
     try {
       const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
@@ -308,7 +316,7 @@ export class NeuroDexApi {
           chainId: string;
         }>;
       };
-      const pair = data.pairs[0]; // get first pair based on dexscreener api docs
+      const pair = data.pairs[0]; // get first pair. Maybe this won't work for all tokens, but no edge cases were found yet
 
       if (!pair) {
         throw new Error('No trading pairs found for token');
@@ -348,7 +356,7 @@ export class NeuroDexApi {
    */
   async buy(
     params: BuyParams,
-    chain: OpenOceanChain = 'base'
+    chain: NeuroDexChain = 'base'
   ): Promise<NeuroDexResponse<SwapResult>> {
     try {
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
@@ -378,7 +386,7 @@ export class NeuroDexApi {
           slippage: params.slippage.toString(),
           account: params.walletAddress,
           referrer: params.referrer,
-          referrerFee: 1, // 1% refferer fee
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
@@ -433,7 +441,7 @@ export class NeuroDexApi {
    */
   async sell(
     params: SellParams,
-    chain: OpenOceanChain = 'base'
+    chain: NeuroDexChain = 'base'
   ): Promise<NeuroDexResponse<SwapResult>> {
     try {
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
@@ -467,7 +475,7 @@ export class NeuroDexApi {
           slippage: params.slippage.toString(),
           account: params.walletAddress,
           referrer: params.referrer,
-          referrerFee: 1, // 1% refferer fee
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
@@ -533,28 +541,38 @@ export class NeuroDexApi {
    */
   async createLimitOrder(
     params: LimitOrderParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
-      const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       const web3 = new Web3(config.node.baseMainnetRpc);
       const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
       web3.eth.accounts.wallet.add(account);
       this.openOceanClient.initializeSdk(chainId, web3 as Web3, account.address);
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
 
+      const makerTokenDecimals = await this.getTokenDecimals(params.fromTokenAddress, chain);
+      const takerTokenDecimals = await this.getTokenDecimals(params.toTokenAddress, chain);
+
+      const makerAmount = await this.getTokenAmount(
+        params.fromAmount,
+        params.fromTokenAddress,
+        chain
+      );
+      const takerAmount = await this.getTokenAmount(params.toAmount, params.toTokenAddress, chain);
+
       const result = await this.openOceanClient.createLimitOrder(
         {
-          makerTokenAddress: params.makerTokenAddress,
-          makerTokenDecimals: params.makerTokenDecimals,
-          takerTokenAddress: params.takerTokenAddress,
-          takerTokenDecimals: params.takerTokenDecimals,
-          makerAmount: params.makerAmount,
-          takerAmount: params.takerAmount,
+          makerTokenAddress: params.fromTokenAddress,
+          makerTokenDecimals: makerTokenDecimals,
+          takerTokenAddress: params.toTokenAddress,
+          takerTokenDecimals: takerTokenDecimals,
+          makerAmount: makerAmount,
+          takerAmount: takerAmount,
           gasPrice: gasPrice,
           expire: params.expire,
-          referrer: params.referrer || '',
-          referrerFee: 1,
+          referrer: params.referrer || undefined,
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
@@ -583,10 +601,10 @@ export class NeuroDexApi {
    */
   async cancelLimitOrder(
     params: CancelLimitOrderParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
-      const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       const web3 = new Web3(config.node.baseMainnetRpc);
       const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
       web3.eth.accounts.wallet.add(account);
@@ -636,7 +654,7 @@ export class NeuroDexApi {
    */
   async getLimitOrders(
     params: GetLimitOrdersParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<LimitOrderInfo[]>> {
     try {
       // Use the detailed endpoint to get full order information
@@ -691,7 +709,7 @@ export class NeuroDexApi {
    */
   async createDcaOrder(
     params: DcaParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
       const web3 = new Web3(config.node.baseMainnetRpc);
@@ -699,22 +717,38 @@ export class NeuroDexApi {
       web3.eth.accounts.wallet.add(account);
       const gasPrice = await this.getGasPrice(chain, params.gasPriority);
 
+      // Get native token address (maker token - what we're selling)
+      const nativeTokenAddress = this.nativeTokenAddress[chain];
+
+      // Get token decimals for both tokens
+      const makerTokenDecimals = await this.getTokenDecimals(nativeTokenAddress, chain);
+      const takerTokenDecimals = await this.getTokenDecimals(params.toTokenAddress, chain);
+
+      // Calculate maker amount with decimals
+      const makerAmount = await this.getTokenAmount(params.fromAmount, nativeTokenAddress, chain);
+
+      // Initialize the SDK for DCA orders
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
+      this.openOceanClient.initializeSdk(chainId, web3 as Web3, account.address, true);
+
       const result = await this.openOceanClient.createDcaOrder(
         {
           provider: web3,
           address: params.walletAddress,
-          makerTokenAddress: params.makerTokenAddress,
-          makerTokenDecimals: params.makerTokenDecimals,
-          takerTokenAddress: params.takerTokenAddress,
-          takerTokenDecimals: params.takerTokenDecimals,
-          makerAmount: params.makerAmount,
+          makerTokenAddress: nativeTokenAddress,
+          makerTokenDecimals: makerTokenDecimals,
+          takerTokenAddress: params.toTokenAddress,
+          takerTokenDecimals: takerTokenDecimals,
+          makerAmount: makerAmount,
+          takerAmount: '1',
           gasPrice: gasPrice,
-          expire: '30D', // Default to 30 days for DCA
+          expire: params.expire,
           time: params.time,
           times: params.times,
           minPrice: params.minPrice,
           maxPrice: params.maxPrice,
-          version: 'v2',
+          referrer: params.referrer || undefined,
+          referrerFee: config.defaultReferrerFee,
         },
         chain
       );
@@ -743,10 +777,10 @@ export class NeuroDexApi {
    */
   async cancelDcaOrder(
     params: CancelDcaOrderParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<{ code: number }>> {
     try {
-      const chainId = chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : 56;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       const web3 = new Web3(config.node.baseMainnetRpc);
       const account = web3.eth.accounts.privateKeyToAccount(params.privateKey);
       web3.eth.accounts.wallet.add(account);
@@ -756,24 +790,7 @@ export class NeuroDexApi {
       const result = await this.openOceanClient.cancelDcaOrderAPI(params.orderHash, chain);
 
       if (!result.success) {
-        // If API cancellation fails, try onchain cancellation
-        const gasPrice = await this.getGasPrice(chain, params.gasPriority);
-        const onchainResult = await this.openOceanClient.cancelDcaOrderOnchain(
-          {
-            orderData: params.orderData,
-            gasPrice: gasPrice,
-          },
-          chain
-        );
-        if (!onchainResult.success) {
-          throw new Error(
-            'Failed to cancel DCA order: ' + (onchainResult.error || 'Unknown error')
-          );
-        }
-        return {
-          success: true,
-          data: onchainResult.data,
-        };
+        throw new Error('Failed to cancel DCA order: ' + (result.error || 'Unknown error'));
       }
 
       return {
@@ -796,7 +813,7 @@ export class NeuroDexApi {
    */
   async getDcaOrders(
     params: GetDcaOrdersParams,
-    chain: OpenOceanChain = this.chain
+    chain: NeuroDexChain = this.chain
   ): Promise<NeuroDexResponse<DcaOrderInfo[]>> {
     try {
       const response = await this.openOceanClient.getDcaOrders(

@@ -7,14 +7,14 @@ dotenv.config();
 
 // Test wallet configuration
 const TEST_WALLET = {
-  address: '0xd08EB3DF731C151f2ABC33b19e450Cd3f1Eb9f20',
-  privateKey: '0xdcffd7f29aa6686dc0ac7bfed114762a033323f69b810673a3b46590730b94a9',
+  address: process.env.TEST_WALLET_ADDRESS || '0x...',
+  privateKey: process.env.TEST_WALLET_PRIVATE_KEY || '0x...',
 };
 
 // Test token addresses on Base
 const TEST_TOKENS = {
   USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
-  WETH: '0x4200000000000000000000000000000000000006', // WETH on Base
+  ETH: '0x4200000000000000000000000000000000000006', // ETH on Base
 };
 
 async function testCreateDcaOrder(): Promise<void> {
@@ -23,19 +23,17 @@ async function testCreateDcaOrder(): Promise<void> {
   const neurodex = new NeuroDexApi();
 
   try {
-    // Create a DCA order to buy WETH with USDC
-    // Example: Creating a DCA order to spend 10 USDC over 5 intervals (2 USDC each)
+    // Create a DCA order to buy USDC with native ETH
+    // Example: Creating a DCA order to spend 0.001 ETH over 2 intervals (0.0005 ETH each)
     const dcaOrderResult = await neurodex.createDcaOrder(
       {
-        makerTokenAddress: TEST_TOKENS.USDC, // Token to spend (USDC)
-        makerTokenDecimals: 6, // USDC has 6 decimals
-        takerTokenAddress: TEST_TOKENS.WETH, // Token to buy (WETH)
-        takerTokenDecimals: 18, // WETH has 18 decimals
-        makerAmount: '10000000', // 10 USDC with decimals
+        toTokenAddress: TEST_TOKENS.USDC, // Token to buy (USD)
+        fromAmount: 0.004, // Amount of native ETH to spend
         time: 3600, // 1 hour intervals
-        times: 5, // 5 intervals (2 USDC per interval)
-        minPrice: '0.9', // Optional: 10% below current price
-        maxPrice: '1.1', // Optional: 10% above current price
+        times: 1, // 2 intervals (0.0015 ETH per interval)
+        expire: '1D',
+        // minPrice: '0.9', // Optional: 10% below current price
+        // maxPrice: '1.1', // Optional: 10% above current price
         slippage: 1,
         gasPriority: 'standard',
         walletAddress: TEST_WALLET.address,
