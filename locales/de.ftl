@@ -415,3 +415,43 @@ buy_token_found_msg =
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
 buy_token_msg = Geben Sie die Token-Vertragsadresse zum Kaufen ein:
+
+withdraw_select_amount_msg =
+    📤 *ETH abheben*
+
+    Ihr Guthaben: { $ethBalance } ETH
+
+    Bitte wählen Sie aus, wie viel ETH Sie abheben möchten:
+
+    Wichtig:
+    - Überprüfen Sie die Empfängeradresse doppelt
+    - Abhebungen werden normalerweise innerhalb von Minuten bestätigt
+    - Teilen Sie niemals Ihren Private Key mit jemandem
+
+withdraw_custom_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie abheben möchten:
+withdraw_recipient_address_msg = Bitte geben Sie die Empfänger-Wallet-Adresse ein (0x...):
+withdraw_insufficient_balance_msg = ⚠️ Unzureichendes Guthaben. Sie haben nur { $balance } ETH, möchten aber { $amount } ETH abheben.
+withdraw_invalid_operation_msg = ⚠️ Ungültiger Abhebungsvorgang. Bitte versuchen Sie es erneut.
+withdraw_error_msg = ❌ Etwas ist bei der Abhebung schiefgelaufen. Bitte versuchen Sie es erneut.
+withdraw_cancel_msg = ⭕ Abhebung wurde abgebrochen.
+invalid_address_msg = ⚠️ Ungültiges Adressformat. Bitte geben Sie eine gültige Ethereum-Adresse ein, die mit 0x beginnt.
+invalid_input_msg = ⚠️ Ungültige Eingabe. Bitte versuchen Sie es erneut.
+
+withdraw_confirm_msg =
+    🔍 *Abhebung bestätigen*
+
+    Betrag: *{ $amount } ETH*
+    An Adresse: `{ $recipientAddress }`
+
+    Sind Sie sicher, dass Sie mit dieser Abhebung fortfahren möchten?
+
+withdraw_success_msg =
+    🎊 *Abhebung erfolgreich!*
+
+    Betrag: { $amount } ETH
+    An Adresse: `{ $recipientAddress }`
+    Transaktion: https://basescan.org/tx/{ $txHash }
+
+    Ihre Abhebung wurde an das Netzwerk übermittelt und sollte innerhalb von Minuten bestätigt werden.
+
+    Überprüfen Sie Ihre Transaktion auf [BaseScan](https://basescan.org/tx/{ $txHash })

@@ -414,3 +414,43 @@ buy_token_found_msg =
     Ve a /settings para ajustar slippage y gas si la transacción falla.
 
 buy_token_msg = Ingresa la dirección del contrato del token para comprar:
+
+withdraw_select_amount_msg =
+    📤 *Retirar ETH*
+
+    Su saldo: { $ethBalance } ETH
+
+    Por favor seleccione cuánto ETH desea retirar:
+
+    Importante:
+    - Verifique dos veces la dirección de destino
+    - Los retiros usualmente se confirman en minutos
+    - Nunca comparta su clave privada con nadie
+
+withdraw_custom_amount_msg = Por favor ingrese la cantidad de ETH que desea retirar:
+withdraw_recipient_address_msg = Por favor ingrese la dirección de la billetera destinataria (0x...):
+withdraw_insufficient_balance_msg = ⚠️ Saldo insuficiente. Solo tiene { $balance } ETH pero quiere retirar { $amount } ETH.
+withdraw_invalid_operation_msg = ⚠️ Operación de retiro inválida. Por favor intente de nuevo.
+withdraw_error_msg = ❌ Algo salió mal durante el retiro. Por favor intente de nuevo.
+withdraw_cancel_msg = ⭕ El retiro ha sido cancelado.
+invalid_address_msg = ⚠️ Formato de dirección inválido. Por favor ingrese una dirección Ethereum válida que comience con 0x.
+invalid_input_msg = ⚠️ Entrada inválida. Por favor intente de nuevo.
+
+withdraw_confirm_msg =
+    🔍 *Confirmar Retiro*
+
+    Cantidad: *{ $amount } ETH*
+    A la Dirección: `{ $recipientAddress }`
+
+    ¿Está seguro de que desea proceder con este retiro?
+
+withdraw_success_msg =
+    🎊 *¡Retiro Exitoso!*
+
+    Cantidad: { $amount } ETH
+    A la Dirección: `{ $recipientAddress }`
+    Transacción: https://basescan.org/tx/{ $txHash }
+
+    Su retiro ha sido enviado a la red y debería confirmarse en minutos.
+
+    Revise su transacción en [BaseScan](https://basescan.org/tx/{ $txHash })

@@ -24,6 +24,8 @@ import {
   SwapResult,
   TokenData,
   WalletInfo,
+  WithdrawParams,
+  WithdrawResult,
 } from '@/types/neurodex';
 import {
   NeuroDexChain,
@@ -38,7 +40,7 @@ import { erc20Abi } from '@/utils/abis';
  */
 export class NeuroDexApi {
   private readonly openOceanClient: OpenOceanClient;
-  private readonly viemService: ViemService;
+  public readonly viemService: ViemService;
   private readonly nativeTokenAddress: Record<NeuroDexChain, string> = {
     base: config.nativeTokenAddress.base,
     ethereum: config.nativeTokenAddress.ethereum,
@@ -887,6 +889,52 @@ export class NeuroDexApi {
         return 'expired';
       default:
         return 'unknown';
+    }
+  }
+
+  /**
+   * Withdraw native tokens from user's wallet to another address
+   * @param params - Withdrawal parameters
+   * @param chain - Target blockchain network
+   * @returns Withdrawal result
+   */
+  async withdraw(
+    params: WithdrawParams,
+    chain: NeuroDexChain = this.chain
+  ): Promise<NeuroDexResponse<WithdrawResult>> {
+    try {
+      if (chain !== this.chain) {
+        throw new Error('Chain mismatch between withdrawal and NeuroDexApi instance.');
+      }
+
+      const nativeTokenAddress = this.nativeTokenAddress[chain];
+      const amountInWei = await this.getTokenAmount(params.amount, nativeTokenAddress, chain);
+      const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+
+      const account = privateKeyToAccount(params.privateKey as `0x${string}`);
+
+      const receipt = await this.viemService.transferNativeToken(
+        account,
+        params.toAddress as Address,
+        amountInWei,
+        gasPrice.toString()
+      );
+
+      return {
+        success: true,
+        data: {
+          txHash: receipt.transactionHash,
+          amount: amountInWei,
+          toAddress: params.toAddress,
+          fromAddress: params.walletAddress,
+          gasUsed: receipt.gasUsed.toString(),
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error in withdraw',
+      };
     }
   }
 }
