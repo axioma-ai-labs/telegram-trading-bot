@@ -14,7 +14,7 @@ const TEST_WALLET = {
 // Test token addresses on Base
 const TEST_TOKENS = {
   USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
-  WETH: '0x4200000000000000000000000000000000000006', // WETH on Base
+  ETH: '0x4200000000000000000000000000000000000006', // ETH on Base
 };
 
 async function testCreateLimitOrder(): Promise<void> {
@@ -27,12 +27,10 @@ async function testCreateLimitOrder(): Promise<void> {
     // Example: Creating a limit order to sell 1 USDC for 0.00041 WETH
     const limitOrderResult = await neurodex.createLimitOrder(
       {
-        makerTokenAddress: TEST_TOKENS.USDC, // Token to sell
-        makerTokenDecimals: 6, // USDC has 6 decimals
-        takerTokenAddress: TEST_TOKENS.WETH, // Token to buy
-        takerTokenDecimals: 18, // WETH has 18 decimals
-        makerAmount: '1000000', // 1 USDC with decimals
-        takerAmount: '410000000000000', // 0.00041 WETH with decimals
+        fromTokenAddress: TEST_TOKENS.ETH, // Token to sell
+        toTokenAddress: TEST_TOKENS.USDC, // Token to buy
+        fromAmount: 0.001, // 0.001 ETH to sell
+        toAmount: 3, // 3 USDC to buy
         expire: '1D',
         slippage: 1,
         gasPriority: 'standard',

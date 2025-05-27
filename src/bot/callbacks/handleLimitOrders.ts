@@ -165,33 +165,23 @@ export async function limitConfirm(ctx: BotContext): Promise<void> {
       return;
     }
 
-    // calculate amounts with proper decimals
-    const makerTokenDecimals = tokenData.data.decimals || 18;
-    const takerTokenDecimals = 18; // WETH decimals
-    const makerAmount = (currentOperation.amount! * Math.pow(10, makerTokenDecimals)).toString();
-    const takerAmount = (
-      currentOperation.amount! *
-      currentOperation.price! *
-      Math.pow(10, takerTokenDecimals)
-    ).toString();
+    // Calculate the amount of WETH to receive based on price
+    const toAmount = currentOperation.amount! * currentOperation.price!;
 
     logger.info('Wallet address:', wallet.address);
     logger.info('Private key:', privateKey);
-    logger.info('Maker token address:', currentOperation.token);
-    logger.info('Maker token decimals:', makerTokenDecimals);
-    logger.info('Taker token address:', '0x4200000000000000000000000000000000000006');
-    logger.info('Taker token decimals:', takerTokenDecimals);
-    logger.info('Maker amount:', makerAmount);
+    logger.info('From token address:', currentOperation.token);
+    logger.info('To token address:', '0x4200000000000000000000000000000000000006');
+    logger.info('From amount:', currentOperation.amount!);
+    logger.info('To amount:', toAmount);
 
     // create limit order
     const result = await neurodex.createLimitOrder(
       {
-        makerTokenAddress: currentOperation.token!,
-        makerTokenDecimals: makerTokenDecimals,
-        takerTokenAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
-        takerTokenDecimals: takerTokenDecimals,
-        makerAmount: makerAmount,
-        takerAmount: takerAmount,
+        fromTokenAddress: currentOperation.token!, // Token to sell
+        toTokenAddress: '0x4200000000000000000000000000000000000006', // WETH on Base - Token to buy
+        fromAmount: currentOperation.amount!, // Amount to sell (human-readable)
+        toAmount: toAmount, // Amount to buy (human-readable)
         expire: currentOperation.expiry!,
         slippage: user.settings?.slippage ? parseFloat(user.settings.slippage) : 1,
         gasPriority: user.settings?.gasPriority as GasPriority,

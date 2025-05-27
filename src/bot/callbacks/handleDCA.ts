@@ -167,13 +167,11 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     const wallet = user.wallets[0];
 
     const dcaParams: DcaParams = {
-      makerTokenAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // token to spend
-      makerTokenDecimals: 18,
-      takerTokenAddress: currentOperation.token, // token to buy
-      takerTokenDecimals: 18,
-      makerAmount: (currentOperation.amount * 1e18).toString(),
+      toTokenAddress: currentOperation.token, // token to buy
+      fromAmount: currentOperation.amount, // amount of native token to spend
       time: currentOperation.interval,
       times: currentOperation.times,
+      expire: '1D', // Default expiration of 1 day
       slippage: Number(settings?.slippage),
       gasPriority: 'standard',
       walletAddress: wallet.address,

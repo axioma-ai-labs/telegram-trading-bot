@@ -14,7 +14,7 @@ const TEST_WALLET = {
 // Test token addresses on Base
 const TEST_TOKENS = {
   USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
-  WETH: '0x4200000000000000000000000000000000000006', // WETH on Base
+  ETH: '0x4200000000000000000000000000000000000006', // ETH on Base
 };
 
 async function testCreateDcaOrder(): Promise<void> {
@@ -23,17 +23,14 @@ async function testCreateDcaOrder(): Promise<void> {
   const neurodex = new NeuroDexApi();
 
   try {
-    // Create a DCA order to buy WETH with USDC
-    // Example: Creating a DCA order to spend 10 USDC over 5 intervals (2 USDC each)
+    // Create a DCA order to buy USDC with native ETH
+    // Example: Creating a DCA order to spend 0.001 ETH over 2 intervals (0.0005 ETH each)
     const dcaOrderResult = await neurodex.createDcaOrder(
       {
-        makerTokenAddress: TEST_TOKENS.USDC, // Token to spend (USDC)
-        makerTokenDecimals: 6, // USDC has 6 decimals
-        takerTokenAddress: TEST_TOKENS.WETH, // Token to buy (WETH)
-        takerTokenDecimals: 18, // WETH has 18 decimals
-        makerAmount: '1000000', // 10 USDC with decimals
+        toTokenAddress: TEST_TOKENS.USDC, // Token to buy (USD)
+        fromAmount: 0.004, // Amount of native ETH to spend
         time: 3600, // 1 hour intervals
-        times: 2, // 2 intervals (5 USDC per interval)
+        times: 1, // 2 intervals (0.0015 ETH per interval)
         expire: '1D',
         // minPrice: '0.9', // Optional: 10% below current price
         // maxPrice: '1.1', // Optional: 10% above current price

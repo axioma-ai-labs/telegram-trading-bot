@@ -2,8 +2,8 @@ import { LimitOrderNodeSdk } from '@openocean.finance/limitorder-sdk';
 import axios, { AxiosInstance } from 'axios';
 import Web3 from 'web3';
 
+import logger from '@/config/logger';
 import {
-  DcaOrderCancelOnchainParams,
   DcaOrderCreateApiParams,
   DcaOrderCreateParams,
   DcaOrderGetParams,
@@ -12,7 +12,8 @@ import {
   LimitOrderCancelOnchainParams,
   LimitOrderCreateParams,
   LimitOrdersResponse,
-  OpenOceanChain,
+  NeuroDexChain,
+  NeuroDexChainToOpenOceanChain,
   OpenOceanResponse,
   QuoteParams,
   QuoteResponse,
@@ -32,7 +33,7 @@ import {
  */
 export class OpenOceanClient {
   private readonly axiosInstance: AxiosInstance;
-  private readonly defaultChain: OpenOceanChain;
+  private readonly defaultChain: NeuroDexChain;
   private sdk: LimitOrderNodeSdk | null = null;
   private chainId: number | null = null;
   private dca: boolean = false;
@@ -41,7 +42,7 @@ export class OpenOceanClient {
    * Creates a new OpenOcean client instance
    * @param config - Configuration object containing RPC URL, addon ID and default chain
    */
-  constructor(defaultChain: OpenOceanChain) {
+  constructor(defaultChain: NeuroDexChain) {
     this.defaultChain = defaultChain;
     this.axiosInstance = axios.create({
       baseURL: 'https://open-api.openocean.finance',
@@ -60,11 +61,10 @@ export class OpenOceanClient {
   initializeSdk(chainId: number, provider: Web3, address: string, dca: boolean = false): void {
     this.chainId = chainId;
     this.dca = dca;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (this.dca) {
-      this.sdk = new LimitOrderNodeSdk(chainId, provider as any, address, 'Dca');
+      this.sdk = new LimitOrderNodeSdk(chainId, provider, address, 'Dca');
     } else {
-      this.sdk = new LimitOrderNodeSdk(chainId, provider as any, address);
+      this.sdk = new LimitOrderNodeSdk(chainId, provider, address);
     }
   }
 
@@ -75,7 +75,7 @@ export class OpenOceanClient {
    * @param version - API version (defaults to v4)
    * @returns Full API endpoint URL
    */
-  private buildEndpoint(chain: OpenOceanChain, endpoint: string, version: string = 'v4'): string {
+  private buildEndpoint(chain: NeuroDexChain, endpoint: string, version: string = 'v4'): string {
     return `/${version}/${chain}/${endpoint}`;
   }
 
@@ -88,7 +88,7 @@ export class OpenOceanClient {
    */
   async quote(
     params: QuoteParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<QuoteResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'quote'), {
@@ -97,6 +97,12 @@ export class OpenOceanClient {
           'Content-Type': 'application/json',
         },
       });
+      if (data.code !== 200) {
+        logger.error(
+          `Quote failed with code: ${data.code}. The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Quote failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -114,7 +120,7 @@ export class OpenOceanClient {
    */
   async reverseQuote(
     params: QuoteParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<QuoteResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'reverseQuote'), {
@@ -123,6 +129,13 @@ export class OpenOceanClient {
           'Content-Type': 'application/json',
         },
       });
+      if (data.code !== 200) {
+        logger.error(
+          `Reverse quote failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Reverse quote failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -140,7 +153,7 @@ export class OpenOceanClient {
    */
   async swap(
     params: SwapParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<SwapResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'swap'), {
@@ -149,6 +162,12 @@ export class OpenOceanClient {
           'x-qn-api-chain': chain,
         },
       });
+      if (data.code !== 200) {
+        logger.error(
+          `Swap failed with code: ${data.code}. The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Swap failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -164,7 +183,7 @@ export class OpenOceanClient {
    * @returns List of tokens
    */
   async getTokens(
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<TokenListResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'tokenList'), {
@@ -172,6 +191,12 @@ export class OpenOceanClient {
           'x-qn-api-chain': chain,
         },
       });
+      if (data.code !== 200) {
+        logger.error(
+          `Get tokens failed with code: ${data.code}. The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Get tokens failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -187,7 +212,7 @@ export class OpenOceanClient {
    * @returns Gas price data
    */
   async getGasPrice(
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<GasPriceResponse>> {
     try {
       const { data } = await this.axiosInstance.get(this.buildEndpoint(chain, 'gasPrice'), {
@@ -195,6 +220,13 @@ export class OpenOceanClient {
           'x-qn-api-chain': chain,
         },
       });
+      if (data.code !== 200) {
+        logger.error(
+          `Get gas price failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Get gas price failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -213,16 +245,14 @@ export class OpenOceanClient {
    */
   async createLimitOrder(
     params: LimitOrderCreateParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
       if (!this.sdk) {
         throw new Error('SDK not initialized. Call initializeSdk first.');
       }
 
-      // Check if chain is the same as the chain the SDK
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (this.chainId && this.chainId !== chainId) {
         throw new Error('SDK not initialized for this chain');
       }
@@ -251,7 +281,8 @@ export class OpenOceanClient {
         referrerFee: params.referrerFee || undefined,
       };
       const { data } = await this.axiosInstance.post(
-        this.buildEndpoint(chainId.toString() as OpenOceanChain, 'limit-order', 'v1'),
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+        this.buildEndpoint(chainId.toString() as NeuroDexChain, 'limit-order', 'v1'),
         apiParams,
         {
           headers: {
@@ -259,6 +290,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (data.code !== 200) {
+        logger.error(
+          `Create limit order failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Create limit order failed with code: ${data.code}.`);
+      }
 
       return { success: true, data };
     } catch (error) {
@@ -277,18 +316,18 @@ export class OpenOceanClient {
    */
   async cancelLimitOrderAPI(
     orderHash: string,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
       // First cancel on API
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (!chainId) {
         throw new Error('Invalid chain');
       }
       const { data: apiCancelResult } = await this.axiosInstance.post(
         this.buildEndpoint(
-          chainId.toString() as OpenOceanChain,
+          // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+          chainId.toString() as NeuroDexChain,
           'limit-order/cancelLimitOrder',
           'v1'
         ),
@@ -299,6 +338,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (apiCancelResult.code !== 200) {
+        logger.error(
+          `Cancel limit order failed with code: ${apiCancelResult.code}. ` +
+            `The full response is: ${JSON.stringify(apiCancelResult)}`
+        );
+        throw new Error(`Cancel limit order failed with code: ${apiCancelResult.code}.`);
+      }
 
       if (!(apiCancelResult.data.status === 3 || apiCancelResult.data.status === 4)) {
         throw new Error('Failed to cancel order on API');
@@ -321,15 +368,14 @@ export class OpenOceanClient {
    */
   async cancelLimitOrderOnchain(
     params: LimitOrderCancelOnchainParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
       if (!this.sdk) {
         throw new Error('SDK not initialized. Call initializeSdk first.');
       }
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       // Check if chain is the same as the chain the SDK
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
       if (this.chainId && this.chainId !== chainId) {
         throw new Error('SDK not initialized for this chain');
       }
@@ -347,7 +393,9 @@ export class OpenOceanClient {
   /**
    * Gets detailed limit order information for an address
    * @param address - Wallet address
-   * @param statuses - Optional status filter (default shows open orders). eg: [1,2,3], 1-unfill, 2-fail, 3-cancel, 4-filled, 5-pending, 6- hash not exist, 7-expire
+   * @param statuses - Optional status filter (default shows open orders).
+   *                   eg: [1,2,3], 1-unfill, 2-fail, 3-cancel, 4-filled,
+   *                   5-pending, 6- hash not exist, 7-expire
    * @param limit - Optional limit (default 100)
    * @param page - Optional page (default 1)
    * @param sortBy - Optional sort by (default createDateTime)
@@ -362,12 +410,11 @@ export class OpenOceanClient {
     page: number = 1,
     sortBy: string = 'createDateTime',
     exclude: string = '0',
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<LimitOrdersResponse>> {
     try {
       const statusesString = `[${statuses.join(',')}]`;
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (!chainId) {
         throw new Error('Invalid chain');
       }
@@ -375,8 +422,9 @@ export class OpenOceanClient {
         throw new Error('SDK not initialized for this chain');
       }
       const { data } = await this.axiosInstance.get(
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
         this.buildEndpoint(
-          chainId.toString() as OpenOceanChain,
+          chainId.toString() as NeuroDexChain,
           `limit-order/address/${address}`,
           'v1'
         ),
@@ -393,6 +441,13 @@ export class OpenOceanClient {
           },
         }
       );
+      if (data.code !== 200) {
+        logger.error(
+          `Get limit orders failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Get limit orders failed with code: ${data.code}.`);
+      }
       return { success: true, data };
     } catch (error) {
       return {
@@ -410,7 +465,7 @@ export class OpenOceanClient {
    */
   async createDcaOrder(
     params: DcaOrderCreateParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
       if (!this.sdk) {
@@ -420,8 +475,7 @@ export class OpenOceanClient {
         throw new Error('SDK not initialized for DCA. Call initializeSdk with dca=true first.');
       }
       // Check if chain is the same as the chain the SDK
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
 
       const order = {
         makerTokenAddress: params.makerTokenAddress,
@@ -431,7 +485,7 @@ export class OpenOceanClient {
         makerAmount: params.makerAmount,
         takerAmount: params.takerAmount,
         gasPrice: params.gasPrice,
-        expire: params.expire
+        expire: params.expire,
       };
       const sdkOrder = await this.sdk.createLimitOrder(order);
 
@@ -450,7 +504,8 @@ export class OpenOceanClient {
 
       // Submit to API
       const { data } = await this.axiosInstance.post(
-        this.buildEndpoint(chainId!.toString() as OpenOceanChain, 'dca/swap', 'v1'),
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+        this.buildEndpoint(chainId!.toString() as NeuroDexChain, 'dca/swap', 'v1'),
         apiParams,
         {
           headers: {
@@ -458,6 +513,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (data.code !== 200) {
+        logger.error(
+          `Create DCA order failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Create DCA order failed with code: ${data.code}.`);
+      }
 
       return { success: true, data };
     } catch (error) {
@@ -476,18 +539,18 @@ export class OpenOceanClient {
    */
   async cancelDcaOrderAPI(
     orderHash: string,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<{ code: number }>> {
     try {
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (!chainId) {
         throw new Error('Invalid chain');
       }
 
       // Cancel DCA order on API
       const { data: apiCancelResult } = await this.axiosInstance.post(
-        this.buildEndpoint(chainId.toString() as OpenOceanChain, 'dca/cancel', 'v1'),
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+        this.buildEndpoint(chainId.toString() as NeuroDexChain, 'dca/cancel', 'v1'),
         { orderHash },
         {
           headers: {
@@ -495,6 +558,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (apiCancelResult.code !== 200) {
+        logger.error(
+          `Cancel DCA order failed with code: ${apiCancelResult.code}. ` +
+            `The full response is: ${JSON.stringify(apiCancelResult)}`
+        );
+        throw new Error(`Cancel DCA order failed with code: ${apiCancelResult.code}.`);
+      }
 
       return { success: true, data: apiCancelResult };
     } catch (error) {
@@ -506,39 +577,6 @@ export class OpenOceanClient {
   }
 
   /**
-   * Cancels a DCA order onchain
-   * @param params - Cancel order parameters
-   * @param chain - Target blockchain network (defaults to config defaultChain)
-   * @returns Cancellation result
-   */
-  async cancelDcaOrderOnchain(
-    params: DcaOrderCancelOnchainParams,
-    chain: OpenOceanChain = this.defaultChain
-  ): Promise<OpenOceanResponse<{ code: number }>> {
-    try {
-      if (!this.sdk) {
-        throw new Error('SDK not initialized. Call initializeSdk first.');
-      }
-
-      // Check if chain is the same as the chain the SDK
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
-      if (this.chainId && this.chainId !== chainId) {
-        throw new Error('SDK not initialized for this chain');
-      }
-
-      // Cancel DCA order onchain using SDK
-      const sdkResult = await this.sdk.cancelLimitOrder({
-        orderData: params.orderData,
-        gasPrice: params.gasPrice,
-      });
-      return { success: true, data: sdkResult };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-    }
-  }
-
-  /**
    * Gets list of DCA orders for an address
    * @param params - Parameters for getting DCA orders
    * @param chain - Target blockchain network (defaults to config defaultChain)
@@ -546,11 +584,10 @@ export class OpenOceanClient {
    */
   async getDcaOrders(
     params: DcaOrderGetParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<DcaOrdersResponse>> {
     try {
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (!chainId) {
         throw new Error('Invalid chain');
       }
@@ -560,7 +597,8 @@ export class OpenOceanClient {
       const limit = params.limit || 100;
 
       const { data } = await this.axiosInstance.get(
-        this.buildEndpoint(chainId.toString() as OpenOceanChain, `dca/address/${address}`, 'v1'),
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+        this.buildEndpoint(chainId.toString() as NeuroDexChain, `dca/address/${address}`, 'v1'),
         {
           params: {
             statuses,
@@ -571,6 +609,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (data.code !== 200) {
+        logger.error(
+          `Get DCA orders failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Get DCA orders failed with code: ${data.code}.`);
+      }
 
       return { success: true, data };
     } catch (error) {
@@ -589,11 +635,10 @@ export class OpenOceanClient {
    */
   async getAllDcaOrders(
     params: DcaOrderGetParams,
-    chain: OpenOceanChain = this.defaultChain
+    chain: NeuroDexChain = this.defaultChain
   ): Promise<OpenOceanResponse<DcaOrdersResponse>> {
     try {
-      const chainId =
-        chain === 'base' ? 8453 : chain === 'ethereum' ? 1 : chain === 'bsc' ? 56 : null;
+      const chainId = NeuroDexChainToOpenOceanChain[chain];
       if (!chainId) {
         throw new Error('Invalid chain');
       }
@@ -602,7 +647,8 @@ export class OpenOceanClient {
       const limit = params.limit || 100;
 
       const { data } = await this.axiosInstance.get(
-        this.buildEndpoint(chainId.toString() as OpenOceanChain, 'dca/all', 'v1'),
+        // The chainId is not really NeuroDexChain, but we put it here to avoind linting errors
+        this.buildEndpoint(chainId.toString() as NeuroDexChain, 'dca/all', 'v1'),
         {
           params: {
             statuses,
@@ -613,6 +659,14 @@ export class OpenOceanClient {
           },
         }
       );
+
+      if (data.code !== 200) {
+        logger.error(
+          `Get all DCA orders failed with code: ${data.code}. ` +
+            `The full response is: ${JSON.stringify(data)}`
+        );
+        throw new Error(`Get all DCA orders failed with code: ${data.code}.`);
+      }
 
       return { success: true, data };
     } catch (error) {
