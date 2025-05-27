@@ -12,7 +12,7 @@ start_msg =
     /sell - Sell crypto tokens
     /dca - Create DCA order
     /limit - Create limit order
-    /orders - View your orders
+    /orders - View your limit & DCA orders
     /wallet - Manage your wallet
     /settings - Personalize your bot settings
     /help - Get help & support
@@ -47,11 +47,16 @@ wallet_fail_msg =
     Something went wrong. Please try again or go to /help.
 
 wallet_msg =
-    💰 *Wallet:* `{ $walletAddress }`
+    💰 *Portfolio Overview* 
 
-    Balance: { $ethBalance } ETH
+    📊 *Total Value:* ${ $totalPortfolioValue }
 
-    To deposit funds, please send your coins to the wallet address above.
+    • *ETH Balance:* { $ethBalance } ETH
+
+    • *Token Holdings:*
+    { $formattedBalances }
+
+    Discover deeper insights and market alpha at [Neurobro](https://neurobro.ai)
 
 wallet_repeat_pk_error_msg = ❌ *Private Key Verification Failed*
     
@@ -156,9 +161,14 @@ dca_token_msg = Enter token contract address for DCA:
 deposit_msg =
     📥 *Deposit ETH or Tokens*
 
-    ETH: { $ethBalance }
+    💰 *Wallet:* `{ $walletAddress }`
 
-    Send ETH or any ERC-20 token to your wallet: `{ $walletAddress }`
+    📊 *Total Portfolio Value:* ${ $totalPortfolioValue }
+
+    🔹 *ETH Balance:* { $ethBalance } ETH
+
+    🔹 *Token Balances:*
+    { $formattedBalances }
 
     Important:
     - Only send assets on the Base Network
@@ -178,16 +188,6 @@ withdraw_msg =
 
 # sell
 sell_cancel_msg = ⭕ Sell order has been successfully cancelled!
-
-
-sell_confirm_msg =
-    🔍 *Confirm Sell Order*
-
-    Token: *{ $tokenSymbol }* | { $tokenName }
-    CA: `{ $tokenAddress }`
-    Amount: *{ $amount } { $tokenSymbol }*
-
-    Are you sure you want to proceed with this sale?
 
 sell_confirm_msg =
     🔍 *Confirm Sell Order*
@@ -211,12 +211,6 @@ sell_success_msg =
     • Token: { $token }
     • Transaction: https://basescan.org/tx/{ $txHash }
 
-
-
-
-
-
-
 sell_token_found_msg = 
     ✅ *Token Found*
 
@@ -231,7 +225,176 @@ sell_token_found_msg =
 
 sell_token_msg = Enter token contract address of a token you want to sell:
 
-# help & referrals
+# orders
+orders_overview_msg =
+    📋 *Orders Overview*
+
+    🔹 *Total DCA Orders:* { $totalDcaOrders }
+    🔹 *Total Limit Orders:* { $totalLimitOrders }
+
+    To get more details about your limit & DCA orders, click the buttons below:
+
+# Order message
+limit_orders_header_msg =
+    📋 *Limit Orders*
+    
+    🟢 → Active/Pending
+
+    ✅ → Filled/Completed  
+    
+    ❌ → Cancelled
+    
+    ⏰ → Expired
+    
+    🔴 → Failed
+    
+    🔵 → Unknown
+
+    ─────────────────
+
+limit_order_item_msg =
+    { $statusEmoji } *#{ $orderNumber } | { $makerSymbol } → { $takerSymbol }*
+    • *Amount:* { $makerAmount } { $makerSymbol }
+    • *Target:* { $takerAmount } { $takerSymbol }
+    • *Range:* { $createdDate } → { $expiryDate }
+    • *Hash:* `{ $orderHash }`
+
+dca_orders_header_msg = 📋 *DCA Orders*
+
+    🟢 → Active/Pending
+
+    ✅ → Filled/Completed  
+    
+    ❌ → Cancelled
+    
+    ⏰ → Expired
+    
+    🔴 → Failed
+    
+    🔵 → Unknown
+
+    ─────────────────
+
+dca_order_item_msg =
+    { $statusEmoji } *#{ $orderNumber } | { $makerSymbol } → { $takerSymbol }*
+    • *Amount:* { $makerAmount } { $makerSymbol }
+    • *Interval:* { $intervalText }
+    • *Progress:* { $progress }/{ $totalTimes } executions
+    • *Range:* { $createdDate } → { $expiryDate }
+    • *Hash:* `{ $orderHash }`
+
+orders_total_count_msg = Total Orders: { $totalCount }
+
+no_dca_orders_msg =
+    📋 *DCA Orders*
+
+    You don't have any DCA orders yet.
+
+    Use /dca to create your first DCA order.
+
+no_limit_orders_msg =
+    📋 *Limit Orders*
+
+    You don't have any limit orders yet.
+
+    Use /limit to create your first limit order.
+
+
+# Limit Order Messages
+limit_token_msg = Please send the token contract address for which you want to create a limit order:
+limit_custom_amount_msg = Please enter the amount of tokens you want to buy:
+limit_invalid_price_msg = ❌ Invalid price. Please enter a valid number greater than 0.
+limit_invalid_expiry_msg = ⚠️ Invalid expiry time. Please enter a valid expiry time (e.g. 2H, 3D, 1W).
+limit_price_msg = Please enter the price per token (in ETH) for your limit order:
+limit_expiry_msg = Please select the expiry time for your limit order:
+limit_custom_expiry_msg = Please enter the expiry time (e.g. 2H, 3D, 1W):
+limit_restart_msg = Please start over with the /limit command.
+limit_cancel_msg = ⭕ Limit order has been successfully cancelled!
+limit_order_not_found_msg = ❌ Order not found or already cancelled.
+
+limit_no_orders_msg =
+    📋 *No Limit Orders*
+
+    You don't have any limit orders yet.
+
+    Use /limit to create your first limit order.
+
+limit_token_found_msg =
+    ✅ *Token Found*
+
+    Symbol: *{ $tokenSymbol }*
+    Name: *{ $tokenName }*
+    Price: *{ $tokenPrice }*
+    Chain: { $tokenChain }
+
+    Please select how many { $tokenSymbol } you want to buy in your limit order.
+
+    Go to /settings to adjust slippage and gas if the transaction fails.
+
+limit_order_created_msg =
+    🎊 Congratulations! Your limit order has been created successfully!
+
+    Token: { $tokenSymbol }
+    Amount: { $amount } { $tokenSymbol }
+    Price: { $price } ETH per token
+    Expiry: { $expiry }
+
+    Your limit order has been submitted to the network. It will be executed when the market price reaches your target price.
+
+    Use /orders to view all your orders.
+    
+limit_order_cancel_success_msg =
+    ✅ *Limit Order Cancelled*
+
+    Your limit order for { $makerSymbol } → { $takerSymbol } has been successfully cancelled.
+
+    Use /orders to view your remaining orders.
+
+limit_confirm_msg =
+    🔍 *Confirm Limit Order*
+
+    Token: { $tokenSymbol } | { $tokenName }
+    CA: `{ $token }`
+    Amount: { $amount } { $tokenSymbol }
+    Price: { $price } ETH per token
+    Total Value: { $totalValue } ETH
+    Expiry: { $expiry }
+
+    Please confirm the creation of your limit order:
+
+# settings
+gas_priority_updated_msg = Gas priority set to { $gasPriority }
+slippage_updated_msg = Slippage set to { $slippage }
+language_updated_msg = Language set to { $language }
+set_gas_msg =
+    ⛽ Set Gas Priority
+
+    Select your preferred gas priority:
+
+set_language_msg =
+    🌎 Select Language
+
+    Choose your preferred language:
+
+set_slippage_msg =
+    📊 Set Slippage Tolerance
+
+    Select your preferred slippage tolerance:
+
+settings_msg =
+    ⚙️ *Settings*
+
+    Current Settings:
+    • Slippage: { $slippage }
+    • Language: { $language }
+    • Gas Priority: { $gasPriority }
+
+    Best Practices:
+    - Increase *slippage* to 1% for less liquid tokens
+    - Set *gas priority* to high for fast transactions
+
+    Please set your desired settings below.
+
 # help & referrals
 help_msg =
     🆘 *Help & Support*
@@ -281,149 +444,16 @@ referral_msg =
     Your Referral Link:
     `{ $referral_link }`
 
-    Learn more about rewards and tiers in our official [docs](https://docs.neurodex.xyz/referral-program)
+    Learn more about rewards and tiers in our official [documentation](https://docs.neurodex.xyz/referral-program)
 
 referral_stats_msg =
-    📊 *Referral Stats*
+    📊 *Referral Statistics*
 
     Referred Users: { $totalReferrals } users
-    Referred Trades: { $totalTrades } trades
-    Referred Volume: { $totalVolume }
+    Referral Trades: { $totalTrades } trades
+    Referral Volume: { $totalVolume }
     Total Referral Earnings: { $totalEarned }
 
     Keep spreading the word and watch your earnings grow! 🚀
 
-referral_success_notification_msg = 🥳 *Boom!* You just referred a new user to Neurodex! You're growing the movement — and your rewards!
-
-
-# settings
-gas_priority_updated_msg = Gas priority set to { $gasPriority }
-slippage_updated_msg = Slippage set to { $slippage }
-language_updated_msg = Language set to { $language }
-set_gas_msg =
-    ⛽ Set Gas Priority
-
-    Select your preferred gas priority:
-
-set_language_msg =
-    🌎 Select Language
-
-    Choose your preferred language:
-
-set_slippage_msg =
-    📊 Set Slippage Tolerance
-
-    Select your preferred slippage tolerance:
-
-settings_msg =
-    ⚙️ *Settings*
-
-    Current Settings:
-    • Slippage: { $slippage }
-    • Language: { $language }
-    • Gas Priority: { $gasPriority }
-
-    Best Practices:
-    - Increase *slippage* to 1% for less liquid tokens
-    - Set *gas priority* to high for fast transactions
-
-    Please set your desired settings below.
-
-
-# limit order
-limit_cancel_msg = ⭕ Limit order creation cancelled.
-limit_confirm_msg =
-    🔍 *Confirm Limit Order*
-
-    Token: { $tokenSymbol } | { $tokenName }
-    CA: `{ $token }`
-    Amount: { $amount } { $tokenSymbol }
-    Price: { $price } ETH per token
-    Total Value: { $totalValue } ETH
-    Expiry: { $expiry }
-
-    Please confirm to create the limit order:
-
-limit_custom_amount_msg = Please enter the amount of tokens you want to buy:
-limit_custom_expiry_msg = Please enter the expiry time (e.g., 2H, 3D, 1W):
-limit_error_msg = ❌ Something went wrong during the limit order creation. Please try again.
-limit_invalid_expiry_msg = ⚠️ Invalid expiry time. Please enter a valid expiry time (e.g., 2H, 3D, 1W)
-limit_expiry_msg = Please select the expiry time for your limit order:
-limit_loading_orders_msg = 📋 Loading your limit orders...
-limit_no_order_msg = No limit order to confirm.
-limit_no_orders_msg =
-    📋 *No Limit Orders*
-
-    You don't have any limit orders yet.
-
-    Use /limit to create your first limit order.
-
-limit_order_cancel_success_msg =
-    ⭕ *Limit Order Cancelled*
-
-    Your limit order for { $makerSymbol } → { $takerSymbol } has been successfully cancelled.
-
-    Use /orders to view your remaining orders.
-
-limit_order_created_msg =
-    🎊 *Congratulations! Your limit order has been created successfully!*
-
-    Token: { $tokenSymbol }
-    Amount: { $amount } { $tokenSymbol }
-    Price: { $price } ETH per token
-    Expiry: { $expiry }
-
-    Your limit order has been submitted to the network. It will be executed when the market price reaches your target price.
-
-    Use /orders to view all your orders.
-
-limit_price_msg = Please enter the price per token (in ETH) for your limit order:
-limit_restart_msg = Please start over with /limit command.
-limit_token_found_msg =
-    ✅ *Token Found*
-
-    Symbol: *{ $tokenSymbol }*
-    Name: *{ $tokenName }*
-    Price: *{ $tokenPrice }*
-    Chain: { $tokenChain }
-
-    Please select how much { $tokenSymbol } you want to buy in your limit order.
-
-    Go to /settings to adjust slippage and gas if the transaction fails.
-
-limit_token_msg = Please send contract address of the token you want to create a limit order for:
-
-# buy
-buy_amount_msg = Please enter the amount of ETH you want to spend:
-buy_confirm_msg =
-    🔍 *Confirm Buy Order*
-
-    Token: *{ $tokenSymbol }* | { $tokenName }
-    CA: `{ $token }`
-    Amount: *{ $amount } ETH*
-
-    Are you sure you want to proceed with this purchase?
-
-buy_error_msg = ❌ Something went wrong during the buy operation. Please try again.
-buy_success_msg =
-    🎊 *Congratulations! Your buy order for { $amount } { $tokenSymbol } has been created successfully!*
-
-    Transaction details:
-    • Amount: { $amount } { $tokenSymbol }
-    • Token: { $token }
-    • Transaction: https://basescan.org/tx/{ $txHash }
-
-    Check out your transaction on [BaseScan](https://basescan.org/tx/{ $txHash })
-buy_token_found_msg =
-    ✅ *Token Found*
-
-    Symbol: *${ $tokenSymbol }*
-    Name: *{ $tokenName }*
-    Price: ${ $tokenPrice }
-    Chain: { $tokenChain }
-
-    Please select how much ETH you want to spend on { $tokenSymbol }.
-
-    Go to /settings to adjust slippage and gas if the transaction fails.
-
-buy_token_msg = Enter token contract address to buy:
+referral_success_notification_msg = 🥳 *Congratulations!* You just referred a new user to Neurodex! You're growing with us (and so are your rewards)!

@@ -1,6 +1,7 @@
 import { depositKeyboard } from '@/bot/commands/deposit';
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
+import { CoinStatsService } from '@/services/engine/coinstats.service';
 import { ViemService } from '@/services/engine/viem.service';
 import { UserService } from '@/services/prisma/user';
 import { BotContext } from '@/types/telegram';
@@ -35,9 +36,17 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     }
     // Refresh wallet
     else if (callbackData === 'refresh_wallet') {
+      const coinStatsService = CoinStatsService.getInstance();
+      const walletHoldings = await coinStatsService.getWalletTokenHoldings(
+        walletAddress as `0x${string}`,
+        'base',
+        0.1
+      );
       const message = ctx.t('wallet_msg', {
         walletAddress: walletAddress,
         ethBalance: ethBalance,
+        totalPortfolioValue: walletHoldings.totalPortfolioValue.toFixed(2),
+        formattedBalances: walletHoldings.formattedBalances,
       });
 
       await ctx.editMessageText(message, {

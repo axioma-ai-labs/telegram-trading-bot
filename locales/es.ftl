@@ -291,21 +291,58 @@ slippage_updated_msg = Slippage establecido en { $slippage }
 language_updated_msg = Idioma establecido en { $language }
 gas_priority_updated_msg = Prioridad de gas establecida en { $gasPriority }
 
-dca_order_cancelled_msg = ✅ ¡La orden DCA ha sido cancelada exitosamente!
-dca_no_active_orders_msg = ❌ No se encontraron órdenes DCA activas para cancelar.
-dca_orders_found_msg = ✅ Órdenes DCA encontradas.
-dca_no_orders_msg = ❌ No se encontraron órdenes DCA activas.
-dca_cancel_failed_msg = ❌ No se pudo cancelar la orden DCA. Por favor intenta más tarde.
-dca_order_created_msg =
-    🎊 *¡Felicitaciones! ¡Tu orden DCA ha sido creada exitosamente!*
+# orders
+orders_overview_msg =
+    📋 *Resumen de Órdenes*
 
-    Token: { $tokenSymbol } | { $tokenName }
-    CA: `{ $token }`
-    Cantidad: { $amount } ETH
-    Intervalo: { $interval }
-    Veces: { $times }
+    🔹 *Total de Órdenes DCA:* $totalDcaOrders
+    🔹 *Total de Órdenes Límite:* $totalLimitOrders
 
-    ¡Puedes ver tus órdenes DCA abiertas usando /orders!
+    Haga clic en el botón de abajo para ver sus órdenes respectivas.
+
+# Order display messages
+limit_orders_header_msg = 📋 *Órdenes Límite*
+
+dca_orders_header_msg = 📋 *Órdenes DCA*
+
+dca_loading_orders_msg = 📋 Cargando sus órdenes DCA...
+
+dca_retrieve_error_msg = ❌ Error al obtener órdenes DCA: { $error }
+
+orders_total_count_msg = Total de Órdenes: { $totalCount }
+
+limit_order_item_msg =
+    { $statusEmoji } *Orden #{ $orderNumber }*
+    📊 { $makerSymbol } → { $takerSymbol }
+    💰 Cantidad: { $makerAmount } { $makerSymbol }
+    🎯 Objetivo: { $takerAmount } { $takerSymbol }
+    📅 Creado: { $createdDate }
+    ⏰ Expira: { $expiryDate }
+    🔗 Hash: `{ $orderHash }`
+
+dca_order_item_msg =
+    { $statusEmoji } *Orden #{ $orderNumber }*
+    📊 { $makerSymbol } → { $takerSymbol }
+    💰 Cantidad: { $makerAmount } { $makerSymbol }
+    🔄 Intervalo: { $intervalText }
+    📈 Progreso: { $progress }/{ $totalTimes } ejecuciones
+    📅 Creado: { $createdDate }
+    ⏰ Expira: { $expiryDate }
+    { $priceRangeText }🔗 Hash: `{ $orderHash }`
+
+no_dca_orders_msg =
+    📋 *Órdenes DCA*
+
+    Aún no tienes órdenes DCA.
+
+    Usa /dca para crear tu primera orden DCA.
+
+no_limit_orders_msg =
+    📋 *Órdenes Límite*
+
+    Aún no tienes órdenes límite.
+
+    Usa /limit para crear tu primera orden límite.
 
 # Limit Order Messages
 limit_token_msg = Por favor envía la dirección del contrato del token para el que quieres crear una orden límite:
@@ -414,3 +451,21 @@ buy_token_found_msg =
     Ve a /settings para ajustar slippage y gas si la transacción falla.
 
 buy_token_msg = Ingresa la dirección del contrato del token para comprar:
+
+dca_order_cancelled_msg = ✅ ¡La orden DCA ha sido cancelada exitosamente!
+dca_no_active_orders_msg = ❌ No se encontraron órdenes DCA activas para cancelar.
+dca_orders_found_msg = ✅ Órdenes DCA encontradas.
+dca_no_orders_msg = ❌ No se encontraron órdenes DCA activas.
+dca_cancel_failed_msg = ❌ No se pudo cancelar la orden DCA. Por favor intenta más tarde.
+dca_order_created_msg =
+    🎊 *¡Felicitaciones! ¡Tu orden DCA ha sido creada exitosamente!*
+
+    Token: { $tokenSymbol } | { $tokenName }
+    CA: `{ $token }`
+    Cantidad: { $amount } ETH
+    Intervalo: { $interval }
+    Veces: { $times }
+
+    ¡Puedes ver tus órdenes DCA abiertas usando /orders!
+
+# Limit Order Messages

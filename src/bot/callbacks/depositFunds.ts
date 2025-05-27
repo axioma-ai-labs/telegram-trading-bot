@@ -1,4 +1,5 @@
 import { depositKeyboard } from '@/bot/commands/deposit';
+import { CoinStatsService } from '@/services/engine/coinstats.service';
 import { ViemService } from '@/services/engine/viem.service';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
@@ -9,11 +10,22 @@ export async function depositFunds(ctx: BotContext): Promise<void> {
   if (!isValid || !user) return;
 
   const viemService = new ViemService();
-  const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+  const coinStatsService = CoinStatsService.getInstance();
+  const walletAddress = user.wallets[0].address as `0x${string}`;
+
+  // Get native ETH balance and CoinStats portfolio data in parallel
+  const [balance, walletHoldings] = await Promise.all([
+    viemService.getNativeBalance(walletAddress),
+    coinStatsService.getWalletTokenHoldings(walletAddress, 'base', 0.1),
+  ]);
+
   const ethBalance = balance || '0.000';
+
   const message = ctx.t('deposit_msg', {
     walletAddress: user.wallets[0].address,
+    totalPortfolioValue: walletHoldings.totalPortfolioValue.toFixed(2),
     ethBalance,
+    formattedBalances: walletHoldings.formattedBalances,
   });
 
   await ctx.editMessageText(message, {

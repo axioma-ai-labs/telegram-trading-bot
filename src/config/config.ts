@@ -27,6 +27,7 @@ const envSchema = z.object({
   DEFAULT_GAS_PRIORITY: z.enum(['standard', 'fast', 'instant'] as const).default('standard'),
 
   COVALENTHQ_API_KEY: z.string().min(1, 'COVALENTHQ_API_KEY is required'),
+  COINSTATS_API_KEY: z.string().min(1, 'COINSTATS_API_KEY is required'),
 
   SUPABASE_URL: z.string().url('SUPABASE_URL must be a valid URL'),
   SUPABASE_KEY: z.string().min(1, 'SUPABASE_KEY is required'),
@@ -92,6 +93,7 @@ const createConfig = (): AppConfig => {
 
     // Third Party APIs
     covalenthqApiKey: env.COVALENTHQ_API_KEY,
+    coinstatsApiKey: env.COINSTATS_API_KEY,
 
     // Supabase Settings
     supabase: {

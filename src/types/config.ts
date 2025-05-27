@@ -61,6 +61,7 @@ export interface AppConfig {
   database: DatabaseConfig;
   node: NodeConfig;
   covalenthqApiKey: string;
+  coinstatsApiKey: string;
   betterstack: BetterstackConfig;
   // Constants
   MAX_UINT256: string;

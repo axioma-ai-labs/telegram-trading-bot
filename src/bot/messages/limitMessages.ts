@@ -26,19 +26,27 @@ export async function handleLimitMessages(
       const neurodex = new NeuroDexApi();
       const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
 
+      if (!tokenData.success || !tokenData.data) {
+        const message = await ctx.reply(ctx.t('token_not_found_msg'), {
+          parse_mode: 'Markdown',
+        });
+        await deleteBotMessage(ctx, message.message_id, 10000);
+        return;
+      }
+
       ctx.session.currentOperation = {
         type: 'limit',
         token: userInput,
-        tokenSymbol: tokenData.data?.symbol,
-        tokenName: tokenData.data?.name,
-        tokenChain: tokenData.data?.chain,
+        tokenSymbol: tokenData.data.symbol,
+        tokenName: tokenData.data.name,
+        tokenChain: tokenData.data.chain,
       };
 
       const message = ctx.t('limit_token_found_msg', {
-        tokenSymbol: tokenData.data?.symbol || '',
-        tokenName: tokenData.data?.name || '',
-        tokenPrice: tokenData.data?.price || 0,
-        tokenChain: tokenData.data?.chain || '',
+        tokenSymbol: tokenData.data.symbol || '',
+        tokenName: tokenData.data.name || '',
+        tokenPrice: tokenData.data.price || 0,
+        tokenChain: tokenData.data.chain || '',
       });
 
       await ctx.reply(message, {
@@ -46,16 +54,17 @@ export async function handleLimitMessages(
         reply_markup: limitAmountKeyboard,
       });
     } catch (error) {
-      await ctx.reply(ctx.t('token_not_found_msg'), {
+      const message = await ctx.reply(ctx.t('token_not_found_msg'), {
         parse_mode: 'Markdown',
       });
+      await deleteBotMessage(ctx, message.message_id, 10000);
     }
   } else if (!currentOperation.amount) {
     // Handle amount input
     const parsedAmount = parseFloat(userInput);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-      await deleteBotMessage(ctx, message.message_id);
+      await deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
@@ -71,8 +80,8 @@ export async function handleLimitMessages(
     // Handle price input
     const parsedPrice = parseFloat(userInput);
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      const message = await ctx.reply(ctx.t('invalid_price_msg'));
-      await deleteBotMessage(ctx, message.message_id);
+      const message = await ctx.reply(ctx.t('limit_invalid_price_msg'));
+      await deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
@@ -82,7 +91,7 @@ export async function handleLimitMessages(
     const expiryPattern = /^(\d+)([HDWM])$/i;
     if (!expiryPattern.test(userInput)) {
       const message = await ctx.reply(ctx.t('limit_invalid_expiry_msg'));
-      await deleteBotMessage(ctx, message.message_id);
+      await deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 

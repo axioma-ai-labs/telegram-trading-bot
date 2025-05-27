@@ -291,6 +291,59 @@ slippage_updated_msg = Slippage установлен на { $slippage }
 language_updated_msg = Язык установлен на { $language }
 gas_priority_updated_msg = Приоритет газа установлен на { $gasPriority }
 
+# orders
+orders_overview_msg =
+    📋 *Обзор ордеров*
+
+    🔹 *Всего DCA ордеров:* $totalDcaOrders
+    🔹 *Всего лимитных ордеров:* $totalLimitOrders
+
+    Нажмите кнопку ниже, чтобы просмотреть соответствующие ордера.
+
+# Order display messages
+limit_orders_header_msg = 📋 *Лимитные ордера*
+
+dca_orders_header_msg = 📋 *DCA ордера*
+
+dca_loading_orders_msg = 📋 Загружаю ваши DCA ордера...
+
+dca_retrieve_error_msg = ❌ Не удалось получить DCA ордера: { $error }
+
+orders_total_count_msg = Всего ордеров: { $totalCount }
+
+limit_order_item_msg =
+    { $statusEmoji } *Ордер #{ $orderNumber }*
+    📊 { $makerSymbol } → { $takerSymbol }
+    💰 Количество: { $makerAmount } { $makerSymbol }
+    🎯 Цель: { $takerAmount } { $takerSymbol }
+    📅 Создан: { $createdDate }
+    ⏰ Истекает: { $expiryDate }
+    🔗 Хеш: `{ $orderHash }`
+
+dca_order_item_msg =
+    { $statusEmoji } *Ордер #{ $orderNumber }*
+    📊 { $makerSymbol } → { $takerSymbol }
+    💰 Количество: { $makerAmount } { $makerSymbol }
+    🔄 Интервал: { $intervalText }
+    📈 Прогресс: { $progress }/{ $totalTimes } выполнений
+    📅 Создан: { $createdDate }
+    ⏰ Истекает: { $expiryDate }
+    { $priceRangeText }🔗 Хеш: `{ $orderHash }`
+
+no_dca_orders_msg =
+    📋 *DCA ордера*
+
+    У вас пока нет DCA ордеров.
+
+    Используйте /dca, чтобы создать ваш первый DCA ордер.
+
+no_limit_orders_msg =
+    📋 *Лимитные ордера*
+
+    У вас пока нет лимитных ордеров.
+
+    Используйте /limit, чтобы создать ваш первый лимитный ордер.
+
 dca_order_cancelled_msg = ✅ DCA ордер успешно отменен!
 dca_no_active_orders_msg = ❌ Активные DCA ордера для отмены не найдены.
 dca_orders_found_msg = ✅ DCA ордера найдены.

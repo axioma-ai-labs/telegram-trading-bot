@@ -212,7 +212,15 @@ export async function createNewUser(
   if (referrer) {
     await ReferralService.linkReferral(user.id, referrer.id);
     logger.info('Referrer:', referrer.id, 'has successfully referred:', user.id);
-    await sendReferralNotification(ctx, referrer.telegramId);
+
+    // send referral notification to referrer
+    const message = ctx.t('referral_success_notification_msg');
+    await bot.api.sendMessage(referrer.telegramId, message, {
+      parse_mode: 'Markdown',
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   }
 
   // Create default settings
@@ -234,17 +242,4 @@ export async function createNewUser(
 
   logger.info('New user created:', telegramId);
   return user as UserWithRelations;
-}
-
-export async function sendReferralNotification(ctx: BotContext, telegramId: string): Promise<void> {
-  const message = ctx.t('referral_success_notification_msg');
-
-  await bot.api.sendMessage(telegramId, message, {
-    parse_mode: 'Markdown',
-    link_preview_options: {
-      is_disabled: true,
-    },
-  });
-
-  logger.info(`Referral notification sent to user: ${telegramId}`);
 }
