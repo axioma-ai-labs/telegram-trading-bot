@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from 'axios';
 import Web3 from 'web3';
 
 import logger from '@/config/logger';
+import { NeuroDexChain, NeuroDexChainToOpenOceanChain } from '@/types/neurodex';
 import {
   DcaOrderCreateApiParams,
   DcaOrderCreateParams,
@@ -12,8 +13,6 @@ import {
   LimitOrderCancelOnchainParams,
   LimitOrderCreateParams,
   LimitOrdersResponse,
-  NeuroDexChain,
-  NeuroDexChainToOpenOceanChain,
   OpenOceanResponse,
   QuoteParams,
   QuoteResponse,

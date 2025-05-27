@@ -29,7 +29,7 @@ import {
   NeuroDexChain,
   NeuroDexChainToOpenOceanChain,
   NeuroDexChainToViemChain,
-} from '@/types/openocean';
+} from '@/types/neurodex';
 import { erc20Abi } from '@/utils/abis';
 
 /**

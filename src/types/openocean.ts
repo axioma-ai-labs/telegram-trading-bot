@@ -1,29 +1,4 @@
-import { Chain } from 'viem';
-import { base, bsc, mainnet } from 'viem/chains';
 import Web3 from 'web3';
-
-/**
- * Supported blockchain networks for OpenOcean integration
- */
-export type NeuroDexChain = 'base' | 'ethereum' | 'bsc';
-
-/**
- * Mapping of NeuroDexChain to OpenOcean chain IDs
- */
-export const NeuroDexChainToOpenOceanChain: Record<NeuroDexChain, number> = {
-  base: 8453,
-  ethereum: 1,
-  bsc: 56,
-};
-
-/**
- * Mapping of NeuroDexChain to Viem chain
- */
-export const NeuroDexChainToViemChain: Record<NeuroDexChain, Chain> = {
-  base: base,
-  ethereum: mainnet,
-  bsc: bsc,
-};
 
 // ------------------------------------------------------------
 // Parameters
