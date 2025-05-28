@@ -1,10 +1,14 @@
 import { InlineKeyboard } from 'grammy';
 
+import { ordersKeyboard } from '@/bot/commands/orders';
 import { referralKeyboard } from '@/bot/commands/referrals';
 import { settingsKeyboard } from '@/bot/commands/settings';
 import { startKeyboard } from '@/bot/commands/start';
 import { transactionsKeyboard, transactionsMessage } from '@/bot/commands/transactions';
 import { walletKeyboard } from '@/bot/commands/wallet';
+import logger from '@/config/logger';
+import { CoinStatsService } from '@/services/engine/coinstats';
+import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
@@ -38,6 +42,32 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     },
     keyboard: settingsKeyboard,
   },
+  back_orders: {
+    message: async (ctx: BotContext) => {
+      const { isValid, user } = await validateUserAndWallet(ctx);
+      if (!isValid || !user?.wallets?.[0]) return '';
+
+      const walletAddress = user.wallets[0].address;
+      const neurodex = new NeuroDexApi();
+      const totalDcaOrders = await neurodex.getDcaOrders({ address: walletAddress });
+      const totalLimitOrders = await neurodex.getLimitOrders({
+        address: walletAddress,
+        statuses: [1, 2, 3, 4, 5, 6, 7],
+      });
+      if (!totalDcaOrders.success || !totalLimitOrders.success) {
+        logger.error('Failed to get orders:', totalDcaOrders.error || totalLimitOrders.error);
+        return ctx.t('error_msg');
+      }
+
+      const message = ctx.t('orders_overview_msg', {
+        totalDcaOrders: totalDcaOrders.data?.length || 0,
+        totalLimitOrders: totalLimitOrders.data?.length || 0,
+      });
+
+      return message;
+    },
+    keyboard: ordersKeyboard,
+  },
   back_referrals: {
     message: async (ctx: BotContext) => {
       const { isValid, user } = await validateUserAndWallet(ctx);
@@ -51,16 +81,24 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_wallet: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUserAndWallet(ctx);
-      if (!isValid || !user) return '';
+      const { user } = await validateUserAndWallet(ctx, { cacheOnly: true });
 
       const viemService = new ViemService();
-      const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+      const coinStatsService = CoinStatsService.getInstance();
+      const walletAddress = user?.wallets[0].address as `0x${string}`;
+
+      const [balance, walletHoldings] = await Promise.all([
+        viemService.getNativeBalance(walletAddress),
+        coinStatsService.getWalletTokenHoldings(walletAddress, 'base', 0.1),
+      ]);
+
       const ethBalance = balance || '0.000';
 
       const message = ctx.t('wallet_msg', {
-        walletAddress: user.wallets[0].address,
+        walletAddress: walletAddress,
+        totalPortfolioValue: walletHoldings.totalPortfolioValue.toFixed(2),
         ethBalance,
+        formattedBalances: walletHoldings.formattedBalances,
       });
 
       return message;

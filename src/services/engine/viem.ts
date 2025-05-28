@@ -290,16 +290,16 @@ export class ViemService {
   /**
    * Get native balance (ETH/BNB/BASE) for a wallet in readable format
    * @param address Wallet address
-   * @returns Balance in ETH as string (e.g., "0.123")
+   * @returns Balance in ETH as string with 6 decimal places (e.g., "0.123456")
    */
   async getNativeBalance(address: Address): Promise<string> {
     try {
       const publicClient = this.createPublicClient();
       const balance = await publicClient.getBalance({ address });
-      return formatEther(balance);
+      return Number(formatEther(balance)).toFixed(6);
     } catch (error) {
       logger.error('Error fetching native balance:', error);
-      return '0';
+      return '0.000000';
     }
   }
 

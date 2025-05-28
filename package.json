@@ -44,6 +44,7 @@
     "libsodium-wrappers": "^0.7.15",
     "prisma-field-encryption": "^1.6.0",
     "tsconfig-paths": "^4.2.0",
+    "v1.0#gsr018bomb6hjmfw": "link:@coinstatsopenapi/v1.0#gsr018bomb6hjmfw",
     "viem": "^2.29.2",
     "web3": "^1.10.4",
     "winston": "^3.17.0",

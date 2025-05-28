@@ -1,5 +1,6 @@
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
+import { CoinStatsService } from '@/services/engine/coinstats';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
 import { UserService } from '@/services/prisma/user';
@@ -21,20 +22,33 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
 
     const neurodex = new NeuroDexApi();
     const viemService = new ViemService();
+    const coinStatsService = CoinStatsService.getInstance();
 
     // Check if user already has a wallet
     if (user.wallets && user.wallets.length > 0) {
-      const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+      const walletAddress = user.wallets[0].address as `0x${string}`;
+
+      // Get ETH and token holdings
+      const [balance, walletHoldings] = await Promise.all([
+        viemService.getNativeBalance(walletAddress),
+        coinStatsService.getWalletTokenHoldings(walletAddress, 'base', 0.1),
+      ]);
+
       const ethBalance = balance || '0.000';
 
       const existingWalletMessage = ctx.t('wallet_msg', {
         walletAddress: user.wallets[0].address,
+        totalPortfolioValue: walletHoldings.totalPortfolioValue.toFixed(2),
         ethBalance,
+        formattedBalances: walletHoldings.formattedBalances,
       });
 
       await ctx.editMessageText(existingWalletMessage, {
         parse_mode: 'Markdown',
         reply_markup: walletKeyboard,
+        link_preview_options: {
+          is_disabled: true,
+        },
       });
       return;
     }

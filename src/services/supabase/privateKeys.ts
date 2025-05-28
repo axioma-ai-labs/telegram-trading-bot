@@ -42,7 +42,9 @@ export class PrivateStorageService {
    * @param walletAddress - The wallet address
    * @returns The decrypted private key or null if not found
    */
-  static async getPrivateKey(walletAddress: string): Promise<string | null> {
+  static async getPrivateKey(walletAddress: string | null): Promise<string | null> {
+    if (!walletAddress) return null;
+
     try {
       const { data, error } = await supabaseService
         .from(this.TABLE_NAME)

@@ -1,20 +1,25 @@
+# start
 start_msg =
     💸 *Neurodex*
 
-    Neurodex ist Ihr blitzschneller Krypto-Trading-Bot
+    Neurodex ist Ihr blitzschneller Krypto-Trading-Bot.
 
-    Kaufen und verkaufen Sie Kryptowährungen ganz einfach mit Neurodex.
+    Kaufen und verkaufen Sie Kryptowährungen, erstellen Sie DCA-Orders, richten Sie Limit-Orders ganz einfach mit Neurodex ein.
 
-    /buy - Kaufen Sie jeden Krypto-Token auf Base, BSC & Ethereum
-    /sell - Verkaufen Sie jeden Krypto-Token auf Base, BSC & Ethereum
-    /dca - Dollar Cost Averaging (DCA)
-    /limit - Limit-Orders erstellen
-    /wallet - Verwalten Sie Ihre Wallet
-    /settings - Bot-Einstellungen konfigurieren
+    Neurodex unterstützt derzeit den Handel auf *Base*, *BSC* und *Ethereum*.
+
+    /buy - Krypto-Token kaufen
+    /sell - Krypto-Token verkaufen
+    /dca - DCA-Order erstellen
+    /limit - Limit-Order erstellen
+    /orders - Ihre Limit- und DCA-Orders anzeigen
+    /wallet - Ihre Wallet verwalten
+    /settings - Bot-Einstellungen personalisieren
     /help - Hilfe und Support erhalten
 
-    Powered by [Neurobro](https://neurobro.ai) und [Docs](https://docs.neurodex.xyz)
+    ⚡ Powered by [Neurobro](https://neurobro.ai) und [Docs](https://docs.neurodex.xyz)
 
+# terms & conditions
 accept_terms_conditions_msg =
     💸 *Willkommen bei Neurodex*
 
@@ -23,20 +28,18 @@ accept_terms_conditions_msg =
     • [Nutzungsbedingungen](https://docs.neurodex.xyz/terms-of-service)
     • [Datenschutzrichtlinie](https://docs.neurodex.xyz/privacy-policy)
 
-wallet_success_msg =
-    ✅ *Ihre Wallet wurde erfolgreich erstellt*
 
-    Wallet-Adresse: { $walletAddress }
-    Private Key: { $privateKey }
+# wallet
+wallet_create_msg =
+    💸 *Neurodex*
 
-    ⚠️ *WICHTIG:* Bewahren Sie Ihren Private Key sicher auf
-    • Teilen Sie ihn mit niemandem
-    • Speichern Sie ihn nicht digital oder online
-    • Schreiben Sie ihn auf und bewahren Sie ihn sicher auf
+    Neurodex ist Ihr blitzschneller Krypto-Trading-Bot
 
-    ⏰ Diese Nachricht wird in 5 Minuten aus Sicherheitsgründen gelöscht
+    Um /buy, /sell oder andere Aktionen durchführen zu können, müssen Sie zuerst eine Wallet erstellen. Erstellen Sie jetzt eine, indem Sie auf die Schaltfläche unten klicken.
 
-    Um mit dem Trading zu beginnen, verwenden Sie den /start Befehl.
+    Für Hilfe bei der Einrichtung lesen Sie bitte [diese Anleitung](https://docs.neurodex.xyz/getting-started/setup) oder holen Sie sich /help.
+
+
 
 wallet_fail_msg =
     ❌ *Wallet-Erstellung fehlgeschlagen*
@@ -44,11 +47,16 @@ wallet_fail_msg =
     Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut oder gehen Sie zu /help.
 
 wallet_msg =
-    💰 *Wallet:* { $walletAddress }
+    💰 *Portfolio-Übersicht* 
 
-    Guthaben: { $ethBalance } ETH
+    📊 *Gesamtwert:* ${ $totalPortfolioValue }
 
-    Um Geld einzuzahlen, senden Sie bitte Ihre Coins an die obige Wallet-Adresse.
+    • *ETH-Guthaben:* { $ethBalance } ETH
+
+    • *Token-Bestände:*
+    { $formattedBalances }
+
+    Entdecken Sie tiefere Einblicke und Markt-Alpha bei [Neurobro](https://neurobro.ai)
 
 wallet_repeat_pk_error_msg = ❌ *Private Key Verifizierung fehlgeschlagen*
     
@@ -64,29 +72,36 @@ wallet_repeat_pk_success_msg = ✅ *Private Key verifiziert*
 
     Um mit dem Trading zu beginnen, verwenden Sie den /start Befehl oder klicken Sie auf die Schaltfläche unten:
 
-wallet_create_msg =
-    💸 *Neurodex*
 
-    Neurodex ist Ihr blitzschneller Krypto-Trading-Bot
+wallet_success_msg =
+    ✅ *Ihre Wallet wurde erfolgreich erstellt*
 
-    Um /buy, /sell oder andere Aktionen durchführen zu können, müssen Sie zuerst eine Wallet erstellen. Erstellen Sie jetzt eine, indem Sie auf die Schaltfläche unten klicken.
+    • *Wallet-Adresse:* `{ $walletAddress }`
 
-    Für Hilfe bei der Einrichtung lesen Sie bitte [diese Anleitung](https://docs.neurodex.xyz/getting-started/setup) oder holen Sie sich /help.
+    • *Private Key:* `{ $privateKey }`
 
-buy_token_msg = Geben Sie die Token-Vertragsadresse zum Kaufen ein:
-dca_token_msg = Geben Sie die Token-Vertragsadresse für DCA ein:
-error_msg = ❌ Transaktion fehlgeschlagen. Bitte versuchen Sie es später erneut.
-invalid_amount_msg = ⚠️ Ungültiger Betrag ausgewählt. Bitte wählen Sie einen anderen Betrag.
-invalid_price_msg = ⚠️ Ungültiger Preis ausgewählt. Bitte wählen Sie einen anderen Preis.
+    ⚠️ *WICHTIG:* Bewahren Sie Ihren Private Key sicher auf
+    • Teilen Sie ihn mit niemandem
+    • Speichern Sie ihn nicht digital oder online
+    • Schreiben Sie ihn auf und bewahren Sie ihn sicher auf
 
+    ⏰ Diese Nachricht wird in 5 Minuten aus Sicherheitsgründen gelöscht
+
+    Um mit dem Trading zu beginnen, verwenden Sie den /start Befehl.
+
+
+# error & status messages
+error_msg = ❌ Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.
 insufficient_funds_msg =
     ⚠️ Unzureichende Mittel zur Durchführung der Transaktion.
 
     Bitte stellen Sie sicher, dass Sie genug ETH haben für:
     • Den Transaktionsbetrag
     • Gas-Gebühren
-
-invalid_token_msg = ❌ Kein Token ausgewählt. Bitte wählen Sie zuerst einen Token aus.
+invalid_amount_msg = ⚠️ Ungültiger Betrag ausgewählt. Bitte wählen Sie einen anderen Betrag.
+invalid_token_msg = ⚠️ Kein Token ausgewählt. Bitte wählen Sie zuerst einen Token aus.
+invalid_price_msg = ⚠️ Ungültiger Preis ausgewählt. Bitte wählen Sie einen anderen Preis
+no_wallet_msg = ⚠️ Sie haben keine Wallet. Bitte erstellen Sie eine mit /wallet oder klicken Sie auf die Schaltfläche unten:
 no_private_key_msg = ⚠️ Private Key nicht gefunden. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.
 already_up_to_date_msg = ✨ Bereits auf dem neuesten Stand!
 rate_limit_second_msg = Bitte langsamer! Maximal 3 Anfragen pro Sekunde.
@@ -94,14 +109,8 @@ rate_limit_minute_msg = Sie haben das Limit von 50 Anfragen pro Minute überschr
 rate_limit_15min_msg = Sie haben das Limit von 300 Anfragen pro 15 Minuten überschritten. Bitte warten Sie.
 token_not_found_msg = ❌ Token nicht gefunden. Bitte überprüfen Sie die Token-Vertragsadresse und versuchen Sie es erneut.
 
-dca_times_msg = Bitte wählen Sie die Anzahl der Wiederholungen für Ihre DCA-Order:
-dca_interval_msg = Bitte wählen Sie das Zeitintervall für Ihre DCA-Order:
-dca_custom_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie für Ihre DCA-Order ausgeben möchten:
-dca_custom_interval_msg = Bitte geben Sie das Intervall in Stunden für Ihre DCA-Order ein:
-dca_custom_times_msg = Bitte geben Sie die Anzahl der Wiederholungen (1-100) für Ihre DCA-Order ein:
-dca_invalid_interval_msg = ⚠️ Ungültiges Intervall ausgewählt. Bitte wählen Sie ein anderes Intervall.
-dca_invalid_times_msg = ⚠️ Ungültige Anzahl von Wiederholungen. Bitte geben Sie eine Zahl zwischen 1 und 100 ein.
-
+# dca
+dca_cancel_msg = ⭕ DCA-Order wurde erfolgreich storniert!
 dca_confirm_msg =
     🔍 *DCA-Order bestätigen*
 
@@ -113,6 +122,27 @@ dca_confirm_msg =
 
     Bitte bestätigen Sie die Erstellung der DCA-Order:
 
+dca_custom_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie für Ihre DCA-Order ausgeben möchten:
+dca_custom_interval_msg = Bitte geben Sie das Intervall in Stunden für Ihre DCA-Order ein:
+dca_custom_times_msg = Bitte geben Sie die Anzahl der Wiederholungen (1-100) für Ihre DCA-Order ein:
+dca_interval_msg = Bitte wählen Sie das Zeitintervall für Ihre DCA-Order:
+dca_invalid_interval_msg = ⚠️ Ungültiges Intervall ausgewählt. Bitte wählen Sie ein anderes Intervall.
+dca_invalid_times_msg = ⚠️ Ungültige Anzahl von Wiederholungen. Bitte geben Sie eine Zahl zwischen 1 und 100 ein.
+dca_no_orders_msg = Keine aktiven DCA-Orders gefunden.
+
+dca_orders_found_msg = ✅ DCA-Orders gefunden.
+dca_success_msg =
+    🎊 *Herzlichen Glückwunsch! Ihre DCA-Order wurde erfolgreich erstellt!*
+
+    Token: { $tokenSymbol } | { $tokenName }
+    CA: `{ $token }`
+    Betrag: { $amount } ETH
+    Intervall: { $interval }
+    Wiederholungen: { $times }
+
+    Sie können Ihre offenen DCA-Orders mit /orders anzeigen!
+
+dca_times_msg = Bitte wählen Sie die Anzahl der Wiederholungen für Ihre DCA-Order:
 dca_token_found_msg =
     ✅ *Token gefunden*
 
@@ -125,6 +155,26 @@ dca_token_found_msg =
 
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
+dca_token_msg = Geben Sie die Token-Vertragsadresse für DCA ein:
+
+# deposit & withdraw
+deposit_msg =
+    📥 *ETH oder Token einzahlen*
+
+    💰 *Wallet:* `{ $walletAddress }`
+
+    📊 *Gesamter Portfolio-Wert:* ${ $totalPortfolioValue }
+
+    🔹 *ETH-Guthaben:* { $ethBalance } ETH
+
+    🔹 *Token-Guthaben:*
+    { $formattedBalances }
+
+    Wichtig:
+    - Senden Sie nur Assets im Base Network
+    - ETH-Einzahlungen werden normalerweise innerhalb von Minuten bestätigt
+    - Teilen Sie niemals Ihren Private Key mit jemandem
+
 withdraw_msg =
     📤 *ETH oder andere Token abheben*
 
@@ -136,41 +186,8 @@ withdraw_msg =
     - Abhebungen werden normalerweise innerhalb von Minuten bestätigt
     - Teilen Sie niemals Ihren Private Key mit jemandem
 
-deposit_msg =
-    📥 *ETH oder Token einzahlen*
-
-    ETH: { $ethBalance }
-
-    Senden Sie ETH oder jeden ERC-20 Token an Ihre Wallet: `{ $walletAddress }`
-
-    Wichtig:
-    - Senden Sie nur Assets im Base Network
-    - ETH-Einzahlungen werden normalerweise innerhalb von Minuten bestätigt
-    - Teilen Sie niemals Ihren Private Key mit jemandem
-
-no_registration_msg =
-    ❌ Sie sind nicht registriert.
-
-    Bitte verwenden Sie /start, um zu beginnen.
-
-no_wallet_msg =
-    ❌ Sie haben keine Wallet.
-
-    Bitte verwenden Sie /wallet, um eine zu erstellen.
-
-sell_token_msg = Geben Sie die Token-Vertragsadresse eines Tokens ein, den Sie verkaufen möchten:
-
-sell_token_found_msg =
-    ✅ *Token gefunden*
-
-    Symbol: *{ $tokenSymbol }*
-    Name: *{ $tokenName }*
-    Preis: *{ $tokenPrice }*
-    Chain: { $tokenChain }
-
-    Bitte wählen Sie aus, wie viel { $tokenSymbol } Sie verkaufen möchten.
-
-    Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
+# sell
+sell_cancel_msg = ⭕ Verkaufsorder wurde erfolgreich storniert!
 
 sell_confirm_msg =
     🔍 *Verkaufsorder bestätigen*
@@ -182,153 +199,118 @@ sell_confirm_msg =
     Sind Sie sicher, dass Sie mit diesem Verkauf fortfahren möchten?
 
 sell_custom_amount_msg = Bitte geben Sie die Anzahl der Token ein, die Sie verkaufen möchten:
-sell_balance_fetch_error_msg = ❌ Wallet-Guthaben konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.
-sell_no_balance_msg = ❌ Sie haben kein Guthaben dieses Tokens zum Verkaufen.
-sell_insufficient_balance_msg = ❌ Unzureichendes Guthaben. Sie haben nur { $balance } { $tokenSymbol }.
-sell_invalid_operation_msg = ❌ Ungültiger Verkaufsvorgang. Bitte versuchen Sie es erneut.
-sell_private_key_error_msg = ❌ Private Key nicht gefunden. Bitte versuchen Sie es erneut.
-sell_order_cancelled_msg = ✅ Verkaufsorder wurde erfolgreich storniert!
+sell_error_msg = ❌ Etwas ist während des Verkaufsvorgangs schiefgelaufen. Bitte versuchen Sie es erneut.
+sell_insufficient_balance_msg = ⚠️ Unzureichendes Guthaben. Sie haben nur { $balance } { $tokenSymbol }.
+sell_invalid_operation_msg = ⚠️ Ungültiger Verkaufsvorgang. Bitte versuchen Sie es erneut.
+sell_no_balance_msg = ⚠️ Sie haben kein Guthaben dieses Tokens zum Verkaufen.
 sell_success_msg =
-    ✅ Verkaufsorder für { $amount } { $tokenSymbol } war erfolgreich!
+    🎊 *Herzlichen Glückwunsch! Ihre Verkaufsorder für { $amount } { $tokenSymbol } wurde erfolgreich erstellt!*
 
     Transaktionsdetails:
     • Betrag: { $amount } { $tokenSymbol }
     • Token: { $token }
     • Transaktion: https://basescan.org/tx/{ $txHash }
 
-help_msg =
-    Hilfe & Support
+sell_token_found_msg = 
+    ✅ *Token gefunden*
 
-    Schnellstart:
-    • /start - Bot starten
-    • /wallet - Wallet verwalten
-    • /buy - Krypto-Token kaufen
-    • /sell - Krypto-Token verkaufen
-    • /settings - Bot-Einstellungen konfigurieren
+    Symbol: *{ $tokenSymbol }*
+    Name: *{ $tokenName }*
+    Preis: *{ $tokenPrice }*
+    Chain: { $tokenChain }
 
-    Wie verwende ich Neurodex?
-    Schauen Sie sich unsere [Dokumentation](https://docs.neurodex.xyz) an, wo wir alles im Detail erklären. Treten Sie unserem Support-Chat für zusätzliche Ressourcen bei.
+    Bitte wählen Sie aus, wie viel { $tokenSymbol } Sie verkaufen möchten.
 
-    💰 Wo finde ich meinen Empfehlungscode?
-    Öffnen Sie das /referrals Menü, um Ihren einzigartigen Empfehlungscode anzuzeigen. Teilen Sie ihn mit Freunden, um Belohnungen zu verdienen!
+    Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
-    Was sind die Gebühren?
-    • Trading-Gebühr: 1% pro erfolgreicher Transaktion
-    • Keine Abonnementgebühren
-    • Keine versteckten Kosten
-    • Alle Funktionen sind kostenlos nutzbar
+sell_token_msg = Geben Sie die Token-Vertragsadresse eines Tokens ein, den Sie verkaufen möchten:
 
-    🔒 Sicherheitstipps:
-    • Teilen Sie NIEMALS Ihre Private Keys oder Seed Phrases
-    • Admins werden Sie NIEMALS zuerst anschreiben
-    • Verwenden Sie nur offizielle Links von unserer Website
-    • Wir speichern niemals Ihre Private Keys oder Seed Phrases. Beim Erstellen einer neuen Wallet - bewahren Sie Ihren Private Key an einem sicheren Ort auf.
+# orders
+orders_overview_msg =
+    📋 *Orders-Übersicht*
 
-    💡 Trading-Tipps:
-    Häufige Probleme und Lösungen:
-    • Slippage überschritten: Erhöhen Sie die Slippage oder handeln Sie in kleineren Beträgen
-    • Unzureichendes Guthaben: Fügen Sie mehr Geld hinzu oder reduzieren Sie den Transaktionsbetrag
-    • Transaktion-Timeout: Erhöhen Sie das Gas-Tip bei hoher Netzwerklast
+    🔹 *Gesamt DCA-Orders:* { $totalDcaOrders }
+    🔹 *Gesamt Limit-Orders:* { $totalLimitOrders }
 
-    Benötigen Sie weitere Hilfe?
-    Kontaktieren Sie unser Support-Team, indem Sie auf die Schaltfläche unten klicken.
+    Um weitere Details zu Ihren Limit- und DCA-Orders zu erhalten, klicken Sie auf die Schaltflächen unten:
 
-referral_msg =
-    💎 *Empfehlungsprogramm*
+# Order message
+limit_orders_header_msg =
+    📋 *Limit-Orders*
+    
+    🟢 → Aktiv/Ausstehend
 
-    So funktioniert es:
-    1. Teilen Sie Ihren Empfehlungslink unten mit Ihren Freunden und Ihrer Familie
-    2. Wenn sie sich über Ihren Link anmelden, verdienen Sie 10% ihrer Trading-Gebühren
-    3. Sie können unbegrenzte Belohnungen verdienen!
+    ✅ → Ausgeführt/Abgeschlossen  
+    
+    ❌ → Storniert
+    
+    ⏰ → Abgelaufen
+    
+    🔴 → Fehlgeschlagen
+    
+    🔵 → Unbekannt
 
-    Ihr Empfehlungslink:
-    `{ $referral_link }`
+    ─────────────────
 
-    Erfahren Sie mehr über Belohnungen und Stufen in unserer offiziellen [Dokumentation](https://docs.neurodex.xyz/referral-program)
+limit_order_item_msg =
+    { $statusEmoji } *#{ $orderNumber } | { $makerSymbol } → { $takerSymbol }*
+    • *Betrag:* { $makerAmount } { $makerSymbol }
+    • *Ziel:* { $takerAmount } { $takerSymbol }
+    • *Zeitraum:* { $createdDate } → { $expiryDate }
+    • *Hash:* `{ $orderHash }`
 
-referral_stats_msg =
-    📊 *Empfehlungsstatistiken*
+dca_orders_header_msg = 📋 *DCA-Orders*
 
-    Empfohlene Benutzer: { $totalReferrals } Benutzer
-    Empfohlene Trades: { $totalTrades } Trades
-    Empfohlenes Volumen: { $totalVolume }
-    Gesamte Empfehlungseinnahmen: { $totalEarned }
+    🟢 → Aktiv/Ausstehend
 
-    Verbreiten Sie weiter das Wort und sehen Sie zu, wie Ihre Einnahmen wachsen! 🚀
+    ✅ → Ausgeführt/Abgeschlossen  
+    
+    ❌ → Storniert
+    
+    ⏰ → Abgelaufen
+    
+    🔴 → Fehlgeschlagen
+    
+    🔵 → Unbekannt
 
-referral_success_notification_msg = 🥳 *Boom!* Sie haben gerade einen neuen Benutzer zu Neurodex empfohlen! Sie wachsen mit uns (und mit Ihren Belohnungen)!
+    ─────────────────
 
-settings_msg =
-    ⚙️ *Einstellungen*
+dca_order_item_msg =
+    { $statusEmoji } *#{ $orderNumber } | { $makerSymbol } → { $takerSymbol }*
+    • *Betrag:* { $makerAmount } { $makerSymbol }
+    • *Intervall:* { $intervalText }
+    • *Fortschritt:* { $progress }/{ $totalTimes } Ausführungen
+    • *Zeitraum:* { $createdDate } → { $expiryDate }
+    • *Hash:* `{ $orderHash }`
 
-    Aktuelle Einstellungen:
-    • Slippage: { $slippage }
-    • Sprache: { $language }
-    • Gas-Priorität: { $gasPriority }
+orders_total_count_msg = Gesamt Orders: { $totalCount }
 
-    Best Practices:
-    - Erhöhen Sie die *Slippage* auf 1% für weniger liquide Token
-    - Setzen Sie die *Gas-Priorität* auf hoch für schnelle Transaktionen
+no_dca_orders_msg =
+    📋 *DCA-Orders*
 
-    Bitte stellen Sie Ihre gewünschten Einstellungen unten ein.
+    Sie haben noch keine DCA-Orders.
 
-set_slippage_msg =
-    📊 Slippage-Toleranz einstellen
+    Verwenden Sie /dca, um Ihre erste DCA-Order zu erstellen.
 
-    Wählen Sie Ihre bevorzugte Slippage-Toleranz:
+no_limit_orders_msg =
+    📋 *Limit-Orders*
 
-set_language_msg =
-    🌎 Sprache auswählen
+    Sie haben noch keine Limit-Orders.
 
-    Wählen Sie Ihre bevorzugte Sprache:
+    Verwenden Sie /limit, um Ihre erste Limit-Order zu erstellen.
 
-set_gas_msg =
-    ⛽ Gas-Priorität einstellen
-
-    Wählen Sie Ihre bevorzugte Gas-Priorität:
-
-slippage_updated_msg = Slippage auf { $slippage } gesetzt
-language_updated_msg = Sprache auf { $language } gesetzt
-gas_priority_updated_msg = Gas-Priorität auf { $gasPriority } gesetzt
-
-dca_order_cancelled_msg = ✅ DCA-Order wurde erfolgreich storniert!
-dca_no_active_orders_msg = ❌ Keine aktiven DCA-Orders zum Stornieren gefunden.
-dca_orders_found_msg = ✅ DCA-Orders gefunden.
-dca_no_orders_msg = ❌ Keine aktiven DCA-Orders gefunden.
-dca_cancel_failed_msg = ❌ DCA-Order konnte nicht storniert werden. Bitte versuchen Sie es später erneut.
-
-dca_order_created_msg =
-    🎊 *Herzlichen Glückwunsch! Ihre DCA-Order wurde erfolgreich erstellt!*
-
-    Token: { $tokenSymbol } | { $tokenName }
-    CA: `{ $token }`
-    Betrag: { $amount } ETH
-    Intervall: { $interval }
-    Wiederholungen: { $times }
-
-    Sie können Ihre offenen DCA-Orders mit /orders einsehen!
 
 # Limit Order Messages
-limit_token_msg = Bitte senden Sie die Vertragsadresse des Tokens, für den Sie eine Limit-Order erstellen möchten:
+limit_token_msg = Bitte senden Sie die Token-Vertragsadresse, für die Sie eine Limit-Order erstellen möchten:
 limit_custom_amount_msg = Bitte geben Sie die Anzahl der Token ein, die Sie kaufen möchten:
-limit_error_msg = ❌ Limit-Order konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.
 limit_invalid_price_msg = ❌ Ungültiger Preis. Bitte geben Sie eine gültige Zahl größer als 0 ein.
 limit_invalid_expiry_msg = ⚠️ Ungültige Ablaufzeit. Bitte geben Sie eine gültige Ablaufzeit ein (z.B. 2H, 3D, 1W).
 limit_price_msg = Bitte geben Sie den Preis pro Token (in ETH) für Ihre Limit-Order ein:
 limit_expiry_msg = Bitte wählen Sie die Ablaufzeit für Ihre Limit-Order:
 limit_custom_expiry_msg = Bitte geben Sie die Ablaufzeit ein (z.B. 2H, 3D, 1W):
-limit_restart_msg = Bitte beginnen Sie erneut mit dem /limit Befehl.
-limit_no_order_msg = Keine Limit-Order zum Bestätigen.
-limit_private_key_error_msg = ❌ Private Key konnte nicht abgerufen werden.
-limit_token_info_error_msg = ❌ Token-Informationen konnten nicht abgerufen werden.
-limit_order_cancelled_msg = ❌ Limit-Order-Erstellung abgebrochen.
-limit_no_wallet_msg = ❌ Keine Wallet gefunden. Bitte erstellen Sie zuerst eine Wallet.
-limit_order_details_error_msg = ❌ Order-Details konnten nicht abgerufen werden.
+limit_restart_msg = Bitte beginnen Sie von vorne mit dem /limit Befehl.
+limit_cancel_msg = ⭕ Limit-Order wurde erfolgreich storniert!
 limit_order_not_found_msg = ❌ Order nicht gefunden oder bereits storniert.
-limit_loading_orders_msg = 📋 Lade Ihre Limit-Orders...
-limit_create_error_msg = ❌ Limit-Order konnte nicht erstellt werden: { $error }
-limit_retrieve_error_msg = ❌ Limit-Orders konnten nicht abgerufen werden: { $error }
-limit_cancel_error_msg = ❌ Limit-Order konnte nicht storniert werden: { $error }
 
 limit_no_orders_msg =
     📋 *Keine Limit-Orders*
@@ -345,12 +327,12 @@ limit_token_found_msg =
     Preis: *{ $tokenPrice }*
     Chain: { $tokenChain }
 
-    Bitte wählen Sie aus, wie viel { $tokenSymbol } Sie in Ihrer Limit-Order kaufen möchten.
+    Bitte wählen Sie aus, wie viele { $tokenSymbol } Sie in Ihrer Limit-Order kaufen möchten.
 
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
 limit_order_created_msg =
-    ✅ *Limit-Order erfolgreich erstellt!*
+    🎊 Herzlichen Glückwunsch! Ihre Limit-Order wurde erfolgreich erstellt!
 
     Token: { $tokenSymbol }
     Betrag: { $amount } { $tokenSymbol }
@@ -360,7 +342,7 @@ limit_order_created_msg =
     Ihre Limit-Order wurde an das Netzwerk übermittelt. Sie wird ausgeführt, wenn der Marktpreis Ihren Zielpreis erreicht.
 
     Verwenden Sie /orders, um alle Ihre Orders anzuzeigen.
-
+    
 limit_order_cancel_success_msg =
     ✅ *Limit-Order storniert*
 
@@ -378,7 +360,7 @@ limit_confirm_msg =
     Gesamtwert: { $totalValue } ETH
     Ablauf: { $expiry }
 
-    Bitte bestätigen Sie die Erstellung der Limit-Order:
+    Bitte bestätigen Sie die Erstellung Ihrer Limit-Order:
 
 # buy
 buy_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie ausgeben möchten:
@@ -416,42 +398,99 @@ buy_token_found_msg =
 
 buy_token_msg = Geben Sie die Token-Vertragsadresse zum Kaufen ein:
 
-withdraw_select_amount_msg =
-    📤 *ETH abheben*
 
-    Ihr Guthaben: { $ethBalance } ETH
+# settings
+gas_priority_updated_msg = Gas-Priorität auf { $gasPriority } gesetzt
+slippage_updated_msg = Slippage auf { $slippage } gesetzt
+language_updated_msg = Sprache auf { $language } gesetzt
+set_gas_msg =
+    ⛽ Gas-Priorität festlegen
 
-    Bitte wählen Sie aus, wie viel ETH Sie abheben möchten:
+    Wählen Sie Ihre bevorzugte Gas-Priorität:
 
-    Wichtig:
-    - Überprüfen Sie die Empfängeradresse doppelt
-    - Abhebungen werden normalerweise innerhalb von Minuten bestätigt
-    - Teilen Sie niemals Ihren Private Key mit jemandem
+set_language_msg =
+    🌎 Sprache auswählen
 
-withdraw_custom_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie abheben möchten:
-withdraw_recipient_address_msg = Bitte geben Sie die Empfänger-Wallet-Adresse ein (0x...):
-withdraw_insufficient_balance_msg = ⚠️ Unzureichendes Guthaben. Sie haben nur { $balance } ETH, möchten aber { $amount } ETH abheben.
-withdraw_invalid_operation_msg = ⚠️ Ungültiger Abhebungsvorgang. Bitte versuchen Sie es erneut.
-withdraw_error_msg = ❌ Etwas ist bei der Abhebung schiefgelaufen. Bitte versuchen Sie es erneut.
-withdraw_cancel_msg = ⭕ Abhebung wurde abgebrochen.
-invalid_address_msg = ⚠️ Ungültiges Adressformat. Bitte geben Sie eine gültige Ethereum-Adresse ein, die mit 0x beginnt.
-invalid_input_msg = ⚠️ Ungültige Eingabe. Bitte versuchen Sie es erneut.
+    Wählen Sie Ihre bevorzugte Sprache:
 
-withdraw_confirm_msg =
-    🔍 *Abhebung bestätigen*
+set_slippage_msg =
+    📊 Slippage-Toleranz festlegen
 
-    Betrag: *{ $amount } ETH*
-    An Adresse: `{ $recipientAddress }`
+    Wählen Sie Ihre bevorzugte Slippage-Toleranz:
 
-    Sind Sie sicher, dass Sie mit dieser Abhebung fortfahren möchten?
+settings_msg =
+    ⚙️ *Einstellungen*
 
-withdraw_success_msg =
-    🎊 *Abhebung erfolgreich!*
+    Aktuelle Einstellungen:
+    • Slippage: { $slippage }
+    • Sprache: { $language }
+    • Gas-Priorität: { $gasPriority }
 
-    Betrag: { $amount } ETH
-    An Adresse: `{ $recipientAddress }`
-    Transaktion: https://basescan.org/tx/{ $txHash }
+    Best Practices:
+    - Erhöhen Sie *Slippage* auf 1% für weniger liquide Token
+    - Setzen Sie *Gas-Priorität* auf hoch für schnelle Transaktionen
 
-    Ihre Abhebung wurde an das Netzwerk übermittelt und sollte innerhalb von Minuten bestätigt werden.
+    Bitte stellen Sie Ihre gewünschten Einstellungen unten ein.
 
-    Überprüfen Sie Ihre Transaktion auf [BaseScan](https://basescan.org/tx/{ $txHash })
+# help & referrals
+help_msg =
+    🆘 *Hilfe & Support*
+
+    Schnellstart:
+    • /start - Bot starten
+    • /wallet - Wallet verwalten
+    • /buy - Krypto-Token kaufen
+    • /sell - Krypto-Token verkaufen
+    • /settings - Bot-Einstellungen konfigurieren
+
+    💡 *Wie verwende ich Neurodex?*
+    Schauen Sie sich unsere [Dokumentation](https://docs.neurodex.xyz) an, wo wir alles im Detail erklären. Treten Sie unserem Support-Chat für zusätzliche Ressourcen bei.
+
+    💰 *Wo finde ich meinen Empfehlungscode?*
+    Öffnen Sie das /referrals Menü, um Ihren einzigartigen Empfehlungscode anzuzeigen. Teilen Sie ihn mit Freunden, um Belohnungen zu verdienen!
+
+    💰 *Was sind die Gebühren?*
+    • Handelsgebühr: 1% pro erfolgreicher Transaktion
+    • Keine Abonnementgebühren
+    • Keine versteckten Kosten
+    • Alle Funktionen sind kostenlos nutzbar
+
+    🔒 Sicherheitstipps:
+    • Teilen Sie NIEMALS Ihre Private Keys oder Seed-Phrasen
+    • Admins werden Sie NIEMALS zuerst anschreiben
+    • Verwenden Sie nur offizielle Links von unserer Website
+    • Wir speichern niemals Ihre Private Keys oder Seed-Phrasen. Beim Erstellen einer neuen Wallet - bewahren Sie Ihren Private Key sicher auf.
+
+    💡 Trading-Tipps:
+    Häufige Probleme und Lösungen:
+    • Slippage überschritten: Erhöhen Sie Slippage oder handeln Sie in kleineren Beträgen
+    • Unzureichendes Guthaben: Fügen Sie mehr Geld hinzu oder reduzieren Sie den Transaktionsbetrag
+    • Transaktions-Timeout: Erhöhen Sie Gas-Tip bei hoher Netzwerklast
+
+    Benötigen Sie weitere Hilfe?
+    Kontaktieren Sie unser Support-Team, indem Sie auf die Schaltfläche unten klicken.
+
+referral_msg =
+    💎 *Empfehlungsprogramm*
+
+    So funktioniert es:
+    1. Teilen Sie Ihren Empfehlungslink unten mit Ihren Freunden und Familie
+    2. Wenn sie sich über Ihren Link anmelden, verdienen Sie 10% ihrer Handelsgebühren
+    3. Sie können unbegrenzte Belohnungen verdienen!
+
+    Ihr Empfehlungslink:
+    `{ $referral_link }`
+
+    Erfahren Sie mehr über Belohnungen und Stufen in unserer offiziellen [Dokumentation](https://docs.neurodex.xyz/referral-program)
+
+referral_stats_msg =
+    📊 *Empfehlungsstatistiken*
+
+    Empfohlene Benutzer: { $totalReferrals } Benutzer
+    Empfehlungshandel: { $totalTrades } Trades
+    Empfehlungsvolumen: { $totalVolume }
+    Gesamte Empfehlungseinnahmen: { $totalEarned }
+
+    Verbreiten Sie weiter das Wort und sehen Sie zu, wie Ihre Einnahmen wachsen! 🚀
+
+referral_success_notification_msg = 🥳 *Herzlichen Glückwunsch!* Sie haben gerade einen neuen Benutzer zu Neurodex empfohlen! Sie wachsen mit uns (und so auch Ihre Belohnungen)!

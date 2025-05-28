@@ -21,6 +21,7 @@ import { handleCreateWallet, handleStartTrading } from '@/bot/callbacks/handleWa
 import { handleRefresh } from '@/bot/callbacks/refresh';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
 import { performSell, sellCancel, sellConfirm, sellToken } from '@/bot/callbacks/sellToken';
+import { showOrders, viewDcaOrders, viewLimitOrders } from '@/bot/callbacks/viewOrders';
 import {
   performWithdraw,
   withdrawCancel,
@@ -59,15 +60,15 @@ import {
 } from './bot/callbacks/handleDCA';
 import {
   cancelLimitOrder,
-  getLimitOrders,
+  confirmLimitOrder,
   limitCancel,
-  limitConfirm,
   limitToken,
   retrieveLimitAmount,
   retrieveLimitExpiry,
 } from './bot/callbacks/handleLimitOrders';
-import { dcaCommandHandler, dcaOrdersCommandHandler } from './bot/commands/dca';
-import { limitCommandHandler, limitOrdersCommandHandler } from './bot/commands/limit';
+import { dcaCommandHandler } from './bot/commands/dca';
+import { limitCommandHandler } from './bot/commands/limit';
+import { ordersCommandHandler } from './bot/commands/orders';
 
 export const bot = new Bot<BotContext>(config.telegramBotToken);
 
@@ -140,6 +141,8 @@ async function initializeBot(): Promise<void> {
     get_help: handleGetHelp,
     view_transactions: viewTransactions,
     view_all_transactions: viewAllTransactions,
+    view_limit_orders: viewLimitOrders,
+    view_dca_orders: viewDcaOrders,
     open_settings: handleConfigureSettings,
     set_slippage: handleSetSlippage,
     set_language: handleSetLanguage,
@@ -148,6 +151,7 @@ async function initializeBot(): Promise<void> {
     get_referral_stats: getReferralStats,
     accept_terms_conditions: acceptTermsConditions,
     dca: dcaToken,
+    orders: showOrders,
     get_dca_orders: getDcaOrders,
     dca_confirm: dcaConfirm,
     dca_cancel: dcaCancel,
@@ -158,10 +162,8 @@ async function initializeBot(): Promise<void> {
     withdraw_confirm: withdrawConfirm,
     withdraw_cancel: withdrawCancel,
     limit: limitToken,
-    get_limit_orders: getLimitOrders,
-    limit_confirm: limitConfirm,
+    limit_confirm: confirmLimitOrder,
     limit_cancel: limitCancel,
-    refresh_limit_orders: getLimitOrders,
     lang_en: (ctx) => updateLanguage(ctx, 'en'),
     lang_ru: (ctx) => updateLanguage(ctx, 'ru'),
     lang_de: (ctx) => updateLanguage(ctx, 'de'),
@@ -249,9 +251,8 @@ async function initializeBot(): Promise<void> {
   bot.command(withdrawCommandHandler.command, withdrawCommandHandler.handler); // /withdraw
   bot.command(referralCommandHandler.command, referralCommandHandler.handler); // /referrals
   bot.command(dcaCommandHandler.command, dcaCommandHandler.handler); // /dca
-  bot.command(dcaOrdersCommandHandler.command, dcaOrdersCommandHandler.handler); // /get_dca_orders
   bot.command(limitCommandHandler.command, limitCommandHandler.handler); // /limit
-  bot.command(limitOrdersCommandHandler.command, limitOrdersCommandHandler.handler); // /limitorders
+  bot.command(ordersCommandHandler.command, ordersCommandHandler.handler); // /orders
 
   // Set commands (quick access)
   bot.api.setMyCommands([
@@ -270,10 +271,6 @@ async function initializeBot(): Promise<void> {
     { command: referralCommandHandler.command, description: referralCommandHandler.description },
     { command: dcaCommandHandler.command, description: dcaCommandHandler.description },
     { command: limitCommandHandler.command, description: limitCommandHandler.description },
-    {
-      command: limitOrdersCommandHandler.command,
-      description: limitOrdersCommandHandler.description,
-    },
   ]);
 
   // Handle token input for buy command
