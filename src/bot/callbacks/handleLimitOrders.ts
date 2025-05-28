@@ -5,6 +5,7 @@ import { NeuroDexApi } from '@/services/engine/neurodex';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { LimitOrderParams } from '@/types/neurodex';
+import { LimitOrderAssetData } from '@/types/openocean';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUserAndWallet } from '@/utils/userValidation';
@@ -240,10 +241,10 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
   }
 
   // Cancel the order
-  const result = await neurodx.cancelLimitOrder(
+  const result = await neurodex.cancelLimitOrder(
     {
       orderHash: orderHash,
-      orderData: {}, // Empty object since API cancellation doesn't use it
+      orderData: {} as LimitOrderAssetData,
       slippage: Number(user?.settings?.slippage) || 1,
       gasPriority: (user?.settings?.gasPriority as GasPriority) || 'standard',
       walletAddress: user.wallets[0].address,

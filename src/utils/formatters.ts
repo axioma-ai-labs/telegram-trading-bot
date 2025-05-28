@@ -1,4 +1,5 @@
 import { DcaOrderInfo, LimitOrderInfo } from '@/types/neurodex';
+import { BotContext } from '@/types/telegram';
 
 // format interval
 export const formatInterval = (seconds: number): string => {
@@ -35,11 +36,7 @@ export function getOrderStatusEmoji(status: string): string {
 }
 
 // format limit order
-export function formatLimitOrder(
-  order: LimitOrderInfo,
-  index: number,
-  t: (key: string, params?: Record<string, unknown>) => string
-): string {
+export function formatLimitOrder(order: LimitOrderInfo, index: number, t: BotContext['t']): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.data.createDateTime).toLocaleDateString();
   const expiryDate = new Date(order.data.expiry).toLocaleDateString();
@@ -61,11 +58,7 @@ export function formatLimitOrder(
 }
 
 // format dca order
-export function formatDcaOrder(
-  order: DcaOrderInfo,
-  index: number,
-  t: (key: string, params?: Record<string, unknown>) => string
-): string {
+export function formatDcaOrder(order: DcaOrderInfo, index: number, t: BotContext['t']): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.createDateTime).toLocaleDateString();
   const expiryDate = new Date(order.expireTime).toLocaleDateString();
