@@ -9,11 +9,11 @@ import { I18nService } from '@/services/i18n/i18n';
 import { SettingsService } from '@/services/prisma/settings';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid) return;
 
   const message = ctx.t('settings_msg', {
@@ -57,7 +57,7 @@ export async function handleSetGas(ctx: BotContext): Promise<void> {
 // Update slippage
 export const updateSlippage = async (ctx: BotContext, slippage: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   await SettingsService.updateSlippage(user.id, slippage);
@@ -81,7 +81,7 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
 // Update gas priority
 export const updateGasPriority = async (ctx: BotContext, gasPriority: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   await SettingsService.updateGasPriority(user.id, gasPriority);
@@ -104,7 +104,7 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
 // Update language
 export const updateLanguage = async (ctx: BotContext, language: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   // upd language

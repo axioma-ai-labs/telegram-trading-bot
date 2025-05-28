@@ -9,11 +9,11 @@ import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { BotContext } from '@/types/telegram';
 import { formatDcaOrder, formatLimitOrder } from '@/utils/formatters';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 // view limit orders
 export async function viewLimitOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const walletAddress = user.wallets[0].address;
@@ -66,16 +66,8 @@ export async function viewLimitOrders(ctx: BotContext): Promise<void> {
   });
 }
 
-/**
- * View DCA orders for the user.
- *
- * Fetches and displays all DCA orders for the user's wallet address.
- * Shows order details including token pairs, amounts, intervals, and progress.
- *
- * @param ctx - The bot context containing user session and message data
- */
 export async function viewDcaOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const walletAddress = user.wallets[0].address;
@@ -129,7 +121,7 @@ export async function viewDcaOrders(ctx: BotContext): Promise<void> {
 }
 
 export async function showOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const walletAddress = user.wallets[0].address;
@@ -141,6 +133,9 @@ export async function showOrders(ctx: BotContext): Promise<void> {
     address: walletAddress,
     statuses: [1, 2, 3, 4, 5, 6, 7],
   });
+
+  logger.info('totalDcaOrders', totalDcaOrders);
+  logger.info('totalLimitOrders', totalLimitOrders);
 
   if (!totalDcaOrders.success || !totalLimitOrders.success) {
     logger.error('Failed to get orders:', totalDcaOrders.error || totalLimitOrders.error);

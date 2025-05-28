@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import logger from '@/config/logger';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const sellTokenKeyboard = new InlineKeyboard()
   .text('25%', 'sell_amount_25')
@@ -23,7 +23,7 @@ export const sellCommandHandler: CommandHandler = {
   description: 'Sell a token',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUserAndWallet(ctx);
+    const { isValid } = await validateUser(ctx);
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'sell' };

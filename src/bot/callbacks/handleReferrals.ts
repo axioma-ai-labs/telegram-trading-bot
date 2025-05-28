@@ -2,11 +2,11 @@ import { referralKeyboard, referralStatsKeyboard } from '@/bot/commands/referral
 import logger from '@/config/logger';
 import { ReferralService } from '@/services/prisma/referrals';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function getReferralLink(ctx: BotContext): Promise<void> {
   //validate user
-  const { isValid, user } = await validateUserAndWallet(ctx, { cacheOnly: true });
+  const { isValid, user } = await validateUser(ctx, { allowStale: true });
   if (!isValid || !user) return;
 
   const referral_link = user.referralCode || '';
@@ -24,7 +24,7 @@ export async function getReferralLink(ctx: BotContext): Promise<void> {
 
 export async function getReferralStats(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx, { allowStale: true });
+  const { isValid, user } = await validateUser(ctx, { allowStale: true });
   if (!isValid || !user) return;
 
   const referralStatistics = await ReferralService.getReferralStats(user.id);

@@ -12,7 +12,7 @@ import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
 import { getGasPriorityName, getLanguageName, getSlippageName } from '@/utils/settingsGetters';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 interface BackHandlerConfig {
   message: string | ((ctx: BotContext) => Promise<string>);
@@ -29,7 +29,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_settings: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUserAndWallet(ctx);
+      const { isValid, user } = await validateUser(ctx, { cacheOnly: true });
       if (!isValid) return '';
 
       const message = ctx.t('settings_msg', {
@@ -44,7 +44,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_orders: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUserAndWallet(ctx);
+      const { isValid, user } = await validateUser(ctx, { cacheOnly: true });
       if (!isValid || !user?.wallets?.[0]) return '';
 
       const walletAddress = user.wallets[0].address;
@@ -70,7 +70,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_referrals: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUserAndWallet(ctx);
+      const { isValid, user } = await validateUser(ctx);
       if (!isValid || !user) return '';
 
       const referral_link = user.referralCode || '';
@@ -81,7 +81,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_wallet: {
     message: async (ctx: BotContext) => {
-      const { user } = await validateUserAndWallet(ctx, { cacheOnly: true });
+      const { user } = await validateUser(ctx, { cacheOnly: true });
 
       const viemService = new ViemService();
       const coinStatsService = CoinStatsService.getInstance();

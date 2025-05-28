@@ -1,10 +1,10 @@
 import { helpKeyboard } from '@/bot/commands/help';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function handleGetHelp(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   const message = ctx.t('help_msg');

@@ -8,12 +8,12 @@ import { LimitOrderParams } from '@/types/neurodex';
 import { LimitOrderAssetData } from '@/types/openocean';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 import { validatePK } from '@/utils/validators';
 
 // limit token callback
 export async function limitToken(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   ctx.session.currentOperation = { type: 'limit' };
@@ -25,7 +25,7 @@ export async function limitToken(ctx: BotContext): Promise<void> {
 
 // retrieve limit amount callback
 export async function retrieveLimitAmount(ctx: BotContext, amount: string): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
   const { currentOperation } = ctx.session;
 
@@ -137,7 +137,7 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
 
 // confirm limit order
 export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
@@ -196,7 +196,7 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
 
 // cancel limit order
 export async function limitCancel(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   ctx.session.currentOperation = null;
@@ -206,7 +206,7 @@ export async function limitCancel(ctx: BotContext): Promise<void> {
 
 // cancel limit order
 export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Promise<void> {
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);

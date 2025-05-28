@@ -77,7 +77,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
     }
 
     // Invalidate user cache since wallet was added
-    invalidateUserCache(ctx);
+    invalidateUserCache(telegramId);
 
     // Show private key and ask for verification
     const message = await ctx.editMessageText(

@@ -6,7 +6,7 @@ import { ReferralService } from '@/services/prisma/referrals';
 import { UserService } from '@/services/prisma/user';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { createNewUser, validateUserAndWallet } from '@/utils/userValidation';
+import { createNewUser, validateUser } from '@/utils/userValidation';
 
 export const startKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
@@ -72,8 +72,8 @@ export const startCommandHandler: CommandHandler = {
       return;
     }
 
-    // For existing users, use validateUserAndWallet
-    const { isValid } = await validateUserAndWallet(ctx, { skipMessages: true });
+    // validate user (existing user)
+    const { isValid } = await validateUser(ctx, { allowStale: true });
 
     if (isValid) {
       // Existing user with wallet & accepted terms conditions
@@ -87,8 +87,8 @@ export const startCommandHandler: CommandHandler = {
         },
       });
     } else {
-      // validate user and wallet (existing user)
-      await validateUserAndWallet(ctx);
+      // validate user (existing user)
+      await validateUser(ctx);
     }
   },
 };

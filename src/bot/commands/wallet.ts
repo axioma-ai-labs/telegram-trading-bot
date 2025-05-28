@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import { ViemService } from '@/services/engine/viem';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const walletKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
@@ -31,7 +31,7 @@ export const walletCommandHandler: CommandHandler = {
   description: 'Manage your wallet',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUserAndWallet(ctx);
+    const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user?.wallets?.[0]) return;
 
     // get eth balance

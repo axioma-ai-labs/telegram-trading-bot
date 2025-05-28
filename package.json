@@ -23,7 +23,6 @@
   "author": "NeuroFoundation, LLC",
   "license": "MIT",
   "dependencies": {
-    "@covalenthq/client-sdk": "^2.2.6",
     "@grammyjs/i18n": "^1.1.2",
     "@grammyjs/ratelimiter": "^1.2.1",
     "@logtail/node": "^0.5.5",
@@ -44,7 +43,6 @@
     "libsodium-wrappers": "^0.7.15",
     "prisma-field-encryption": "^1.6.0",
     "tsconfig-paths": "^4.2.0",
-    "v1.0#gsr018bomb6hjmfw": "link:@coinstatsopenapi/v1.0#gsr018bomb6hjmfw",
     "viem": "^2.29.2",
     "web3": "^1.10.4",
     "winston": "^3.17.0",

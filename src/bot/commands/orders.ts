@@ -4,7 +4,7 @@ import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const ordersKeyboard = new InlineKeyboard()
   .text('Limit Orders', 'view_limit_orders')
@@ -27,7 +27,7 @@ export const ordersCommandHandler: CommandHandler = {
   command: 'orders',
   description: 'View your limit & DCAorders',
   handler: async (ctx: BotContext): Promise<void> => {
-    const { isValid, user } = await validateUserAndWallet(ctx);
+    const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user?.wallets?.[0]) return;
 
     const walletAddress = user.wallets[0].address;
@@ -37,6 +37,7 @@ export const ordersCommandHandler: CommandHandler = {
       address: walletAddress,
       statuses: [1, 2, 3, 4, 5, 6, 7],
     });
+
     if (!totalDcaOrders.success || !totalLimitOrders.success) {
       logger.error('Failed to get orders:', totalDcaOrders.error || totalLimitOrders.error);
       await ctx.reply(ctx.t('error_msg'));

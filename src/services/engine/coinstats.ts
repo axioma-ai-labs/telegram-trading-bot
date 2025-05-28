@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 import { config } from '@/config/config';
 import logger from '@/config/logger';
+import { CacheManager } from '@/services/cache/cacheManager';
 import { CoinStatsBalance, CoinStatsBlockchainBalance, FormattedBalance } from '@/types/coinstats';
 
 /**
@@ -10,10 +11,11 @@ import { CoinStatsBalance, CoinStatsBlockchainBalance, FormattedBalance } from '
 export class CoinStatsService {
   private static instance: CoinStatsService;
   private httpClient: AxiosInstance;
+  private cache: CacheManager;
   private readonly baseUrl = 'https://openapiv1.coinstats.app';
 
   constructor() {
-    // Initialize HTTP client with CoinStats API configuration
+    // api call to coinstats
     this.httpClient = axios.create({
       baseURL: this.baseUrl,
       timeout: 30000,
@@ -23,6 +25,9 @@ export class CoinStatsService {
         Accept: 'application/json',
       },
     });
+
+    // cache manager
+    this.cache = new CacheManager(200, 2 * 60 * 1000);
 
     // Add request interceptor for logging
     this.httpClient.interceptors.request.use(
@@ -66,6 +71,17 @@ export class CoinStatsService {
    * @returns Promise<CoinStatsBlockchainBalance[]> - Array of blockchain balances
    */
   async getWalletBalances(address: string): Promise<CoinStatsBlockchainBalance[]> {
+    // cache key
+    const cacheKey = `wallet_balances_${address}`;
+
+    // check cache first
+    const cachedData = this.cache.get<CoinStatsBlockchainBalance[]>(cacheKey);
+    if (cachedData) {
+      logger.info(`Cache hit for wallet balances: ${address}`);
+      return cachedData;
+    }
+
+    // fetch balances
     try {
       logger.info(`Fetching CoinStats balances for address: ${address}`);
 
@@ -81,8 +97,13 @@ export class CoinStatsService {
         return [];
       }
 
-      logger.info(`Successfully fetched balances for ${response.data.length} blockchains`);
-      return response.data as CoinStatsBlockchainBalance[];
+      const balances = response.data as CoinStatsBlockchainBalance[];
+
+      // Cache the result
+      this.cache.set(cacheKey, balances);
+      logger.info(`Successfully fetched and cached balances for ${balances.length} blockchains`);
+
+      return balances;
     } catch (error) {
       logger.error('Error fetching wallet balances from CoinStats:', error);
       return [];

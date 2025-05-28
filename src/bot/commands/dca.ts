@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import { getDcaOrders } from '@/bot/callbacks/handleDCA';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const dcaTokenKeyboard = new InlineKeyboard()
   .text('0.1 ETH', 'dca_amount_0.1')
@@ -41,7 +41,7 @@ export const dcaCommandHandler: CommandHandler = {
   description: 'Create a DCA order',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUserAndWallet(ctx);
+    const { isValid } = await validateUser(ctx);
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'dca' };

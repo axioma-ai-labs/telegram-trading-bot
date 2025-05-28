@@ -6,11 +6,11 @@ import { GasPriority } from '@/types/config';
 import { SellParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function sellToken(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // sell
@@ -25,7 +25,7 @@ export async function sellToken(ctx: BotContext): Promise<void> {
 
 export async function performSell(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
@@ -134,7 +134,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
 
 export async function sellConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const { currentOperation } = ctx.session;
@@ -210,7 +210,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
 export async function sellCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // reset operation

@@ -8,10 +8,10 @@ import { DcaOrderAssetData } from '@/types/openocean';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { formatInterval } from '@/utils/formatters';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function dcaToken(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // DCA
@@ -25,7 +25,7 @@ export async function dcaToken(ctx: BotContext): Promise<void> {
 }
 
 export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   const { currentOperation } = ctx.session;
@@ -61,7 +61,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
 }
 
 export async function retrieveDcaInterval(ctx: BotContext, interval: string): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   const { currentOperation } = ctx.session;
@@ -92,7 +92,7 @@ export async function retrieveDcaInterval(ctx: BotContext, interval: string): Pr
 }
 
 export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<void> {
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   const { currentOperation } = ctx.session;
@@ -137,7 +137,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
 
 export async function dcaConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   const settings = user?.settings;
@@ -219,7 +219,7 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
 
 export async function dcaCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // reset operation
@@ -230,7 +230,7 @@ export async function dcaCancel(ctx: BotContext): Promise<void> {
 
 export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   try {
@@ -316,7 +316,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
 
 export async function getDcaOrders(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
 
   // get DCA orders

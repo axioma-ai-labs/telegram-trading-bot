@@ -7,11 +7,11 @@ import { GasPriority } from '@/types/config';
 import { WithdrawParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   // Set current operation
@@ -35,7 +35,7 @@ export async function withdrawFunds(ctx: BotContext): Promise<void> {
 
 export async function performWithdraw(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
@@ -108,7 +108,7 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
 
 export async function setRecipientAddress(ctx: BotContext, address: string): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
   const { currentOperation } = ctx.session;
 
@@ -152,7 +152,7 @@ export async function setRecipientAddress(ctx: BotContext, address: string): Pro
 
 export async function withdrawConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
@@ -229,7 +229,7 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
 
 export async function withdrawCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // reset operation
