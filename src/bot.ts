@@ -38,9 +38,10 @@ import { handleDcaMessages } from '@/bot/messages/dcaMessages';
 import { handleLimitMessages } from '@/bot/messages/limitMessages';
 import { handleSellMessages } from '@/bot/messages/sellMessages';
 import { handlePkVerificationMessages } from '@/bot/messages/walletMessages';
+import { handleWithdrawMessages } from '@/bot/messages/withdrawMessages';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
-import { I18nService } from '@/services/i18n/i18n.service';
+import { I18nService } from '@/services/i18n/i18n';
 import { BotContext, SessionData } from '@/types/telegram';
 
 import {
@@ -153,6 +154,8 @@ async function initializeBot(): Promise<void> {
     buy_cancel: buyCancel,
     sell_confirm: sellConfirm,
     sell_cancel: sellCancel,
+    withdraw_confirm: withdrawConfirm,
+    withdraw_cancel: withdrawCancel,
     limit: limitToken,
     limit_confirm: confirmLimitOrder,
     limit_cancel: limitCancel,
@@ -179,6 +182,9 @@ async function initializeBot(): Promise<void> {
       },
       sell_amount: async (ctx, param) => {
         await performSell(ctx, param);
+      },
+      withdraw_amount: async (ctx, param) => {
+        await performWithdraw(ctx, param);
       },
       dca_amount: async (ctx, param) => {
         await retrieveDcaAmount(ctx, param);
@@ -288,6 +294,10 @@ async function initializeBot(): Promise<void> {
 
       case 'pk_verification':
         await handlePkVerificationMessages(ctx, userInput, currentOperation);
+        break;
+
+      case 'withdraw':
+        await handleWithdrawMessages(ctx, userInput, currentOperation);
         break;
     }
 

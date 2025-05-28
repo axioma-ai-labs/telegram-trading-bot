@@ -362,6 +362,43 @@ limit_confirm_msg =
 
     Bitte bestätigen Sie die Erstellung Ihrer Limit-Order:
 
+# buy
+buy_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie ausgeben möchten:
+
+buy_confirm_msg =
+    🔍 *Kauforder bestätigen*
+
+    Token: *{ $tokenSymbol }* | { $tokenName }
+    CA: `{ $token }`
+    Betrag: *{ $amount } ETH*
+
+    Sind Sie sicher, dass Sie mit diesem Kauf fortfahren möchten?
+
+buy_error_msg = ❌ Etwas ist beim Kaufvorgang schiefgelaufen. Bitte versuchen Sie es erneut.
+buy_success_msg =
+    🎊 *Herzlichen Glückwunsch! Ihre Kauforder für { $amount } { $tokenSymbol } wurde erfolgreich erstellt!*
+
+    Transaktionsdetails:
+    • Betrag: { $amount } { $tokenSymbol }
+    • Token: { $token }
+    • Transaktion: https://basescan.org/tx/{ $txHash }
+
+    Schauen Sie sich Ihre Transaktion auf [BaseScan](https://basescan.org/tx/{ $txHash }) an
+buy_token_found_msg =
+    ✅ *Token gefunden*
+
+    Symbol: *${ $tokenSymbol }*
+    Name: *{ $tokenName }*
+    Preis: ${ $tokenPrice }
+    Chain: { $tokenChain }
+
+    Bitte wählen Sie aus, wie viel ETH Sie für { $tokenSymbol } ausgeben möchten.
+
+    Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
+
+buy_token_msg = Geben Sie die Token-Vertragsadresse zum Kaufen ein:
+
+
 # settings
 gas_priority_updated_msg = Gas-Priorität auf { $gasPriority } gesetzt
 slippage_updated_msg = Slippage auf { $slippage } gesetzt

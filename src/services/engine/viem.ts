@@ -302,4 +302,87 @@ export class ViemService {
       return '0.000000';
     }
   }
+
+  /**
+   * Transfer native tokens (ETH/BNB/BASE) from one wallet to another
+   * @param account - Account to send transaction from
+   * @param to - Recipient address
+   * @param amount - Amount of native token to transfer in wei
+   * @param gasPrice - Optional gas price in wei
+   * @returns Transaction receipt
+   */
+  async transferNativeToken(
+    account: Account,
+    to: Address,
+    amount: string,
+    gasPrice?: string
+  ): Promise<TransactionReceipt> {
+    try {
+      const walletClient = this.createWalletClient(account);
+      const publicClient = this.createPublicClient();
+
+      // Prepare transaction parameters
+      const txParams = {
+        account,
+        chain: this.chain,
+        to,
+        value: BigInt(amount),
+        ...(gasPrice && { gasPrice: BigInt(gasPrice) }),
+      };
+
+      // Send transaction
+      const hash = await walletClient.sendTransaction(txParams);
+
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('Native token transfer failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Transfer ERC20 tokens from one wallet to another
+   * @param account - Account to send transaction from
+   * @param tokenAddress - Token address
+   * @param to - Recipient address
+   * @param amount - Amount to transfer in token's base units
+   * @param gasPrice - Optional gas price in wei
+   * @returns Transaction receipt
+   */
+  async transferERC20Token(
+    account: Account,
+    tokenAddress: Address,
+    to: Address,
+    amount: string,
+    gasPrice?: string
+  ): Promise<TransactionReceipt> {
+    try {
+      const walletClient = this.createWalletClient(account);
+      const publicClient = this.createPublicClient();
+
+      // Simulate the transfer first
+      const { request } = await publicClient.simulateContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [to, BigInt(amount)],
+        account,
+        ...(gasPrice && { gasPrice: BigInt(gasPrice) }),
+      });
+
+      // Execute the transfer
+      const hash = await walletClient.writeContract(request);
+
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('ERC20 token transfer failed:', error);
+      throw error;
+    }
+  }
 }

@@ -8,7 +8,7 @@
     "start": "TS_NODE_PROJECT=tsconfig.json TS_NODE_BASEURL=./dist node -r tsconfig-paths/register dist/bot.js",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/bot.ts",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "test": "jest",
     "test:load": "k6 run tests/rate-limit.test.js",
     "test:load:quick": "k6 run --iterations 10 tests/rate-limit.test.js",

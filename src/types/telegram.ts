@@ -63,7 +63,14 @@ export interface SessionData {
  */
 export type BotContext = Context & SessionFlavor<SessionData> & I18nFlavor;
 
-export type OperationType = 'buy' | 'sell' | 'dca' | 'limit' | 'pk_verification' | null;
+export type OperationType =
+  | 'buy'
+  | 'sell'
+  | 'dca'
+  | 'limit'
+  | 'pk_verification'
+  | 'withdraw'
+  | null;
 
 export interface OperationState {
   type: OperationType;
@@ -77,6 +84,7 @@ export interface OperationState {
   price?: number;
   expiry?: string;
   walletAddress?: string;
+  recipientAddress?: string;
 }
 
 export type MessageType = 'verification' | 'temporary' | 'confirmation';

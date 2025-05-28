@@ -9,6 +9,11 @@ import { DcaOrderAssetData, LimitOrderAssetData } from '@/types/openocean';
 // ------------------------------------------------------------
 
 /**
+ * Order status
+ */
+export type OrderStatus = 'pending' | 'executed' | 'cancelled' | 'expired';
+
+/**
  * Supported blockchain networks for OpenOcean integration
  */
 export type NeuroDexChain = 'base' | 'ethereum' | 'bsc';
@@ -72,6 +77,16 @@ export interface SellParams extends BasicTradeParams {
 }
 
 /**
+ * Parameters for withdrawing native tokens
+ */
+export interface WithdrawParams extends BasicTradeParams {
+  /** Recipient wallet address */
+  toAddress: string;
+  /** Amount of native token to withdraw (in human-readable format, e.g., 0.1) */
+  amount: number;
+}
+
+/**
  * Parameters for DCA (Dollar Cost Averaging) operations
  */
 export interface DcaParams extends BasicTradeParams {
@@ -131,6 +146,10 @@ export interface GetLimitOrdersParams {
   limit?: number;
 }
 
+// ------------------------------------------------------------
+// Responses
+// ------------------------------------------------------------
+
 /**
  * Token information
  */
@@ -175,6 +194,22 @@ export interface SwapResult {
 }
 
 /**
+ * Withdrawal result data
+ */
+export interface WithdrawResult {
+  /** Transaction hash */
+  txHash: string;
+  /** Amount withdrawn in wei */
+  amount: string;
+  /** Recipient address */
+  toAddress: string;
+  /** Sender address */
+  fromAddress: string;
+  /** Estimated gas used */
+  gasUsed: string;
+}
+
+/**
  * Response wrapper for NeuroDex API calls
  */
 export interface NeuroDexResponse<T> {
@@ -203,11 +238,6 @@ export interface TradingPair {
   /** 24h price change percentage */
   priceChange24h: number;
 }
-
-/**
- * Order status
- */
-export type OrderStatus = 'pending' | 'executed' | 'cancelled' | 'expired';
 
 /**
  * Order information
