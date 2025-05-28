@@ -5,7 +5,7 @@ import { LRUCache } from 'lru-cache';
  * Perfect for caching API responses and reducing external API calls
  */
 export class CacheManager {
-  private cache: LRUCache<string, Record<string, unknown> | string | number | boolean>;
+  private cache: LRUCache<string, string | number | boolean | object>;
 
   constructor(maxSize: number = 100, ttlMs: number = 5 * 60 * 1000) {
     this.cache = new LRUCache({
@@ -20,7 +20,7 @@ export class CacheManager {
   }
 
   // set value in cache
-  set(key: string, value: Record<string, unknown> | string | number | boolean): void {
+  set(key: string, value: string | number | boolean | object): void {
     this.cache.set(key, value);
   }
 

@@ -9,25 +9,18 @@ import { BotContext } from '@/types/telegram';
  * @param delayMs Delay in milliseconds before deletion (default: 10000ms)
  * @returns Promise that resolves when the deletion is complete or fails
  */
-export const deleteBotMessage = async (
-  ctx: BotContext,
-  messageId: number,
-  delayMs = 10000
-): Promise<boolean> => {
+export const deleteBotMessage = (ctx: BotContext, messageId: number, delayMs = 10000): void => {
   if (!ctx.chat?.id) {
     logger.error('Cannot delete message: chat ID not available');
-    return false;
+    return;
   }
 
-  return new Promise((resolve) => {
-    setTimeout(async () => {
-      try {
-        await ctx.api.deleteMessage(ctx.chat!.id, messageId);
-        resolve(true);
-      } catch (error) {
-        logger.error('Error deleting message:', error);
-        resolve(false);
-      }
-    }, delayMs);
-  });
+  // Schedule deletion without blocking
+  setTimeout(async () => {
+    try {
+      await ctx.api.deleteMessage(ctx.chat!.id, messageId);
+    } catch (error) {
+      logger.error('Error deleting message:', error);
+    }
+  }, delayMs);
 };

@@ -31,7 +31,7 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
 
   if (!currentOperation?.token) {
     const message = await ctx.reply(ctx.t('invalid_token_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -46,7 +46,7 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
   const parsedAmount = parseFloat(amount);
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
     const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -70,7 +70,7 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
   const parsedPrice = parseFloat(price);
   if (isNaN(parsedPrice) || parsedPrice <= 0) {
     const message = await ctx.reply(ctx.t('limit_invalid_price_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -151,7 +151,7 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
     !currentOperation?.expiry
   ) {
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -189,7 +189,7 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
     ctx.session.currentOperation = null;
   } else {
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     ctx.session.currentOperation = null;
   }
 }
@@ -201,7 +201,7 @@ export async function limitCancel(ctx: BotContext): Promise<void> {
 
   ctx.session.currentOperation = null;
   const message = await ctx.reply(ctx.t('limit_cancel_msg'));
-  await deleteBotMessage(ctx, message.message_id, 5000);
+  deleteBotMessage(ctx, message.message_id, 5000);
 }
 
 // cancel limit order
@@ -212,7 +212,7 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
     const message = await ctx.reply(ctx.t('no_private_key_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
@@ -229,14 +229,14 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
 
   if (!ordersResult.success || !ordersResult.data) {
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
   const orderToCancel = ordersResult.data.find((order) => order.orderHash === orderHash);
   if (!orderToCancel) {
     const message = await ctx.reply(ctx.t('limit_order_not_found_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -265,6 +265,6 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
     });
   } else {
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
   }
 }

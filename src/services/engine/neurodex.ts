@@ -314,11 +314,11 @@ export class NeuroDexApi {
       const data = (await response.json()) as {
         pairs: Array<{
           baseToken: { name: string; symbol: string; logoURI?: string };
-          priceUsd: string;
+          priceUsd: number;
           chainId: string;
         }>;
       };
-      const pair = data.pairs[0]; // get first pair. Maybe this won't work for all tokens, but no edge cases were found yet
+      const pair = data.pairs[0]; // get first pair. Maybe this won't work for all tokens (TODO: investigate)
 
       if (!pair) {
         throw new Error('No trading pairs found for token');
@@ -331,7 +331,7 @@ export class NeuroDexApi {
           name: pair.baseToken.name,
           symbol: pair.baseToken.symbol,
           decimals: 18,
-          price: Number(pair.priceUsd) || undefined,
+          price: pair.priceUsd,
           totalSupply: undefined,
           marketCap: undefined,
           logo: pair.baseToken.logoURI,

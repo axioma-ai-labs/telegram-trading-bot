@@ -22,34 +22,36 @@ export async function handleSellMessages(
 ): Promise<void> {
   if (!currentOperation.token) {
     // Handle token input
-    try {
-      const neurodex = new NeuroDexApi();
-      const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+    const neurodex = new NeuroDexApi();
+    const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
 
-      ctx.session.currentOperation = {
-        type: 'sell',
-        token: userInput,
-        tokenSymbol: tokenData.data?.symbol,
-        tokenName: tokenData.data?.name,
-        tokenChain: tokenData.data?.chain,
-      };
-
-      const message = ctx.t('sell_token_found_msg', {
-        tokenSymbol: tokenData.data?.symbol || '',
-        tokenName: tokenData.data?.name || '',
-        tokenPrice: tokenData.data?.price || 0,
-        tokenChain: tokenData.data?.chain || '',
-      });
-
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: sellTokenKeyboard,
-      });
-    } catch (error) {
-      await ctx.reply(ctx.t('token_not_found_msg'), {
+    if (!tokenData.success || !tokenData.data) {
+      const message = await ctx.reply(ctx.t('token_not_found_msg'), {
         parse_mode: 'Markdown',
       });
+      await deleteBotMessage(ctx, message.message_id, 10000);
+      return;
     }
+
+    ctx.session.currentOperation = {
+      type: 'sell',
+      token: userInput,
+      tokenSymbol: tokenData.data?.symbol,
+      tokenName: tokenData.data?.name,
+      tokenChain: tokenData.data?.chain,
+    };
+
+    const message = ctx.t('sell_token_found_msg', {
+      tokenSymbol: tokenData.data?.symbol || '',
+      tokenName: tokenData.data?.name || '',
+      tokenPrice: tokenData.data?.price || 0,
+      tokenChain: tokenData.data?.chain || '',
+    });
+
+    await ctx.reply(message, {
+      parse_mode: 'Markdown',
+      reply_markup: sellTokenKeyboard,
+    });
   } else if (!currentOperation.amount) {
     // Handle amount input
     const parsedAmount = parseFloat(userInput);

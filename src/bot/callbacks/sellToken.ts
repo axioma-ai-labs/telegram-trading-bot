@@ -31,7 +31,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
 
   if (!currentOperation?.token) {
     const message = await ctx.reply(ctx.t('invalid_token_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -54,7 +54,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
 
     if (!balancesResponse || !balancesResponse.items) {
       const message = await ctx.reply(ctx.t('error_msg'));
-      await deleteBotMessage(ctx, message.message_id, 10000);
+      deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
@@ -66,7 +66,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
 
     if (!tokenBalance || !tokenBalance.balance || tokenBalance.balance === 0n) {
       const message = await ctx.reply(ctx.t('sell_no_balance_msg'));
-      await deleteBotMessage(ctx, message.message_id, 10000);
+      deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
@@ -81,7 +81,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
       const percentage = parseInt(amount.replace('%', ''));
       if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
         const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
         return;
       }
       sellAmount = (balanceNumber * percentage) / 100;
@@ -90,7 +90,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
       sellAmount = parseFloat(amount);
       if (isNaN(sellAmount) || sellAmount <= 0) {
         const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
         return;
       }
 
@@ -102,7 +102,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
             tokenSymbol: tokenBalance.contract_ticker_symbol || 'tokens',
           })
         );
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
         return;
       }
     }
@@ -128,7 +128,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
   } catch (error) {
     logger.error('Error during sell preparation:', error);
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
   }
 }
 
@@ -141,14 +141,14 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
   if (!currentOperation?.token || !currentOperation?.amount) {
     const message = await ctx.reply(ctx.t('sell_invalid_operation_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
     const message = await ctx.reply(ctx.t('no_private_key_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
@@ -185,10 +185,10 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       const errorMessage = sellResult.error?.toLowerCase() || '';
       if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
         const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
       } else {
         const message = await ctx.reply(ctx.t('error_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
       }
       // reset
       ctx.session.currentOperation = null;
@@ -198,10 +198,10 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
     if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
       const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-      await deleteBotMessage(ctx, message.message_id, 10000);
+      deleteBotMessage(ctx, message.message_id, 10000);
     } else {
       const message = await ctx.reply(ctx.t('error_msg'));
-      await deleteBotMessage(ctx, message.message_id, 10000);
+      deleteBotMessage(ctx, message.message_id, 10000);
     }
     // reset
     ctx.session.currentOperation = null;
@@ -216,5 +216,5 @@ export async function sellCancel(ctx: BotContext): Promise<void> {
   // reset operation
   ctx.session.currentOperation = null;
   const message = await ctx.reply(ctx.t('sell_cancel_msg'));
-  await deleteBotMessage(ctx, message.message_id, 5000);
+  deleteBotMessage(ctx, message.message_id, 5000);
 }

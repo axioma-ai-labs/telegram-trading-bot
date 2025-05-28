@@ -2,7 +2,7 @@ import { startTradingKeyboard } from '@/bot/commands/start';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { BotContext, OperationState } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 /**
  * Handles private key verification messages from users.
@@ -22,11 +22,8 @@ export async function handlePkVerificationMessages(
 ): Promise<void> {
   try {
     // Validate user and get wallet
-    const { isValid, user } = await validateUserAndWallet(ctx, { skipMessages: true });
-    if (!isValid || !user?.wallets?.[0]) {
-      await ctx.reply(ctx.t('no_wallet_msg'));
-      return;
-    }
+    const { isValid, user } = await validateUser(ctx);
+    if (!isValid || !user) return;
 
     const walletAddress = user.wallets[0].address;
 
@@ -41,7 +38,7 @@ export async function handlePkVerificationMessages(
     const inputChars = userInput.trim().toLowerCase();
     if (!/^[0-9a-f]{4}$/.test(inputChars)) {
       const message = await ctx.reply(ctx.t('wallet_repeat_pk_error_msg'));
-      await deleteBotMessage(ctx, message.message_id, 3000);
+      deleteBotMessage(ctx, message.message_id, 3000);
       return;
     }
 
@@ -56,7 +53,7 @@ export async function handlePkVerificationMessages(
 
       // delete verification message
       if (ctx.session.currentMessage?.type === 'verification') {
-        await deleteBotMessage(ctx, ctx.session.currentMessage.messageId);
+        deleteBotMessage(ctx, ctx.session.currentMessage.messageId);
 
         ctx.session.currentMessage = null;
       }
@@ -71,7 +68,7 @@ export async function handlePkVerificationMessages(
     } else {
       // Failed verification - ask to try again
       const message = await ctx.reply(ctx.t('wallet_repeat_pk_error_msg'));
-      await deleteBotMessage(ctx, message.message_id, 3000);
+      deleteBotMessage(ctx, message.message_id, 3000);
     }
   } catch (error) {
     console.error('Error in private key verification:', error);

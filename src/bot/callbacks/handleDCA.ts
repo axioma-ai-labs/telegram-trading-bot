@@ -42,7 +42,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
 
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
     const message = await ctx.reply(ctx.t('invalid_amount_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -108,7 +108,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
 
   if (isNaN(parsedTimes) || parsedTimes < 1 || parsedTimes > 100) {
     const message = await ctx.reply(ctx.t('dca_invalid_times_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -151,14 +151,14 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     !currentOperation.times
   ) {
     const message = await ctx.reply(ctx.t('invalid_token_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
@@ -204,16 +204,16 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       const message = dcaOrderResult.error?.toLowerCase() || '';
       if (message.includes('insufficient funds')) {
         const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
       } else {
         const message = await ctx.reply(ctx.t('error_msg'));
-        await deleteBotMessage(ctx, message.message_id, 10000);
+        deleteBotMessage(ctx, message.message_id, 10000);
       }
     }
   } catch (error) {
     logger.error('Error creating DCA order:', error);
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
   }
 }
 
@@ -225,7 +225,7 @@ export async function dcaCancel(ctx: BotContext): Promise<void> {
   // reset operation
   ctx.session.currentOperation = null;
   const message = await ctx.reply(ctx.t('dca_cancel_msg'));
-  await deleteBotMessage(ctx, message.message_id, 5000);
+  deleteBotMessage(ctx, message.message_id, 5000);
 }
 
 export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
@@ -248,7 +248,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
 
     if (!dcaOrders.success || !dcaOrders.data || dcaOrders.data.length === 0) {
       const message = await ctx.reply(ctx.t('dca_no_orders_msg'));
-      await deleteBotMessage(ctx, message.message_id, 5000);
+      deleteBotMessage(ctx, message.message_id, 5000);
       return;
     }
 
@@ -283,7 +283,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
     const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
     if (!privateKey) {
       const message = await ctx.reply(ctx.t('error_msg'));
-      await deleteBotMessage(ctx, message.message_id, 5000);
+      deleteBotMessage(ctx, message.message_id, 5000);
       return;
     }
 
@@ -303,14 +303,14 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
 
     if (cancelResult.success) {
       const message = await ctx.reply(ctx.t('dca_cancel_msg'));
-      await deleteBotMessage(ctx, message.message_id, 5000);
+      deleteBotMessage(ctx, message.message_id, 5000);
     } else {
       throw new Error(cancelResult.error || 'Failed to cancel DCA order');
     }
   } catch (error) {
     logger.error('Error cancelling DCA order:', error);
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
   }
 }
 
@@ -331,11 +331,11 @@ export async function getDcaOrders(ctx: BotContext): Promise<void> {
 
   if (!dcaOrders.success || !dcaOrders.data || dcaOrders.data.length === 0) {
     const message = await ctx.reply(ctx.t('dca_no_orders_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
   // send DCA orders
   const message = await ctx.reply(ctx.t('dca_orders_found_msg'));
-  await deleteBotMessage(ctx, message.message_id, 5000);
+  deleteBotMessage(ctx, message.message_id, 5000);
 }

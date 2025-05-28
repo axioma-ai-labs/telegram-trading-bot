@@ -77,7 +77,7 @@ export async function validateUser(
 
     // cache the result
     if (user) {
-      userCache.set(cacheKey, user);
+      userCache.set(cacheKey, user as UserWithRelations);
     }
   }
 
@@ -169,7 +169,7 @@ export async function createNewUser(
   // update cache with full user data
   const userWithRelations = await UserService.getUserByTelegramId(telegramId);
   if (userWithRelations) {
-    userCache.set(`user_${telegramId}`, userWithRelations);
+    userCache.set(`user_${telegramId}`, userWithRelations as UserWithRelations);
     logger.info('New user created:', telegramId);
     return userWithRelations;
   }
@@ -188,6 +188,6 @@ export function updateUserCache(telegramId: string, updates: Partial<UserWithRel
   const cachedUser = userCache.get<UserWithRelations>(cacheKey);
 
   if (cachedUser) {
-    userCache.set(cacheKey, { ...cachedUser, ...updates });
+    userCache.set(cacheKey, { ...cachedUser, ...updates } as UserWithRelations);
   }
 }

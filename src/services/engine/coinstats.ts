@@ -97,7 +97,7 @@ export class CoinStatsService {
         return [];
       }
 
-      const balances = response.data as CoinStatsBlockchainBalance[];
+      const balances = response.data;
 
       // Cache the result
       this.cache.set(cacheKey, balances);
