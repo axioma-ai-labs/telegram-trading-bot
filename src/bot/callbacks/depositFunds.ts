@@ -1,6 +1,6 @@
 import { depositKeyboard } from '@/bot/commands/deposit';
-import { CoinStatsService } from '@/services/engine/coinstats.service';
-import { ViemService } from '@/services/engine/viem.service';
+import { CoinStatsService } from '@/services/engine/coinstats';
+import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
 import { validateUserAndWallet } from '@/utils/userValidation';
 

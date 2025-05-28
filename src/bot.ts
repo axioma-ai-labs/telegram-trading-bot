@@ -22,7 +22,12 @@ import { handleRefresh } from '@/bot/callbacks/refresh';
 import { handleBackNavigation } from '@/bot/callbacks/returnBack';
 import { performSell, sellCancel, sellConfirm, sellToken } from '@/bot/callbacks/sellToken';
 import { showOrders, viewDcaOrders, viewLimitOrders } from '@/bot/callbacks/viewOrders';
-import { withdrawFunds } from '@/bot/callbacks/withdrawFunds';
+import {
+  performWithdraw,
+  withdrawCancel,
+  withdrawConfirm,
+  withdrawFunds,
+} from '@/bot/callbacks/withdrawFunds';
 import { buyCommandHandler } from '@/bot/commands/buy';
 import depositCommandHandler from '@/bot/commands/deposit';
 import { helpCommandHandler } from '@/bot/commands/help';

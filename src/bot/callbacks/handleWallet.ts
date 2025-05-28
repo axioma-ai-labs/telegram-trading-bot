@@ -1,6 +1,6 @@
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
-import { CoinStatsService } from '@/services/engine/coinstats.service';
+import { CoinStatsService } from '@/services/engine/coinstats';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
 import { UserService } from '@/services/prisma/user';
