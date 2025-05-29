@@ -225,6 +225,60 @@ sell_token_found_msg =
 
 sell_token_msg = Geben Sie die Token-Vertragsadresse eines Tokens ein, den Sie verkaufen möchten:
 
+# transactions
+transactions_overview_msg =
+    💳 *Transaktionshistorie*
+    📊 *Gesamt Transaktionen:* { $totalTransactions }
+    ✅ *Erfolgreich:* { $successfulTrades }
+    ❌ *Fehlgeschlagen:* { $failedTrades }
+    🟡 *Ausstehend:* { $pendingTrades }
+    💰 *Gesamtvolumen:* { $totalVolume } ETH
+    Wählen Sie, was Sie anzeigen möchten:
+recent_transactions_header_msg = 📋 *Letzte Transaktionen (Letzte 10)*
+all_transactions_header_msg = 
+    📋 *Alle Transaktionen*
+    
+    Seite { $page } von { $totalPages } (Gesamt: { $total })
+select_transaction_type_msg = 
+    📊 *Transaktionstyp auswählen*
+    
+    Wählen Sie, welche Art von Transaktionen Sie anzeigen möchten:
+transactions_of_type_header_msg =
+    📋 *{ $type } Transaktionen*
+    
+    Seite { $page } von { $totalPages } (Gesamt: { $total })
+no_transactions_msg = 
+    📋 *Keine Transaktionen*
+    
+    Sie haben noch keine Transaktionen durchgeführt.
+    
+    Beginnen Sie mit dem Handel mit /buy, /sell, /dca oder /limit!
+no_transactions_of_type_msg = 
+    📋 *Keine { $type } Transaktionen*
+    
+    Sie haben noch keine { $type } Transaktionen durchgeführt.
+transaction_stats_header_msg = 📊 *Transaktionsstatistiken*
+transaction_stats_overview_msg = 
+    📈 *Übersicht:*
+    • Gesamt: { $totalTransactions }
+    • Erfolgreich: { $successfulTrades }
+    • Fehlgeschlagen: { $failedTrades }
+    • Ausstehend: { $pendingTrades }
+    • Volumen: { $totalVolume } ETH
+transaction_stats_by_type_msg = 📊 *Nach Typ:*
+# transaction formatting
+transaction_item_msg =
+    { $statusEmoji }{ $typeEmoji } *#{ $transactionNumber } { $type }*
+    { $details }
+    🕒 { $createdDate } { $createdTime }
+    🔗 { $txHash } | ⛓️ { $chain }
+transaction_buy_details_msg = Ausgegeben { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_sell_details_msg = Verkauft { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_dca_details_msg = DCA { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } | { $times } mal | { $expire }
+transaction_limit_details_msg = Limit { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount }) | { $expire }
+transaction_withdraw_details_msg = Abgehoben { $tokenInAmount } { $tokenInSymbol } an { $toAddress }
+transaction_unknown_details_msg = Unbekannter Transaktionstyp
+
 # orders
 orders_overview_msg =
     📋 *Orders-Übersicht*

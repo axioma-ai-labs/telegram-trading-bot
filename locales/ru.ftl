@@ -225,6 +225,60 @@ sell_token_found_msg =
 
 sell_token_msg = Введите адрес контракта токена, который вы хотите продать:
 
+# transactions
+transactions_overview_msg =
+    💳 *История транзакций*
+    📊 *Всего транзакций:* { $totalTransactions }
+    ✅ *Успешных:* { $successfulTrades }
+    ❌ *Неудачных:* { $failedTrades }
+    🟡 *Ожидающих:* { $pendingTrades }
+    💰 *Общий объем:* { $totalVolume } ETH
+    Выберите, что вы хотите просмотреть:
+recent_transactions_header_msg = 📋 *Последние транзакции (Последние 10)*
+all_transactions_header_msg = 
+    📋 *Все транзакции*
+    
+    Страница { $page } из { $totalPages } (Всего: { $total })
+select_transaction_type_msg = 
+    📊 *Выберите тип транзакции*
+    
+    Выберите, какой тип транзакций вы хотите просмотреть:
+transactions_of_type_header_msg =
+    📋 *Транзакции { $type }*
+    
+    Страница { $page } из { $totalPages } (Всего: { $total })
+no_transactions_msg = 
+    📋 *Нет транзакций*
+    
+    Вы еще не совершали никаких транзакций.
+    
+    Начните торговать с /buy, /sell, /dca или /limit!
+no_transactions_of_type_msg = 
+    📋 *Нет транзакций { $type }*
+    
+    Вы еще не совершали никаких транзакций { $type }.
+transaction_stats_header_msg = 📊 *Статистика транзакций*
+transaction_stats_overview_msg = 
+    📈 *Обзор:*
+    • Всего: { $totalTransactions }
+    • Успешных: { $successfulTrades }
+    • Неудачных: { $failedTrades }
+    • Ожидающих: { $pendingTrades }
+    • Объем: { $totalVolume } ETH
+transaction_stats_by_type_msg = 📊 *По типам:*
+# transaction formatting
+transaction_item_msg =
+    { $statusEmoji }{ $typeEmoji } *#{ $transactionNumber } { $type }*
+    { $details }
+    🕒 { $createdDate } { $createdTime }
+    🔗 { $txHash } | ⛓️ { $chain }
+transaction_buy_details_msg = Потрачено { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_sell_details_msg = Продано { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_dca_details_msg = DCA { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } | { $times } раз | { $expire }
+transaction_limit_details_msg = Лимит { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount }) | { $expire }
+transaction_withdraw_details_msg = Выведено { $tokenInAmount } { $tokenInSymbol } на { $toAddress }
+transaction_unknown_details_msg = Неизвестный тип транзакции
+
 # orders
 orders_overview_msg =
     📋 *Обзор ордеров*

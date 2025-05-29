@@ -29,7 +29,7 @@ export class WalletService {
       where: { address },
       include: {
         user: true,
-        trades: true,
+        transactions: true,
       },
     });
   }
@@ -41,7 +41,7 @@ export class WalletService {
     return prisma.wallet.findMany({
       where: { userId },
       include: {
-        trades: true,
+        transactions: true,
       },
     });
   }
@@ -56,7 +56,7 @@ export class WalletService {
         chain,
       },
       include: {
-        trades: true,
+        transactions: true,
       },
     });
   }
