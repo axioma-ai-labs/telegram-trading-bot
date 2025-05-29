@@ -140,12 +140,11 @@ export function formatTransaction(
   const createdTime = new Date(transaction.createdAt).toLocaleTimeString();
 
   // Format amounts
-  const tokenInAmount =
-    transaction.tokenInAmount?.toFixed(6) || transaction.amount?.toFixed(6) || '0';
+  const tokenInAmount = transaction.tokenInAmount?.toFixed(6) || '0';
   const tokenOutAmount = transaction.tokenOutAmount?.toFixed(6) || '0';
 
   // Format symbols
-  const tokenInSymbol = transaction.tokenInSymbol || transaction.tokenSymbol || 'TOKEN';
+  const tokenInSymbol = transaction.tokenInSymbol || 'TOKEN';
   const tokenOutSymbol = transaction.tokenOutSymbol || 'TOKEN';
 
   // Transaction hash (shortened)

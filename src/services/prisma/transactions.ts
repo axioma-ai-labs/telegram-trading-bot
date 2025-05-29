@@ -344,7 +344,7 @@ export class TransactionsService {
     return {
       totalTransactions: transactions.length,
       totalVolume: transactions.reduce((sum, transaction) => {
-        return sum + (transaction.tokenInAmount || transaction.amount || 0);
+        return sum + (transaction.tokenInAmount || 0);
       }, 0),
       successfulTrades: transactions.filter((t) => t.status === TransactionStatus.COMPLETED).length,
       failedTrades: transactions.filter((t) => t.status === TransactionStatus.FAILED).length,

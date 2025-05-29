@@ -41,6 +41,7 @@
     "grammy": "^1.36.1",
     "js-yaml": "^4.1.0",
     "libsodium-wrappers": "^0.7.15",
+    "lru-cache": "^11.1.0",
     "prisma-field-encryption": "^1.6.0",
     "tsconfig-paths": "^4.2.0",
     "viem": "^2.29.2",
