@@ -1,6 +1,9 @@
+import { TransactionStatus } from '@prisma/client/edge';
+
 import { confirmSellKeyboard } from '@/bot/commands/sell';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { SellParams } from '@/types/neurodex';
@@ -152,6 +155,26 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createSellTransaction(user.id, user.wallets[0].id, {
+      chain: 'base',
+      tokenInAddress: currentOperation.token,
+      tokenInSymbol: currentOperation.tokenSymbol || 'TOKEN',
+      tokenInAmount: currentOperation.amount,
+      tokenOutAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+      tokenOutSymbol: 'ETH',
+      status: TransactionStatus.PENDING,
+    });
+    logger.info('Created pending sell transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const params: SellParams = {
       fromTokenAddress: currentOperation.token,
@@ -169,6 +192,13 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (sellResult.success && sellResult.data?.txHash) {
+      // Update transaction with success status and txHash
+      await TransactionsService.updateTransactionStatus(
+        transaction.id,
+        TransactionStatus.COMPLETED,
+        sellResult.data.txHash
+      );
+
       const message = ctx.t('sell_success_msg', {
         amount: currentOperation.amount,
         tokenSymbol: currentOperation.tokenSymbol || 'tokens',
@@ -181,6 +211,9 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       });
       ctx.session.currentOperation = null;
     } else {
+      // Update transaction with failed status
+      await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
       // check if no balance or other errors
       const errorMessage = sellResult.error?.toLowerCase() || '';
       if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
@@ -195,6 +228,10 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     }
   } catch (error) {
     logger.error('Error during sell transaction:', error);
+
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
     if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
       const message = await ctx.reply(ctx.t('insufficient_funds_msg'));

@@ -19,11 +19,11 @@ export async function viewLimitOrders(ctx: BotContext): Promise<void> {
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();
 
-  // Fetch limit orders for all statuses
+  // Fetch active limit orders only
   const ordersResult = await neurodex.getLimitOrders(
     {
       address: walletAddress,
-      statuses: [1, 2, 3, 4, 5, 6, 7], // All possible statuses
+      statuses: [1, 3, 5], // Only active/pending statuses
       limit: 50,
     },
     'base'
@@ -69,7 +69,7 @@ export async function viewLimitOrders(ctx: BotContext): Promise<void> {
 /**
  * View DCA orders for the user.
  *
- * Fetches and displays all DCA orders for the user's wallet address.
+ * Fetches and displays active DCA orders for the user's wallet address.
  * Shows order details including token pairs, amounts, intervals, and progress.
  *
  * @param ctx - The bot context containing user session and message data
@@ -81,11 +81,11 @@ export async function viewDcaOrders(ctx: BotContext): Promise<void> {
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();
 
-  // Fetch DCA orders for all statuses
+  // Fetch active DCA orders only
   const ordersResult = await neurodex.getDcaOrders(
     {
       address: walletAddress,
-      statuses: [1, 2, 3, 4, 5, 6, 7], // All possible statuses
+      statuses: [1, 5], // Only active/pending statuses
       limit: 50,
     },
     'base'
@@ -135,11 +135,14 @@ export async function showOrders(ctx: BotContext): Promise<void> {
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();
 
-  // Fetch both DCA and limit orders
-  const totalDcaOrders = await neurodex.getDcaOrders({ address: walletAddress });
+  // Fetch active orders only
+  const totalDcaOrders = await neurodex.getDcaOrders({
+    address: walletAddress,
+    statuses: [1, 5], // Only active/pending statuses
+  });
   const totalLimitOrders = await neurodex.getLimitOrders({
     address: walletAddress,
-    statuses: [1, 2, 3, 4, 5, 6, 7],
+    statuses: [1, 3, 5], // Only active/pending statuses
   });
 
   if (!totalDcaOrders.success || !totalLimitOrders.success) {

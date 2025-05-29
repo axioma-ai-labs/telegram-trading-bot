@@ -1,6 +1,9 @@
+import { TransactionStatus } from '@prisma/client/edge';
+
 import { confirmDcaKeyboard, intervalKeyboard, timesKeyboard } from '@/bot/commands/dca';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { DcaParams } from '@/types/neurodex';
@@ -162,6 +165,28 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createDcaTransaction(user.id, user.wallets[0].id, {
+      chain: 'base',
+      tokenInAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+      tokenInSymbol: 'ETH',
+      tokenInAmount: currentOperation.amount,
+      tokenOutAddress: currentOperation.token,
+      tokenOutSymbol: currentOperation.tokenSymbol || 'TOKEN',
+      times: currentOperation.times,
+      expire: '1D', // Default expiration of 1 day
+      status: TransactionStatus.PENDING,
+    });
+    logger.info('Created pending DCA transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const neurodex = new NeuroDexApi();
     const wallet = user.wallets[0];
@@ -184,6 +209,12 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
 
     // success
     if (dcaOrderResult.success && dcaOrderResult.data) {
+      // Update transaction with success status
+      await TransactionsService.updateTransactionStatus(
+        transaction.id,
+        TransactionStatus.COMPLETED
+      );
+
       // reset
       ctx.session.currentOperation = null;
 
@@ -200,6 +231,9 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
         parse_mode: 'Markdown',
       });
     } else {
+      // Update transaction with failed status
+      await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
       // check if no mooooooooney
       const message = dcaOrderResult.error?.toLowerCase() || '';
       if (message.includes('insufficient funds')) {
@@ -212,6 +246,10 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
     }
   } catch (error) {
     logger.error('Error creating DCA order:', error);
+
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 5000);
   }
@@ -302,6 +340,17 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
     );
 
     if (cancelResult.success) {
+      // Update transaction status to canceled
+      const transaction = await TransactionsService.getTransactionByOrderHash(
+        orderToCancel.orderHash
+      );
+      if (transaction) {
+        await TransactionsService.updateTransactionStatus(
+          transaction.id,
+          TransactionStatus.CANCELED
+        );
+      }
+
       const message = await ctx.reply(ctx.t('dca_cancel_msg'));
       await deleteBotMessage(ctx, message.message_id, 5000);
     } else {

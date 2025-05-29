@@ -1,7 +1,9 @@
+import { TransactionStatus } from '@prisma/client/edge';
 import { InlineKeyboard } from 'grammy';
 
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { LimitOrderParams } from '@/types/neurodex';
@@ -158,6 +160,32 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   // Calculate the amount of WETH to receive based on price
   const toAmount = currentOperation.amount * currentOperation.price;
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createLimitOrderTransaction(
+      user.id,
+      user.wallets[0].id,
+      {
+        chain: 'base',
+        tokenInAddress: currentOperation.token, // Token to sell
+        tokenInSymbol: currentOperation.tokenSymbol || 'TOKEN',
+        tokenInAmount: currentOperation.amount,
+        tokenOutAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+        tokenOutSymbol: 'ETH',
+        tokenOutAmount: toAmount,
+        expire: currentOperation.expiry,
+        status: TransactionStatus.PENDING,
+      }
+    );
+    logger.info('Created pending limit order transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 10000);
+    return;
+  }
+
   const params: LimitOrderParams = {
     fromTokenAddress: currentOperation.token, // Token to sell
     toTokenAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
@@ -176,6 +204,9 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   logger.info('LIMIT ORDER RESULT:', result);
 
   if (result.success) {
+    // Update transaction with success status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.COMPLETED);
+
     const message = ctx.t('limit_order_created_msg', {
       tokenSymbol: currentOperation?.tokenSymbol || '',
       amount: currentOperation.amount,
@@ -188,6 +219,9 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
     });
     ctx.session.currentOperation = null;
   } else {
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     const message = await ctx.reply(ctx.t('error_msg'));
     await deleteBotMessage(ctx, message.message_id, 10000);
     ctx.session.currentOperation = null;
@@ -255,6 +289,12 @@ export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Prom
   );
 
   if (result.success) {
+    // Update transaction status to canceled
+    const transaction = await TransactionsService.getTransactionByOrderHash(orderHash);
+    if (transaction) {
+      await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.CANCELED);
+    }
+
     const message = ctx.t('limit_order_cancel_success_msg', {
       makerSymbol: orderToCancel.data.makerAssetSymbol,
       takerSymbol: orderToCancel.data.takerAssetSymbol,

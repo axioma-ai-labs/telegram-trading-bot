@@ -4,7 +4,7 @@ import { ordersKeyboard } from '@/bot/commands/orders';
 import { referralKeyboard } from '@/bot/commands/referrals';
 import { settingsKeyboard } from '@/bot/commands/settings';
 import { startKeyboard } from '@/bot/commands/start';
-import { transactionsKeyboard, transactionsMessage } from '@/bot/commands/transactions';
+import { transactionsKeyboard } from '@/bot/commands/transactions';
 import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { CoinStatsService } from '@/services/engine/coinstats';
@@ -106,7 +106,9 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
     keyboard: walletKeyboard,
   },
   back_transactions: {
-    message: transactionsMessage,
+    message: async (ctx: BotContext) => {
+      return ctx.t('transactions_msg');
+    },
     keyboard: transactionsKeyboard,
   },
 };

@@ -1,6 +1,9 @@
+import { TransactionStatus } from '@prisma/client/edge';
+
 import { confirmBuyKeyboard } from '@/bot/commands/buy';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { BuyParams } from '@/types/neurodex';
@@ -89,6 +92,26 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createBuyTransaction(user.id, user.wallets[0].id, {
+      chain: 'base',
+      tokenInAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+      tokenInSymbol: 'ETH',
+      tokenInAmount: currentOperation.amount,
+      tokenOutAddress: currentOperation.token,
+      tokenOutSymbol: currentOperation.tokenSymbol || 'TOKEN',
+      status: TransactionStatus.PENDING,
+    });
+    logger.info('Created pending buy transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('buy_error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const params: BuyParams = {
       toTokenAddress: currentOperation.token,
@@ -106,6 +129,13 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (buyResult.success && buyResult.data?.txHash) {
+      // Update transaction with success status and txHash
+      await TransactionsService.updateTransactionStatus(
+        transaction.id,
+        TransactionStatus.COMPLETED,
+        buyResult.data.txHash
+      );
+
       const message = ctx.t('buy_success_msg', {
         amount: currentOperation.amount,
         token: currentOperation.token,
@@ -116,6 +146,9 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
       });
       ctx.session.currentOperation = null;
     } else {
+      // Update transaction with failed status
+      await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
       // check if no mooooooooney
       const message = buyResult.error?.toLowerCase() || '';
       if (message.includes('insufficient funds')) {
@@ -130,6 +163,10 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     }
   } catch (error) {
     logger.error('Error during buy transaction:', error);
+
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     const message = error instanceof Error ? error.message.toLowerCase() : '';
     if (message.includes('insufficient funds')) {
       const message = await ctx.reply(ctx.t('insufficient_funds_msg'));

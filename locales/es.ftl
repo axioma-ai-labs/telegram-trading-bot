@@ -232,7 +232,79 @@ orders_overview_msg =
     🔹 *Total Órdenes DCA:* { $totalDcaOrders }
     🔹 *Total Órdenes Límite:* { $totalLimitOrders }
 
-    Para obtener más detalles sobre tus órdenes límite y DCA, haz clic en los botones de abajo:
+    Para obtener más detalles sobre tus órdenes límite y DCA activas, haz clic en los botones de abajo:
+
+# transactions
+transactions_overview_msg =
+    💳 *Historial de Transacciones*
+
+    📊 *Total Transacciones:* { $totalTransactions }
+    ✅ *Exitosas:* { $successfulTrades }
+    ❌ *Fallidas:* { $failedTrades }
+    🟡 *Pendientes:* { $pendingTrades }
+    💰 *Volumen Total:* { $totalVolume } ETH
+
+    Selecciona lo que te gustaría ver:
+
+recent_transactions_header_msg = 📋 *Transacciones Recientes (Últimas 10)*
+
+all_transactions_header_msg = 
+    📋 *Todas las Transacciones*
+    
+    Página { $page } de { $totalPages } (Total: { $total })
+
+select_transaction_type_msg = 
+    📊 *Seleccionar Tipo de Transacción*
+    
+    Elige qué tipo de transacciones te gustaría ver:
+
+transactions_of_type_header_msg =
+    📋 *Transacciones { $type }*
+    
+    Página { $page } de { $totalPages } (Total: { $total })
+
+no_transactions_msg = 
+    📋 *Sin Transacciones*
+    
+    Aún no has realizado ninguna transacción.
+    
+    ¡Comienza a operar con /buy, /sell, /dca o /limit!
+
+no_transactions_of_type_msg = 
+    📋 *Sin Transacciones { $type }*
+    
+    Aún no has realizado ninguna transacción { $type }.
+
+transaction_stats_header_msg = 📊 *Estadísticas de Transacciones*
+
+transaction_stats_overview_msg = 
+    📈 *Resumen:*
+    • Total: { $totalTransactions }
+    • Exitosas: { $successfulTrades }
+    • Fallidas: { $failedTrades }
+    • Pendientes: { $pendingTrades }
+    • Volumen: { $totalVolume } ETH
+
+transaction_stats_by_type_msg = 📊 *Por Tipo:*
+
+# transaction formatting
+transaction_item_msg =
+    { $statusEmoji }{ $typeEmoji } *#{ $transactionNumber } { $type }*
+    { $details }
+    🕒 { $createdDate } { $createdTime }
+    🔗 { $txHash } | ⛓️ { $chain }
+
+transaction_buy_details_msg = Gastado { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+
+transaction_sell_details_msg = Vendido { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+
+transaction_dca_details_msg = DCA { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } | { $times } veces | { $expire }
+
+transaction_limit_details_msg = Límite { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount }) | { $expire }
+
+transaction_withdraw_details_msg = Retirado { $tokenInAmount } { $tokenInSymbol } a { $toAddress }
+
+transaction_unknown_details_msg = Tipo de transacción desconocido
 
 # Order message
 limit_orders_header_msg =
