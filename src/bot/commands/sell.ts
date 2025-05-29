@@ -1,6 +1,8 @@
 import { InlineKeyboard } from 'grammy';
 
 import logger from '@/config/logger';
+import { CoinStatsService } from '@/services/engine/coinstats';
+import { ViemService } from '@/services/engine/viem';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUser } from '@/utils/userValidation';
@@ -23,15 +25,35 @@ export const sellCommandHandler: CommandHandler = {
   description: 'Sell a token',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUser(ctx);
-    if (!isValid) return;
+    const { isValid, user } = await validateUser(ctx);
+    if (!isValid || !user?.wallets?.[0]) return;
 
     ctx.session.currentOperation = { type: 'sell' };
 
-    logger.info('Sell token message:', ctx.t('sell_token_msg'));
+    // Get wallet data
+    const walletAddress = user.wallets[0].address as `0x${string}`;
 
-    await ctx.reply(ctx.t('sell_token_msg'), {
-      parse_mode: 'Markdown',
-    });
+    // Get ETH balance
+    const viemService = new ViemService();
+    const ethBalance = (await viemService.getNativeBalance(walletAddress)) || '0.000';
+
+    // Get formatted sell balances
+    const coinStatsService = CoinStatsService.getInstance();
+    const formattedSellBalances = await coinStatsService.getFormattedSellBalances(
+      walletAddress,
+      'base'
+    );
+
+    logger.info('Sell token message with balances for user:', user.telegramId);
+
+    await ctx.reply(
+      ctx.t('sell_token_msg', {
+        ethBalance,
+        formattedSellBalances,
+      }),
+      {
+        parse_mode: 'Markdown',
+      }
+    );
   },
 };

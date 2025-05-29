@@ -22,7 +22,7 @@ import {
 } from '@/types/openocean';
 
 /**
- * OpenOcean API client for interacting with OpenOcean DEX aggregator via QuickNode
+ * OpenOcean API client for interacting with OpenOcean DEX aggregator
  * Supports Base, Ethereum and BNB chains
  *
  * Includes endpoints:

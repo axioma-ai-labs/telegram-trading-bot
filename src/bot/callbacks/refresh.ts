@@ -3,16 +3,17 @@ import { walletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
 import { CoinStatsService } from '@/services/engine/coinstats';
 import { ViemService } from '@/services/engine/viem';
-import { UserService } from '@/services/prisma/user';
 import { BotContext } from '@/types/telegram';
+import { validateUser } from '@/utils/userValidation';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
+  // validate user
+  const { isValid, user } = await validateUser(ctx, { forceRefresh: true });
+  if (!isValid || !user?.wallets?.[0]) return;
+
   const callbackData = ctx.callbackQuery?.data;
   const telegramId = ctx.from?.id?.toString();
   if (!callbackData || !telegramId) return;
-
-  const user = await UserService.getUserByTelegramId(telegramId);
-  if (!user?.wallets?.length) return;
 
   const walletAddress = user.wallets[0].address;
   const viemService = new ViemService();

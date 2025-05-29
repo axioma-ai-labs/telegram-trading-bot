@@ -204,9 +204,9 @@ export class CoinStatsService {
   private formatAmount(amount: number, _decimals?: number): string {
     if (amount === 0) return '0';
 
-    // For very small amounts, show more decimal places
+    // For very small amounts, show up to 8 decimal places
     if (amount < 0.001) {
-      return amount.toExponential(2);
+      return amount.toFixed(8).replace(/\.?0+$/, '');
     }
 
     // For amounts less than 1, show up to 6 decimal places
@@ -334,5 +334,56 @@ export class CoinStatsService {
     }
 
     return `${tokenDisplay} │ ${amount} │ ${usdValue} │ ${changePercent} ${changeEmoji}`;
+  }
+
+  /**
+   * Get formatted sell balances with copyable contract addresses
+   *
+   * @param address - The wallet address
+   * @param blockchain - The blockchain to filter by (default: 'base')
+   * @param minBalance - Minimum balance threshold in USD (default: 0.1)
+   * @returns Promise<string> - Formatted balances for sell operations
+   */
+  async getFormattedSellBalances(
+    address: string,
+    blockchain: string = 'base',
+    minBalance: number = 0.1
+  ): Promise<string> {
+    try {
+      const allBalances = await this.getWalletBalances(address);
+      const blockchainData = allBalances.find((b) => b.blockchain === blockchain);
+
+      if (!blockchainData || blockchainData.balances.length === 0) {
+        return 'No tokens found in wallet';
+      }
+
+      const relevantBalances = blockchainData.balances
+        .filter((balance) => balance.amount * balance.price >= minBalance)
+        .sort((a, b) => b.amount * b.price - a.amount * a.price);
+
+      if (relevantBalances.length === 0) {
+        return 'No tokens with sufficient balance found';
+      }
+
+      return relevantBalances.map((balance) => this.formatSellBalance(balance)).join('\n');
+    } catch (error) {
+      logger.error('Error getting formatted sell balances:', error);
+      return 'Unable to fetch token balances';
+    }
+  }
+
+  /**
+   * Format individual token balance for sell operations
+   *
+   * @param balance - Token balance data
+   * @returns string - Formatted sell balance string
+   */
+  private formatSellBalance(balance: CoinStatsBalance): string {
+    const symbol = `$${balance.symbol}`;
+    const amount = this.formatAmount(balance.amount, balance.decimals);
+    const usdValue = this.formatUsdValue(balance.amount * balance.price);
+    const contractAddress = balance.contractAddress ? `\`${balance.contractAddress}\`` : 'N/A';
+
+    return `${symbol} │ ${amount} │ ${usdValue} │ ${contractAddress}`;
   }
 }

@@ -186,54 +186,110 @@ withdraw_msg =
     - Abhebungen werden normalerweise innerhalb von Minuten bestätigt
     - Teilen Sie niemals Ihren Private Key mit jemandem
 
+withdraw_select_amount_msg =
+    📤 *ETH abheben*
+
+    Ihr Guthaben: { $ethBalance } ETH
+
+    Bitte wählen Sie aus, wie viel ETH Sie abheben möchten:
+
+    Wichtig:
+    - Überprüfen Sie die Empfängeradresse doppelt
+    - Abhebungen werden normalerweise innerhalb von Minuten bestätigt
+    - Teilen Sie niemals Ihren Private Key mit jemandem
+
+withdraw_custom_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie abheben möchten:
+withdraw_recipient_address_msg = Bitte geben Sie die Empfänger-Wallet-Adresse ein (0x...):
+withdraw_insufficient_balance_msg = ⚠️ Unzureichendes Guthaben. Sie haben nur { $balance } ETH, möchten aber { $amount } ETH abheben.
+withdraw_invalid_operation_msg = ⚠️ Ungültiger Abhebungsvorgang. Bitte versuchen Sie es erneut.
+withdraw_error_msg = ❌ Etwas ist während der Abhebung schiefgelaufen. Bitte versuchen Sie es erneut.
+withdraw_cancel_msg = ⭕ Die Abhebung wurde storniert.
+invalid_address_msg = ⚠️ Ungültiges Adressformat. Bitte geben Sie eine gültige Ethereum-Adresse ein, die mit 0x beginnt.
+invalid_input_msg = ⚠️ Ungültige Eingabe. Bitte versuchen Sie es erneut.
+
+withdraw_confirm_msg =
+    🔍 *Abhebung bestätigen*
+
+    Betrag: *{ $amount } ETH*
+    An Adresse: `{ $recipientAddress }`
+
+    Sind Sie sicher, dass Sie mit dieser Abhebung fortfahren möchten?
+
+withdraw_success_msg =
+    🎊 *Abhebung erfolgreich!*
+
+    • *Betrag:* { $amount } ETH
+    • *Von:* { $walletAddress }
+    • *An Adresse:* `{ $recipientAddress }`
+
+    Ihre Abhebung wurde an das Netzwerk übermittelt und sollte innerhalb von Minuten bestätigt werden.
+
+    Überprüfen Sie Ihre Transaktion auf [BaseScan](https://basescan.org/tx/{ $txHash })
+
 # sell
 sell_cancel_msg = ⭕ Verkaufsorder wurde erfolgreich storniert!
 
 sell_confirm_msg =
-    🔍 *Verkaufsorder bestätigen*
+    🎯 *Verkaufsorder bestätigen*
 
-    Token: *{ $tokenSymbol }* | { $tokenName }
-    CA: `{ $tokenAddress }`
-    Betrag: *{ $amount } { $tokenSymbol }*
+    📊 **Details:**
+    • *Symbol:* **${ $tokenSymbol }** | { $tokenName }
+    • *Vertrag:* `{ $tokenAddress }`
 
-    Sind Sie sicher, dass Sie mit diesem Verkauf fortfahren möchten?
+    💰 **Transaktionsübersicht:**
+    • *Verkauf:* **{ $amount } { $tokenSymbol }** (≈ { $usdValue })
+
+    Wichtig: Diese Aktion kann nicht rückgängig gemacht werden. Bitte überprüfen Sie sorgfältig.
+
+    Möchten Sie mit diesem Verkauf fortfahren?
 
 sell_custom_amount_msg = Bitte geben Sie die Anzahl der Token ein, die Sie verkaufen möchten:
-sell_error_msg = ❌ Etwas ist während des Verkaufsvorgangs schiefgelaufen. Bitte versuchen Sie es erneut.
+sell_error_msg = ❌ Etwas ist beim Verkaufsvorgang schiefgelaufen. Bitte versuchen Sie es erneut.
 sell_insufficient_balance_msg = ⚠️ Unzureichendes Guthaben. Sie haben nur { $balance } { $tokenSymbol }.
 sell_invalid_operation_msg = ⚠️ Ungültiger Verkaufsvorgang. Bitte versuchen Sie es erneut.
 sell_no_balance_msg = ⚠️ Sie haben kein Guthaben dieses Tokens zum Verkaufen.
 sell_success_msg =
-    🎊 *Herzlichen Glückwunsch! Ihre Verkaufsorder für { $amount } { $tokenSymbol } wurde erfolgreich erstellt!*
+    🎊 *Verkaufsorder erfolgreich!*
 
     Transaktionsdetails:
-    • Betrag: { $amount } { $tokenSymbol }
-    • Token: { $token }
-    • Transaktion: https://basescan.org/tx/{ $txHash }
+    • Token: *{ $tokenSymbol }*
+    • Verkauft: *{ $amount } { $tokenSymbol }*
+    • Vertrag: `{ $token }`
+    
+    Ansehen auf [BaseScan](https://basescan.org/tx/{ $txHash })
+
+    Benötigen Sie Hilfe? Verwenden Sie /help, um häufige Probleme und Lösungen zu sehen.
 
 sell_token_found_msg = 
-    ✅ *Token gefunden*
+    ✅ *${ $tokenSymbol }* | *{ $tokenName }* auf *{ $tokenChain }*
 
-    Symbol: *{ $tokenSymbol }*
-    Name: *{ $tokenName }*
-    Preis: *{ $tokenPrice }*
-    Chain: { $tokenChain }
+    Guthaben: *{ $balance } { $tokenSymbol }*
 
-    Bitte wählen Sie aus, wie viel { $tokenSymbol } Sie verkaufen möchten.
+    Preis: *${ $tokenPrice }*
+
+    Wählen Sie aus, wie viel *${ $tokenSymbol }* Sie verkaufen möchten.
 
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
-sell_token_msg = Geben Sie die Token-Vertragsadresse eines Tokens ein, den Sie verkaufen möchten:
+sell_token_msg = 
+    💵 *Token verkaufen*
+
+    🔹 *ETH-Guthaben:* { $ethBalance } ETH
+
+    🔹 *Token-Guthaben:*
+    { $formattedSellBalances }
+
+    Geben Sie die Vertragsadresse eines Tokens ein, den Sie verkaufen möchten:
 
 # transactions
 transactions_overview_msg =
     💳 *Transaktionshistorie*
-    📊 *Gesamt Transaktionen:* { $totalTransactions }
+    📊 *Gesamte Transaktionen:* { $totalTransactions }
     ✅ *Erfolgreich:* { $successfulTrades }
     ❌ *Fehlgeschlagen:* { $failedTrades }
     🟡 *Ausstehend:* { $pendingTrades }
     💰 *Gesamtvolumen:* { $totalVolume } ETH
-    Wählen Sie, was Sie anzeigen möchten:
+    Wählen Sie aus, was Sie anzeigen möchten:
 recent_transactions_header_msg = 📋 *Letzte Transaktionen (Letzte 10)*
 all_transactions_header_msg = 
     📋 *Alle Transaktionen*
@@ -252,7 +308,7 @@ no_transactions_msg =
     
     Sie haben noch keine Transaktionen durchgeführt.
     
-    Beginnen Sie mit dem Handel mit /buy, /sell, /dca oder /limit!
+    Beginnen Sie den Handel mit /buy, /sell, /dca oder /limit!
 no_transactions_of_type_msg = 
     📋 *Keine { $type } Transaktionen*
     
@@ -418,6 +474,7 @@ limit_confirm_msg =
 
 # buy
 buy_amount_msg = Bitte geben Sie den ETH-Betrag ein, den Sie ausgeben möchten:
+buy_cancel_msg = ⭕ Kauforder wurde erfolgreich storniert!
 
 buy_confirm_msg =
     🔍 *Kauforder bestätigen*

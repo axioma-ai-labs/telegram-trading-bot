@@ -14,6 +14,18 @@ export const limitAmountKeyboard = new InlineKeyboard()
   .row()
   .text('Custom', 'limit_amount_custom');
 
+export const limitConfirmKeyboard = new InlineKeyboard()
+  .text('✅ Confirm', 'limit_confirm')
+  .text('❌ Cancel', 'limit_cancel');
+
+export const limitExpiryKeyboard = new InlineKeyboard()
+  .text('1 Hour', 'limit_expiry_1H')
+  .text('1 Day', 'limit_expiry_1D')
+  .text('1 Week', 'limit_expiry_7D')
+  .row()
+  .text('1 Month', 'limit_expiry_30D')
+  .text('Custom', 'limit_expiry_custom');
+
 // limit command handler
 export const limitCommandHandler: CommandHandler = {
   command: 'limit',

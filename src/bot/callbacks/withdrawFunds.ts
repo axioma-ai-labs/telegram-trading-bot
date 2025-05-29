@@ -98,15 +98,23 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
     amount: parsedAmount,
   };
 
-  const confirmMessage = ctx.t('withdraw_confirm_msg', {
-    amount: parsedAmount,
-    recipientAddress: currentOperation.recipientAddress,
-  });
+  const confirmMessage = await ctx.reply(
+    ctx.t('withdraw_confirm_msg', {
+      amount: parsedAmount,
+      recipientAddress: currentOperation.recipientAddress,
+    }),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: confirmWithdrawKeyboard,
+    }
+  );
 
-  await ctx.reply(confirmMessage, {
-    parse_mode: 'Markdown',
-    reply_markup: confirmWithdrawKeyboard,
-  });
+  // set current message for deletion
+  ctx.session.currentMessage = {
+    messageId: confirmMessage.message_id,
+    chatId: confirmMessage.chat.id,
+    type: 'confirmation',
+  };
 }
 
 export async function setRecipientAddress(ctx: BotContext, address: string): Promise<void> {
@@ -136,15 +144,22 @@ export async function setRecipientAddress(ctx: BotContext, address: string): Pro
 
   // If amount is already set, show confirmation
   if (currentOperation.amount) {
-    const confirmMessage = ctx.t('withdraw_confirm_msg', {
+    const message = ctx.t('withdraw_confirm_msg', {
       amount: currentOperation.amount,
       recipientAddress: address,
     });
 
-    await ctx.reply(confirmMessage, {
+    const confirmMessage = await ctx.reply(message, {
       parse_mode: 'Markdown',
       reply_markup: confirmWithdrawKeyboard,
     });
+
+    // set current message for deletion
+    ctx.session.currentMessage = {
+      messageId: confirmMessage.message_id,
+      chatId: confirmMessage.chat.id,
+      type: 'confirmation',
+    };
   } else {
     // Ask for amount
     await ctx.reply(ctx.t('withdraw_custom_amount_msg'), {
@@ -191,7 +206,7 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
   } catch (error) {
     logger.error('Error creating transaction record:', error);
     const message = await ctx.reply(ctx.t('withdraw_error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
@@ -212,6 +227,14 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (withdrawResult.success && withdrawResult.data?.txHash) {
+      // Delete confirmation message
+      if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+        await ctx.api.deleteMessage(
+          ctx.session.currentMessage.chatId,
+          ctx.session.currentMessage.messageId
+        );
+      }
+
       // Update transaction with success status and txHash
       await TransactionsService.updateTransactionStatus(
         transaction.id,
@@ -220,14 +243,19 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
       );
 
       const successMessage = ctx.t('withdraw_success_msg', {
+        walletAddress: user.wallets[0].address,
         amount: currentOperation.amount,
         recipientAddress: currentOperation.recipientAddress,
         txHash: withdrawResult.data.txHash,
       });
+
       await ctx.reply(successMessage, {
         parse_mode: 'Markdown',
       });
+
+      // Reset session state
       ctx.session.currentOperation = null;
+      ctx.session.currentMessage = null;
     } else {
       // Update transaction with failed status
       await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
@@ -263,6 +291,14 @@ export async function withdrawCancel(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid } = await validateUser(ctx);
   if (!isValid) return;
+
+  // Delete confirmation message
+  if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+    await ctx.api.deleteMessage(
+      ctx.session.currentMessage.chatId,
+      ctx.session.currentMessage.messageId
+    );
+  }
 
   // reset operation
   ctx.session.currentOperation = null;

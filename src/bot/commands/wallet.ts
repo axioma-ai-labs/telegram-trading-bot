@@ -1,5 +1,6 @@
 import { InlineKeyboard } from 'grammy';
 
+import { CoinStatsService } from '@/services/engine/coinstats';
 import { ViemService } from '@/services/engine/viem';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
@@ -34,20 +35,36 @@ export const walletCommandHandler: CommandHandler = {
     const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user?.wallets?.[0]) return;
 
-    // get eth balance
     const viemService = new ViemService();
-    const walletAddress = user.wallets[0].address as `0x${string}`;
-    const ethBalance = await viemService.getNativeBalance(walletAddress);
-    const balance = ethBalance || '0.000';
+    const coinStatsService = CoinStatsService.getInstance();
 
-    const message = ctx.t('wallet_msg', {
-      walletAddress,
-      ethBalance: balance,
-    });
+    // check if user already has a wallet
+    if (user.wallets && user.wallets.length > 0) {
+      const walletAddress = user.wallets[0].address as `0x${string}`;
 
-    await ctx.reply(message, {
-      parse_mode: 'Markdown',
-      reply_markup: walletKeyboard,
-    });
+      // Get ETH and token holdings
+      const [balance, walletHoldings] = await Promise.all([
+        viemService.getNativeBalance(walletAddress),
+        coinStatsService.getWalletTokenHoldings(walletAddress, 'base', 0.1),
+      ]);
+
+      const ethBalance = balance || '0.000';
+
+      const message = ctx.t('wallet_msg', {
+        walletAddress: user.wallets[0].address,
+        totalPortfolioValue: walletHoldings.totalPortfolioValue.toFixed(2),
+        ethBalance,
+        formattedBalances: walletHoldings.formattedBalances,
+      });
+
+      await ctx.reply(message, {
+        parse_mode: 'Markdown',
+        reply_markup: walletKeyboard,
+        link_preview_options: {
+          is_disabled: true,
+        },
+      });
+      return;
+    }
   },
 };
