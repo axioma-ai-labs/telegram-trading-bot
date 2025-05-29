@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import logger from '@/config/logger';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const helpKeyboard = new InlineKeyboard()
   .url('📞 Contact us', 'https://t.me/neurodex_support')
@@ -15,7 +15,7 @@ export const helpCommandHandler: CommandHandler = {
   description: 'Get help',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUserAndWallet(ctx);
+    const { isValid } = await validateUser(ctx);
     if (!isValid) return;
 
     const message = ctx.t('help_msg');

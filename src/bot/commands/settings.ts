@@ -4,7 +4,7 @@ import logger from '@/config/logger';
 import { SettingsService } from '@/services/prisma/settings';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const settingsKeyboard = new InlineKeyboard()
   .text('📊 Slippage', 'set_slippage')
@@ -45,7 +45,7 @@ export const settingsCommandHandler: CommandHandler = {
   description: 'Configure bot settings',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUserAndWallet(ctx);
+    const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user) return;
 
     // If user has no settings, create default settings

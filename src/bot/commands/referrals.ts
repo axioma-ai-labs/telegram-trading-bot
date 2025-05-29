@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import { ReferralService } from '@/services/prisma/referrals';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const referralKeyboard = new InlineKeyboard()
   .text('📊 Referral Stats', 'get_referral_stats')
@@ -17,7 +17,7 @@ export const referralCommandHandler: CommandHandler = {
   description: 'Get your referral link',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUserAndWallet(ctx);
+    const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user) return;
 
     const referralLink = user.referralCode || '';

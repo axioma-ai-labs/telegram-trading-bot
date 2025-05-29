@@ -457,3 +457,39 @@ referral_stats_msg =
     ¡Sigue difundiendo la palabra y mira crecer tus ganancias! 🚀
 
 referral_success_notification_msg = 🥳 *¡Felicitaciones!* ¡Acabas de referir un nuevo usuario a Neurodex! ¡Estás creciendo con nosotros (y también tus recompensas)!
+
+
+# buy
+buy_amount_msg = Por favor ingresa la cantidad de ETH que deseas gastar:
+buy_confirm_msg =
+    🔍 *Confirmar Orden de Compra*
+
+    Token: *{ $tokenSymbol }* | { $tokenName }
+    CA: `{ $token }`
+    Cantidad: *{ $amount } ETH*
+
+    ¿Estás seguro que deseas proceder con esta compra?
+
+buy_error_msg = ❌ Algo salió mal durante la operación de compra. Por favor intenta de nuevo.
+buy_success_msg =
+    🎊 *¡Felicitaciones! Tu orden de compra por { $amount } { $tokenSymbol } ha sido creada exitosamente!*
+
+    Detalles de la transacción:
+    • Cantidad: { $amount } { $tokenSymbol }
+    • Token: { $token }
+    • Transacción: https://basescan.org/tx/{ $txHash }
+
+    Revisa tu transacción en [BaseScan](https://basescan.org/tx/{ $txHash })
+buy_token_found_msg =
+    ✅ *Token Encontrado*
+
+    Símbolo: *${ $tokenSymbol }*
+    Nombre: *{ $tokenName }*
+    Precio: ${ $tokenPrice }
+    Cadena: { $tokenChain }
+
+    Por favor selecciona cuánto ETH deseas gastar en { $tokenSymbol }.
+
+    Ve a /settings para ajustar el slippage y gas si la transacción falla.
+
+buy_token_msg = Ingresa la dirección del contrato del token a comprar:

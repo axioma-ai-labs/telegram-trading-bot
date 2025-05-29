@@ -3,7 +3,7 @@ import { InlineKeyboard } from 'grammy';
 import { ViemService } from '@/services/engine/viem';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const withdrawAmountKeyboard = new InlineKeyboard()
   .text('0.001 ETH', 'withdraw_amount_0.001')
@@ -28,7 +28,7 @@ export const withdrawCommandHandler: CommandHandler = {
   description: 'Withdraw tokens',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUserAndWallet(ctx);
+    const { isValid, user } = await validateUser(ctx);
     if (!isValid || !user) return;
 
     // Set current operation

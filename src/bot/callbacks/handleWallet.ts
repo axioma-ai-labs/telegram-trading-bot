@@ -3,12 +3,11 @@ import logger from '@/config/logger';
 import { CoinStatsService } from '@/services/engine/coinstats';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
-import { UserService } from '@/services/prisma/user';
 import { WalletService } from '@/services/prisma/wallet';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { invalidateUserCache } from '@/utils/userValidation';
+import { invalidateUserCache, validateUser } from '@/utils/userValidation';
 
 import { startKeyboard } from '../commands/start';
 
@@ -17,14 +16,23 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
     const telegramId = ctx.from?.id?.toString();
     if (!telegramId) return;
 
-    const user = await UserService.getUserByTelegramId(telegramId);
-    if (!user) return;
+    // validate user
+    const { user } = await validateUser(ctx, {
+      skipMessages: true,
+      allowStale: true,
+    });
+
+    // re-validation if user is not found
+    if (!user) {
+      await validateUser(ctx);
+      return;
+    }
 
     const neurodex = new NeuroDexApi();
     const viemService = new ViemService();
     const coinStatsService = CoinStatsService.getInstance();
 
-    // Check if user already has a wallet
+    // check if user already has a wallet
     if (user.wallets && user.wallets.length > 0) {
       const walletAddress = user.wallets[0].address as `0x${string}`;
 
@@ -76,10 +84,10 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       return;
     }
 
-    // Invalidate user cache since wallet was added
-    invalidateUserCache(ctx);
+    // invalidate user cache since wallet was added
+    invalidateUserCache(telegramId);
 
-    // Show private key and ask for verification
+    // show private key and ask for verification
     const message = await ctx.editMessageText(
       ctx.t('wallet_success_msg', {
         walletAddress: wallet.address,
@@ -90,25 +98,23 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
       }
     );
 
-    // Delete the private key message after 5 minutes for security
+    // delete the private key message after 5 minutes for security
     if (typeof message === 'object' && 'message_id' in message) {
-      deleteBotMessage(ctx, message.message_id, 300000).catch((error) => {
-        logger.error('Error in scheduled message deletion:', error);
-      });
+      deleteBotMessage(ctx, message.message_id, 300000);
     }
 
-    // Set up private key verification operation
+    // set up private key verification operation
     ctx.session.currentOperation = {
       type: 'pk_verification',
       walletAddress: wallet.address,
     };
 
-    // Ask user to verify private key
+    // ask user to verify private key
     const verificationMessage = await ctx.reply(ctx.t('wallet_repeat_pk_msg'), {
       parse_mode: 'Markdown',
     });
 
-    // Store verification message for later deletion
+    // store verification message for later deletion
     ctx.session.currentMessage = {
       messageId: verificationMessage.message_id,
       chatId: ctx.chat?.id || 0,

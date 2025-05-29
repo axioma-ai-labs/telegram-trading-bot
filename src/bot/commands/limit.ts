@@ -2,7 +2,7 @@ import { InlineKeyboard } from 'grammy';
 
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export const limitAmountKeyboard = new InlineKeyboard()
   .text('1', 'limit_amount_1')
@@ -20,7 +20,7 @@ export const limitCommandHandler: CommandHandler = {
   description: 'Create a limit order',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUserAndWallet(ctx);
+    const { isValid } = await validateUser(ctx);
     if (!isValid) return;
 
     ctx.session.currentOperation = { type: 'limit' };

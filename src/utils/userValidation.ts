@@ -4,6 +4,7 @@ import { bot } from '@/bot';
 import { acceptTermsConditionsKeyboard } from '@/bot/commands/start';
 import { createWalletKeyboard } from '@/bot/commands/wallet';
 import logger from '@/config/logger';
+import { CacheManager } from '@/services/cache/cacheManager';
 import { ReferralService } from '@/services/prisma/referrals';
 import { SettingsService } from '@/services/prisma/settings';
 import { UserService } from '@/services/prisma/user';
@@ -15,90 +16,17 @@ type UserWithRelations = User & {
   referralStats: ReferralStats | null;
 };
 
-interface CachedUser extends UserWithRelations {
-  cachedAt: number;
-}
-
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-// Check if cache is valid
-function isCacheValid(cachedUser: CachedUser | undefined): boolean {
-  return !!(cachedUser?.cachedAt && Date.now() - cachedUser.cachedAt < CACHE_TTL);
-}
-
-// Get user from cache or DB
-async function getUserData(
-  ctx: BotContext,
-  telegramId: string,
-  forceRefresh = false
-): Promise<UserWithRelations | null> {
-  if (!forceRefresh && ctx.session.user && isCacheValid(ctx.session.user as CachedUser)) {
-    return ctx.session.user as UserWithRelations;
-  }
-
-  const user = await UserService.getUserByTelegramId(telegramId);
-
-  if (user) {
-    ctx.session.user = { ...user, cachedAt: Date.now() };
-    return user;
-  }
-
-  ctx.session.user = undefined;
-  return null;
-}
-
-// Cache utilities
-export function invalidateUserCache(ctx: BotContext): void {
-  ctx.session.user = undefined;
-}
-
-export function updateUserCache(ctx: BotContext, updates: Partial<UserWithRelations>): void {
-  if (ctx.session.user) {
-    ctx.session.user = { ...ctx.session.user, ...updates, cachedAt: Date.now() };
-  }
-}
-
-export function getCachedUser(ctx: BotContext): UserWithRelations | null {
-  return ctx.session.user && isCacheValid(ctx.session.user) ? ctx.session.user : null;
-}
-
-export function refreshUserCache(ctx: BotContext): Promise<UserWithRelations | null> {
-  return ctx.from?.id ? getUserData(ctx, ctx.from.id.toString(), true) : Promise.resolve(null);
-}
-
-// Lightweight cache-only validation
-export function isUserValidCached(ctx: BotContext): boolean {
-  const cachedUser = getCachedUser(ctx);
-  return !!(cachedUser && cachedUser.termsAccepted && cachedUser.wallets?.length > 0);
-}
-
-// Get user with cache preference
-export async function getValidatedUser(
-  ctx: BotContext,
-  allowStale = false
-): Promise<UserWithRelations | null> {
-  if (!allowStale) {
-    const { isValid, user } = await validateUserAndWallet(ctx);
-    return isValid ? user : null;
-  }
-
-  const cachedUser = getCachedUser(ctx);
-  if (cachedUser && cachedUser.termsAccepted && cachedUser.wallets?.length > 0) {
-    return cachedUser;
-  }
-
-  const { isValid, user } = await validateUserAndWallet(ctx);
-  return isValid ? user : null;
-}
+// global cache instance for user data
+const userCache = new CacheManager(500, 5 * 60 * 1000); // 500 users, 5min TTL
 
 /**
- * Validates if a user is registered and has a wallet.
+ * Validates user and returns user data with caching support
  *
  * @param ctx - The bot context containing user information
- * @param options - Optional validation options
- * @returns An object containing validation results and user data
+ * @param options - Validation options
+ * @returns Validation result with user data
  */
-export async function validateUserAndWallet(
+export async function validateUser(
   ctx: BotContext,
   options: {
     allowStale?: boolean;
@@ -123,28 +51,34 @@ export async function validateUserAndWallet(
   }
 
   const telegramId = ctx.from.id.toString();
+  const cacheKey = `user_${telegramId}`;
 
-  // Cache-only mode - no DB calls, no messages
+  // cache-only mode - no DB calls, no messages
   if (cacheOnly) {
-    const cachedUser = getCachedUser(ctx);
+    const cachedUser = userCache.get<UserWithRelations>(cacheKey);
     const isValid = !!(cachedUser && cachedUser.termsAccepted && cachedUser.wallets?.length > 0);
     return { isValid, user: isValid ? cachedUser : null };
   }
 
-  // Get user data with smart caching
-  let user: UserWithRelations | null;
+  // get user data with smart caching
+  let user: UserWithRelations | null = null;
 
-  if (allowStale) {
-    // Try cache first for non-critical operations
-    const cachedUser = getCachedUser(ctx);
+  if (allowStale && !forceRefresh) {
+    // try cache first for non-critical operations
+    const cachedUser = userCache.get<UserWithRelations>(cacheKey);
     if (cachedUser && cachedUser.termsAccepted && cachedUser.wallets?.length > 0) {
       user = cachedUser;
-    } else {
-      user = await getUserData(ctx, telegramId, forceRefresh);
     }
-  } else {
-    // Standard behavior with caching
-    user = await getUserData(ctx, telegramId, forceRefresh);
+  }
+
+  // fetch from database if not in cache or force refresh
+  if (!user || forceRefresh) {
+    user = await UserService.getUserByTelegramId(telegramId);
+
+    // cache the result
+    if (user) {
+      userCache.set(cacheKey, user as UserWithRelations);
+    }
   }
 
   // check registered
@@ -186,7 +120,7 @@ export async function validateUserAndWallet(
 }
 
 /**
- * Creates a new user with optional referral linking and default settings.
+ * Creates a new user with optional referral linking and default settings
  *
  * @param ctx - The bot context containing user information
  * @param telegramId - The user's Telegram ID
@@ -200,7 +134,7 @@ export async function createNewUser(
   referralLink: string,
   referrer?: User
 ): Promise<UserWithRelations> {
-  // Create new user
+  // create new user
   const user = await UserService.upsertUser(telegramId, {
     username: ctx.from?.username,
     firstName: ctx.from?.first_name,
@@ -208,7 +142,7 @@ export async function createNewUser(
     referralCode: referralLink,
   });
 
-  // Link referral if referrer exists
+  // link referral if referrer exists
   if (referrer) {
     await ReferralService.linkReferral(user.id, referrer.id);
     logger.info('Referrer:', referrer.id, 'has successfully referred:', user.id);
@@ -223,7 +157,7 @@ export async function createNewUser(
     });
   }
 
-  // Create default settings
+  // create default settings
   await SettingsService.upsertSettings(user.id, {
     language: 'en',
     autoTrade: false,
@@ -232,14 +166,28 @@ export async function createNewUser(
     slippage: '0.5',
   });
 
-  // Update cache with full user data
+  // update cache with full user data
   const userWithRelations = await UserService.getUserByTelegramId(telegramId);
   if (userWithRelations) {
-    ctx.session.user = { ...userWithRelations, cachedAt: Date.now() };
+    userCache.set(`user_${telegramId}`, userWithRelations as UserWithRelations);
     logger.info('New user created:', telegramId);
     return userWithRelations;
   }
 
   logger.info('New user created:', telegramId);
   return user as UserWithRelations;
+}
+
+// cache utilities
+export function invalidateUserCache(telegramId: string): void {
+  userCache.delete(`user_${telegramId}`);
+}
+
+export function updateUserCache(telegramId: string, updates: Partial<UserWithRelations>): void {
+  const cacheKey = `user_${telegramId}`;
+  const cachedUser = userCache.get<UserWithRelations>(cacheKey);
+
+  if (cachedUser) {
+    userCache.set(cacheKey, { ...cachedUser, ...updates } as UserWithRelations);
+  }
 }

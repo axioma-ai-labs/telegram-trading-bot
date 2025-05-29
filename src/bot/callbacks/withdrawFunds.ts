@@ -7,11 +7,11 @@ import { GasPriority } from '@/types/config';
 import { WithdrawParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   // Set current operation
@@ -35,13 +35,13 @@ export async function withdrawFunds(ctx: BotContext): Promise<void> {
 
 export async function performWithdraw(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
   if (!currentOperation || currentOperation.type !== 'withdraw') {
     const invalidOpMessage = await ctx.reply(ctx.t('withdraw_invalid_operation_msg'));
-    await deleteBotMessage(ctx, invalidOpMessage.message_id, 10000);
+    deleteBotMessage(ctx, invalidOpMessage.message_id, 10000);
     return;
   }
 
@@ -56,7 +56,7 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
   const parsedAmount = parseFloat(amount);
   if (isNaN(parsedAmount) || parsedAmount <= 0) {
     const invalidAmountMessage = await ctx.reply(ctx.t('invalid_amount_msg'));
-    await deleteBotMessage(ctx, invalidAmountMessage.message_id, 10000);
+    deleteBotMessage(ctx, invalidAmountMessage.message_id, 10000);
     return;
   }
 
@@ -72,7 +72,7 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
         amount: parsedAmount,
       })
     );
-    await deleteBotMessage(ctx, insufficientBalanceMessage.message_id, 10000);
+    deleteBotMessage(ctx, insufficientBalanceMessage.message_id, 10000);
     return;
   }
 
@@ -108,20 +108,20 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
 
 export async function setRecipientAddress(ctx: BotContext, address: string): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
   const { currentOperation } = ctx.session;
 
   if (!currentOperation || currentOperation.type !== 'withdraw') {
     const invalidOpMessage = await ctx.reply(ctx.t('withdraw_invalid_operation_msg'));
-    await deleteBotMessage(ctx, invalidOpMessage.message_id, 10000);
+    deleteBotMessage(ctx, invalidOpMessage.message_id, 10000);
     return;
   }
 
   // Basic address validation (starts with 0x and has correct length)
   if (!address.startsWith('0x') || address.length !== 42) {
     const invalidAddressMessage = await ctx.reply(ctx.t('invalid_address_msg'));
-    await deleteBotMessage(ctx, invalidAddressMessage.message_id, 10000);
+    deleteBotMessage(ctx, invalidAddressMessage.message_id, 10000);
     return;
   }
 
@@ -152,7 +152,7 @@ export async function setRecipientAddress(ctx: BotContext, address: string): Pro
 
 export async function withdrawConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user?.wallets?.[0]) return;
   const { currentOperation } = ctx.session;
 
@@ -162,14 +162,14 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
     currentOperation.type !== 'withdraw'
   ) {
     const invalidOpMessage = await ctx.reply(ctx.t('withdraw_invalid_operation_msg'));
-    await deleteBotMessage(ctx, invalidOpMessage.message_id, 5000);
+    deleteBotMessage(ctx, invalidOpMessage.message_id, 5000);
     return;
   }
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
     const noPrivateKeyMessage = await ctx.reply(ctx.t('no_private_key_msg'));
-    await deleteBotMessage(ctx, noPrivateKeyMessage.message_id, 5000);
+    deleteBotMessage(ctx, noPrivateKeyMessage.message_id, 5000);
     return;
   }
 
@@ -204,10 +204,7 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
       const errorMessage = withdrawResult.error?.toLowerCase() || '';
       if (errorMessage.includes('insufficient funds') || errorMessage.includes('balance')) {
         const insufficientFundsMessage = await ctx.reply(ctx.t('insufficient_funds_msg'));
-        await deleteBotMessage(ctx, insufficientFundsMessage.message_id, 10000);
-      } else {
-        const withdrawErrorMessage = await ctx.reply(ctx.t('withdraw_error_msg'));
-        await deleteBotMessage(ctx, withdrawErrorMessage.message_id, 10000);
+        deleteBotMessage(ctx, insufficientFundsMessage.message_id, 10000);
       }
       // reset
       ctx.session.currentOperation = null;
@@ -217,10 +214,10 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
     if (errorMessage.includes('insufficient funds') || errorMessage.includes('balance')) {
       const insufficientFundsMessage = await ctx.reply(ctx.t('insufficient_funds_msg'));
-      await deleteBotMessage(ctx, insufficientFundsMessage.message_id, 10000);
+      deleteBotMessage(ctx, insufficientFundsMessage.message_id, 10000);
     } else {
       const withdrawErrorMessage = await ctx.reply(ctx.t('withdraw_error_msg'));
-      await deleteBotMessage(ctx, withdrawErrorMessage.message_id, 10000);
+      deleteBotMessage(ctx, withdrawErrorMessage.message_id, 10000);
     }
     // reset
     ctx.session.currentOperation = null;
@@ -229,11 +226,11 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
 
 export async function withdrawCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // reset operation
   ctx.session.currentOperation = null;
   const cancelMessage = await ctx.reply(ctx.t('withdraw_cancel_msg'));
-  await deleteBotMessage(ctx, cancelMessage.message_id, 5000);
+  deleteBotMessage(ctx, cancelMessage.message_id, 5000);
 }

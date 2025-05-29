@@ -146,10 +146,10 @@ dca_times_msg = Please select the number of times for your DCA order:
 dca_token_found_msg =
     ✅ *Token Found*
 
-    Symbol: *{ $tokenSymbol }*
+    Symbol: *${ $tokenSymbol }*
     Name: *{ $tokenName }*
-    Price: *{ $tokenPrice }*
-    Chain: { $tokenChain }
+    Price: *${ $tokenPrice }*
+    Chain: *{ $tokenChain }*
 
     Please select how much ETH you want to spend on { $tokenSymbol } for your DCA order.
 
@@ -243,10 +243,10 @@ sell_success_msg =
 sell_token_found_msg = 
     ✅ *Token Found*
 
-    Symbol: *{ $tokenSymbol }*
+    Symbol: *${ $tokenSymbol }*
     Name: *{ $tokenName }*
-    Price: *{ $tokenPrice }*
-    Chain: { $tokenChain }
+    Price: *${ $tokenPrice }*
+    Chain: *{ $tokenChain }*
 
     Please select how much { $tokenSymbol } you want to sell.
 
@@ -351,10 +351,10 @@ limit_no_orders_msg =
 limit_token_found_msg =
     ✅ *Token Found*
 
-    Symbol: *{ $tokenSymbol }*
+    Symbol: *${ $tokenSymbol }*
     Name: *{ $tokenName }*
-    Price: *{ $tokenPrice }*
-    Chain: { $tokenChain }
+    Price: *${ $tokenPrice }*
+    Chain: *{ $tokenChain }*
 
     Please select how many { $tokenSymbol } you want to buy in your limit order.
 
@@ -486,3 +486,40 @@ referral_stats_msg =
     Keep spreading the word and watch your earnings grow! 🚀
 
 referral_success_notification_msg = 🥳 *Congratulations!* You just referred a new user to Neurodex! You're growing with us (and so are your rewards)!
+
+
+
+# buy
+buy_amount_msg = Please enter the amount of ETH you want to spend:
+buy_confirm_msg =
+    🔍 *Confirm Buy Order*
+
+    Token: *{ $tokenSymbol }* | { $tokenName }
+    CA: `{ $token }`
+    Amount: *{ $amount } ETH*
+
+    Are you sure you want to proceed with this purchase?
+
+buy_error_msg = ❌ Something went wrong during the buy operation. Please try again.
+buy_success_msg =
+    🎊 *Congratulations! Your buy order for { $amount } { $tokenSymbol } has been created successfully!*
+
+    Transaction details:
+    • Amount: { $amount } { $tokenSymbol }
+    • Token: { $token }
+    • Transaction: https://basescan.org/tx/{ $txHash }
+
+    Check out your transaction on [BaseScan](https://basescan.org/tx/{ $txHash })
+buy_token_found_msg =
+    ✅ *Token Found*
+
+    Symbol: *${ $tokenSymbol }*
+    Name: *{ $tokenName }*
+    Price: ${ $tokenPrice }
+    Chain: { $tokenChain }
+
+    Please select how much ETH you want to spend on { $tokenSymbol }.
+
+    Go to /settings to adjust slippage and gas if the transaction fails.
+
+buy_token_msg = Enter token contract address to buy:

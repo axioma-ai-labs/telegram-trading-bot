@@ -2,11 +2,11 @@ import { depositKeyboard } from '@/bot/commands/deposit';
 import { CoinStatsService } from '@/services/engine/coinstats';
 import { ViemService } from '@/services/engine/viem';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function depositFunds(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUserAndWallet(ctx);
+  const { isValid, user } = await validateUser(ctx);
   if (!isValid || !user) return;
 
   const viemService = new ViemService();

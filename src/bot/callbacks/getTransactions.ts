@@ -6,11 +6,11 @@ import {
 } from '@/bot/commands/transactions';
 import logger from '@/config/logger';
 import { BotContext } from '@/types/telegram';
-import { validateUserAndWallet } from '@/utils/userValidation';
+import { validateUser } from '@/utils/userValidation';
 
 export async function viewTransactions(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUserAndWallet(ctx);
+  const { isValid } = await validateUser(ctx);
   if (!isValid) return;
 
   // TODO: Fetch actual transactions from database
