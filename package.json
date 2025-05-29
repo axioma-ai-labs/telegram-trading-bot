@@ -12,7 +12,9 @@
     "test": "jest",
     "test:load": "k6 run tests/rate-limit.test.js",
     "test:load:quick": "k6 run --iterations 10 tests/rate-limit.test.js",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch"
   },
   "keywords": [
     "telegram",
@@ -65,6 +67,7 @@
     "prisma": "^6.8.2",
     "ts-node-dev": "^2.0.0",
     "ts-prune": "^0.10.3",
+    "typedoc": "^0.28.5",
     "typescript": "5.5.3"
   }
 }

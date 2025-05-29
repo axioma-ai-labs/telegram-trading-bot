@@ -1,3 +1,6 @@
+/**
+ * @category Bot
+ */
 import { InlineKeyboard } from 'grammy';
 
 import { ViemService } from '@/services/engine/viem';
@@ -5,6 +8,10 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { validateUser } from '@/utils/userValidation';
 
+/**
+ * Wallet management keyboard providing access to trading functions and wallet operations.
+ * Includes quick access to buy/sell functions and wallet refresh capabilities.
+ */
 export const walletKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
   .text('Sell', 'sell')
@@ -14,6 +21,10 @@ export const walletKeyboard = new InlineKeyboard()
   .text('← Back', 'back_start')
   .text('↺ Refresh', 'refresh_wallet');
 
+/**
+ * Message displayed to users who haven't created a wallet yet.
+ * Explains the need for wallet creation and provides setup guidance.
+ */
 export const createWalletMessage = `
 *💸 Neurodex*
 
@@ -24,8 +35,31 @@ To be able to /buy, /sell or do any other actions, you have to create a wallet f
 For any help setting up please refer to [this guide](https://docs.neurodex.xyz/getting-started/setup) or get /help.
 `;
 
+/**
+ * Keyboard for initiating wallet creation process.
+ */
 export const createWalletKeyboard = new InlineKeyboard().text('💵 Create Wallet', 'create_wallet');
 
+/**
+ * Wallet command handler for displaying wallet information and management options.
+ *
+ * Shows the user's wallet address, native token balance, and provides access to
+ * wallet-related functions like trading, transactions, and balance refresh.
+ *
+ * Validates user authentication and wallet existence before displaying information.
+ * Retrieves real-time balance from the blockchain using Viem service.
+ *
+ * @example
+ * User types: /wallet
+ * Bot displays:
+ * - Wallet address (truncated for privacy)
+ * - Current ETH/native token balance
+ * - Action buttons for Buy, Sell, Transactions
+ * - Refresh and Back navigation options
+ *
+ * @throws Will redirect to wallet creation if user has no wallet
+ * @throws Will redirect to user validation if user is not authenticated
+ */
 export const walletCommandHandler: CommandHandler = {
   command: 'wallet',
   description: 'Manage your wallet',

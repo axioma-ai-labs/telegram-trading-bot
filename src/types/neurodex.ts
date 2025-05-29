@@ -1,3 +1,6 @@
+/**
+ * @category Core
+ */
 import { Chain } from 'viem';
 import { base, bsc, mainnet } from 'viem/chains';
 
@@ -9,17 +12,41 @@ import { DcaOrderAssetData, LimitOrderAssetData } from '@/types/openocean';
 // ------------------------------------------------------------
 
 /**
- * Order status
+ * Possible states for trading orders in the system.
+ *
+ * @example
+ * ```typescript
+ * const orderStatus: OrderStatus = 'pending';
+ * if (orderStatus === 'executed') {
+ *   console.log('Order completed successfully');
+ * }
+ * ```
  */
 export type OrderStatus = 'pending' | 'executed' | 'cancelled' | 'expired';
 
 /**
- * Supported blockchain networks for OpenOcean integration
+ * Supported blockchain networks for NeuroDex trading operations.
+ *
+ * Each network corresponds to a specific blockchain with its own
+ * token ecosystem and DEX infrastructure.
+ *
+ * @example
+ * ```typescript
+ * const chain: NeuroDexChain = 'base';
+ * const neuroDex = new NeuroDexApi(chain);
+ * ```
  */
 export type NeuroDexChain = 'base' | 'ethereum' | 'bsc';
 
 /**
- * Mapping of NeuroDexChain to OpenOcean chain IDs
+ * Mapping of NeuroDexChain identifiers to their corresponding OpenOcean chain IDs.
+ *
+ * Used for API calls to OpenOcean DEX aggregator service.
+ *
+ * @example
+ * ```typescript
+ * const chainId = NeuroDexChainToOpenOceanChain['base']; // 8453
+ * ```
  */
 export const NeuroDexChainToOpenOceanChain: Record<NeuroDexChain, number> = {
   base: 8453,
@@ -28,7 +55,15 @@ export const NeuroDexChainToOpenOceanChain: Record<NeuroDexChain, number> = {
 };
 
 /**
- * Mapping of NeuroDexChain to Viem chain
+ * Mapping of NeuroDexChain identifiers to Viem chain configuration objects.
+ *
+ * Used for blockchain interactions through the Viem library.
+ *
+ * @example
+ * ```typescript
+ * const viemChain = NeuroDexChainToViemChain['base']; // base chain config
+ * const viemService = new ViemService(viemChain);
+ * ```
  */
 export const NeuroDexChainToViemChain: Record<NeuroDexChain, Chain> = {
   base: base,
@@ -41,38 +76,82 @@ export const NeuroDexChainToViemChain: Record<NeuroDexChain, Chain> = {
 // ------------------------------------------------------------
 
 /**
- * Basic trading parameters for trading operations
+ * Base parameters required for all trading operations.
+ *
+ * Provides common configuration needed for executing trades including
+ * slippage tolerance, gas settings, wallet authentication, and referral tracking.
+ *
+ * @example
+ * ```typescript
+ * const basicParams: BasicTradeParams = {
+ *   slippage: 1,                    // 1% slippage tolerance
+ *   gasPriority: 'standard',        // Gas price preference
+ *   walletAddress: '0x742d35...',   // User's wallet
+ *   privateKey: '0x1234...',        // For signing transactions
+ *   referrer: '0x8159...'          // Optional referral address
+ * };
+ * ```
  */
 export interface BasicTradeParams {
-  /** Slippage tolerance in percentage */
+  /** Slippage tolerance in percentage (e.g., 1 for 1%) */
   slippage: number;
-  /** Gas priority level */
+  /** Gas priority level affecting transaction speed and cost */
   gasPriority: GasPriority;
-  /** User's wallet address */
+  /** User's wallet address for the transaction */
   walletAddress: string;
-  /** User's private key */
+  /** User's private key for transaction signing */
   privateKey: string;
-  /** Referral code */
+  /** Optional referrer address for fee sharing */
   referrer?: string;
 }
 
 /**
- * Buy parameters
+ * Parameters for buying tokens using native currency.
+ *
+ * Extends BasicTradeParams with buy-specific configuration.
+ * Uses the network's native token (ETH, BNB) as the input currency.
+ *
+ * @example
+ * ```typescript
+ * const buyParams: BuyParams = {
+ *   toTokenAddress: '0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e',  // USDC
+ *   fromAmount: 0.1,                    // 0.1 ETH
+ *   slippage: 1,
+ *   gasPriority: 'standard',
+ *   walletAddress: '0x742d35...',
+ *   privateKey: '0x1234...'
+ * };
+ * ```
  */
 export interface BuyParams extends BasicTradeParams {
-  /** Token address to buy */
+  /** Contract address of the token to purchase */
   toTokenAddress: string;
-  /** Amount of Native Token to spend */
+  /** Amount of native token to spend (in human-readable format) */
   fromAmount: number;
 }
 
 /**
- * Sell parameters
+ * Parameters for selling tokens to receive native currency.
+ *
+ * Extends BasicTradeParams with sell-specific configuration.
+ * Converts the specified token back to the network's native currency.
+ *
+ * @example
+ * ```typescript
+ * const sellParams: SellParams = {
+ *   fromTokenAddress: '0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e',  // USDC
+ *   fromAmount: 1000,                   // 1000 USDC
+ *   slippage: 1,
+ *   gasPriority: 'fast',
+ *   walletAddress: '0x742d35...',
+ *   privateKey: '0x1234...'
+ * };
+ * ```
  */
 export interface SellParams extends BasicTradeParams {
-  /** Token address to sell */
+  /** Contract address of the token to sell */
   fromTokenAddress: string;
-  /** Amount to get in Native Token */
+  /** Amount of token to sell (in human-readable format) */
   fromAmount: number;
 }
 

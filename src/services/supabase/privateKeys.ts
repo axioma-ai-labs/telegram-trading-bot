@@ -1,11 +1,36 @@
+/**
+ * @category Services
+ */
 import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { supabaseService } from '@/services/supabase/client';
 import { EncryptionService } from '@/utils/encryption';
 
 /**
- * Service for securely storing and retrieving private keys
- * Uses Supabase for storage and Argon2id + XChaCha20-Poly1305 for encryption
+ * Secure private key storage service using Supabase with encryption.
+ *
+ * Provides encrypted storage and retrieval of blockchain private keys using:
+ * - Supabase as the secure backend storage
+ * - AES encryption for data protection
+ * - Wallet address indexing for quick lookup
+ * - Error handling and validation
+ *
+ * Private keys are never stored in plain text and are always encrypted
+ * before being saved to the database.
+ *
+ * @example
+ * ```typescript
+ * // Store a private key securely
+ * const success = await PrivateStorageService.storePrivateKey(
+ *   '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c',
+ *   '0x1234567890abcdef...'
+ * );
+ *
+ * // Retrieve a private key
+ * const privateKey = await PrivateStorageService.getPrivateKey(
+ *   '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c'
+ * );
+ * ```
  */
 export class PrivateStorageService {
   private static readonly TABLE_NAME = 'private_keys';

@@ -34,8 +34,37 @@ import {
 import { erc20Abi } from '@/utils/abis';
 
 /**
- * NeuroDex API service for handling trading operations
- * Wraps OpenOcean functionality and provides high-level trading methods
+ * @category Core
+ *
+ * NeuroDex API service for handling trading operations across multiple blockchain networks.
+ *
+ * This service provides a unified interface for trading operations including:
+ * - Token swaps (buy/sell)
+ * - Limit orders
+ * - Dollar Cost Averaging (DCA) orders
+ * - Wallet management
+ * - Token withdrawals
+ *
+ * Supports Base, Ethereum, and BSC networks through OpenOcean DEX aggregation.
+ *
+ * @example
+ * ```typescript
+ * // Initialize NeuroDex API for Base network
+ * const neuroDex = new NeuroDexApi('base');
+ *
+ * // Create a new wallet
+ * const wallet = await neuroDex.createWallet();
+ *
+ * // Buy tokens
+ * const buyResult = await neuroDex.buy({
+ *   toTokenAddress: '0x123...',
+ *   fromAmount: 0.1,
+ *   slippage: 1,
+ *   gasPriority: 'standard',
+ *   walletAddress: wallet.address,
+ *   privateKey: wallet.privateKey
+ * });
+ * ```
  */
 export class NeuroDexApi {
   private readonly openOceanClient: OpenOceanClient;
@@ -47,6 +76,21 @@ export class NeuroDexApi {
   };
   private readonly chain: NeuroDexChain;
 
+  /**
+   * Creates a new NeuroDex API instance
+   *
+   * @param chain - Target blockchain network (default: 'base')
+   * @param rpcUrl - RPC URL for blockchain interaction (default: Base mainnet RPC)
+   *
+   * @example
+   * ```typescript
+   * // Default Base network
+   * const neuroDex = new NeuroDexApi();
+   *
+   * // Ethereum network with custom RPC
+   * const neuroDexEth = new NeuroDexApi('ethereum', 'https://eth-mainnet.alchemyapi.io/...');
+   * ```
+   */
   constructor(chain: NeuroDexChain = 'base', rpcUrl: string = config.node.baseMainnetRpc) {
     this.chain = chain;
     this.openOceanClient = new OpenOceanClient(chain);
@@ -56,9 +100,17 @@ export class NeuroDexApi {
 
   /**
    * Get token decimals for a given token address
-   * @param tokenAddress - Token address to get decimals for
-   * @param chain - Chain name
-   * @returns Number of decimals for the token
+   *
+   * @param tokenAddress - Token contract address
+   * @param chain - Blockchain network (must match instance chain)
+   * @returns Promise resolving to number of decimals for the token
+   * @throws Error if chain mismatch or unable to fetch token info
+   *
+   * @example
+   * ```typescript
+   * const decimals = await neuroDex.getTokenDecimals('0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e', 'base');
+   * console.log(decimals); // 18
+   * ```
    */
   private async getTokenDecimals(
     tokenAddress: string,
@@ -85,16 +137,27 @@ export class NeuroDexApi {
   }
 
   /**
-   * Get amount of token with decimals for a given amount in user-friendly format.
-   * Converts a human-readable amount (e.g., 1.5 ETH) to the token's base units (wei)
-   * by accounting for token's decimals.
+   * Convert human-readable token amounts to token base units with proper decimals.
    *
-   * @param amount - Human-readable amount without decimals (e.g., 1.5)
-   * @param tokenAddress - Token address to get decimals for
-   * @param chain - Chain name
-   * @returns Amount in token base units with appropriate decimals
-   *          (e.g., 1.5 ETH -> 1500000000000000000)
-   *          (e.g., 1.5 USDC -> 1500000)
+   * Converts a human-readable amount (e.g., 1.5 ETH) to the token's base units (wei)
+   * by accounting for the token's decimal places.
+   *
+   * @param amount - Human-readable amount (e.g., 1.5 for 1.5 tokens)
+   * @param tokenAddress - Token contract address to get decimals for
+   * @param chain - Blockchain network (must match instance chain)
+   * @returns Promise resolving to amount in token base units as string
+   * @throws Error if chain mismatch or unable to fetch token info
+   *
+   * @example
+   * ```typescript
+   * // Convert 1.5 ETH to wei
+   * const ethAmount = await neuroDex.getTokenAmount(1.5, '0x0000...', 'base');
+   * console.log(ethAmount); // "1500000000000000000"
+   *
+   * // Convert 1.5 USDC to base units (6 decimals)
+   * const usdcAmount = await neuroDex.getTokenAmount(1.5, '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', 'base');
+   * console.log(usdcAmount); // "1500000"
+   * ```
    */
   private async getTokenAmount(
     amount: number,
@@ -155,9 +218,20 @@ export class NeuroDexApi {
   }
 
   /**
-   * Creates a new wallet. Uses Viem.
+   * Creates a new wallet with generated private key and secure storage.
    *
-   * @returns WalletInfo
+   * Generates a cryptographically secure private key, derives the wallet address,
+   * and stores the private key securely using Supabase encryption.
+   *
+   * @returns Promise resolving to WalletInfo containing address and private key
+   * @throws Error if private key storage fails
+   *
+   * @example
+   * ```typescript
+   * const wallet = await neuroDex.createWallet();
+   * console.log(wallet.address); // "0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c"
+   * console.log(wallet.privateKey); // "0x1234567890abcdef..."
+   * ```
    */
   async createWallet(): Promise<WalletInfo> {
     const privateKey = generatePrivateKey();
@@ -327,14 +401,35 @@ export class NeuroDexApi {
   }
 
   /**
-   * Buy a given amount of `tokenAddress` using the chain's native token.
-   * 1) Prepare quote.
-   * 2) Prepare swap.
-   * 3) Execute swap.
+   * Buy tokens using the chain's native token (ETH/BNB).
    *
-   * @param params - Trade parameters
-   * @param chain - Chain name
-   * @returns Swap response
+   * Executes a token purchase by:
+   * 1. Getting a quote from OpenOcean DEX aggregator
+   * 2. Preparing the swap transaction with optimal routing
+   * 3. Executing the swap on-chain
+   *
+   * Uses the native token (ETH for Ethereum/Base, BNB for BSC) as the input token.
+   *
+   * @param params - Trading parameters including amount, slippage, and wallet info
+   * @param chain - Target blockchain network (default: instance chain)
+   * @returns Promise resolving to NeuroDexResponse with swap result or error
+   *
+   * @example
+   * ```typescript
+   * const result = await neuroDex.buy({
+   *   toTokenAddress: '0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e',  // USDC
+   *   fromAmount: 0.1,          // 0.1 ETH
+   *   slippage: 1,              // 1% slippage tolerance
+   *   gasPriority: 'standard',
+   *   walletAddress: '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c',
+   *   privateKey: '0x1234...'
+   * });
+   *
+   * if (result.success) {
+   *   console.log('Transaction hash:', result.data.txHash);
+   *   console.log('Received tokens:', result.data.outAmount);
+   * }
+   * ```
    */
   async buy(
     params: BuyParams,

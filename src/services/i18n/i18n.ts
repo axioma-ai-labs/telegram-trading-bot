@@ -1,18 +1,63 @@
+/**
+ * @category Services
+ */
 import { I18n } from '@grammyjs/i18n';
 import path from 'path';
 
 import { BotContext } from '@/types/telegram';
 
 /**
- * Simplified internationalization service using grammY's i18n plugin.
- * Supports multiple languages with YAML format translation files.
+ * Internationalization service using grammY's i18n plugin for multi-language support.
+ *
+ * Provides automated translation management with features including:
+ * - YAML-based translation files for easy management
+ * - Automatic locale detection from user's Telegram settings
+ * - Session-based language persistence
+ * - Dynamic language switching
+ * - Global context variables for personalized messages
+ *
+ * Supports English, Spanish, Russian, and German languages with fallback
+ * to English for unsupported locales.
+ *
+ * @example
+ * ```typescript
+ * // Initialize the service (typically done once at startup)
+ * const i18n = await I18nService.initialize();
+ *
+ * // Use in bot middleware
+ * bot.use(i18n.middleware());
+ *
+ * // In message handlers
+ * await ctx.reply(ctx.t('welcome_message', { name: 'John' }));
+ *
+ * // Change user language
+ * I18nService.updateUserLanguage(ctx, 'es');
+ * ```
  */
 export class I18nService {
   private static instance: I18n<BotContext>;
 
   /**
-   * Initialize the i18n service with locale files.
-   * @returns Configured I18n instance
+   * Initializes the i18n service with translation files and configuration.
+   *
+   * Sets up locale negotiation strategy, loads translation files from the
+   * locales directory, and configures global context variables for
+   * personalized messages.
+   *
+   * Locale negotiation priority:
+   * 1. User's session language preference
+   * 2. Telegram user's language_code
+   * 3. Default to English
+   *
+   * @returns Promise resolving to configured I18n instance
+   * @throws Error if translation files cannot be loaded
+   *
+   * @example
+   * ```typescript
+   * // Initialize during application startup
+   * const i18n = await I18nService.initialize();
+   * bot.use(i18n.middleware());
+   * ```
    */
   static async initialize(): Promise<I18n<BotContext>> {
     if (!this.instance) {
@@ -56,9 +101,16 @@ export class I18nService {
   }
 
   /**
-   * Get the i18n instance.
-   * @returns I18n instance
-   * @throws Error if not initialized
+   * Retrieves the singleton i18n instance.
+   *
+   * @returns The configured I18n instance
+   * @throws Error if service hasn't been initialized
+   *
+   * @example
+   * ```typescript
+   * const i18n = I18nService.getInstance();
+   * // Use i18n instance for manual translation operations
+   * ```
    */
   static getInstance(): I18n<BotContext> {
     if (!this.instance) {
@@ -68,9 +120,23 @@ export class I18nService {
   }
 
   /**
-   * Update user's language preference.
-   * @param ctx - Bot context
-   * @param language - Language code
+   * Updates user's language preference and persists it in session.
+   *
+   * Changes the user's active language and immediately applies it to
+   * the current context. The language preference is stored in the
+   * user's session for future interactions.
+   *
+   * @param ctx - Telegram bot context
+   * @param language - Language code (e.g., 'en', 'es', 'ru', 'de')
+   *
+   * @example
+   * ```typescript
+   * // User selects Spanish
+   * I18nService.updateUserLanguage(ctx, 'es');
+   *
+   * // Future messages will be in Spanish
+   * await ctx.reply(ctx.t('settings_updated')); // "Configuración actualizada"
+   * ```
    */
   static updateUserLanguage(ctx: BotContext, language: string): void {
     if (ctx.session) {
@@ -81,17 +147,44 @@ export class I18nService {
   }
 
   /**
-   * Get available languages.
-   * @returns Array of supported language codes
+   * Retrieves list of supported language codes.
+   *
+   * @returns Array of ISO language codes supported by the bot
+   *
+   * @example
+   * ```typescript
+   * const languages = I18nService.getSupportedLanguages();
+   * // ['en', 'es', 'ru', 'de']
+   *
+   * // Create language selection keyboard
+   * const keyboard = new InlineKeyboard();
+   * languages.forEach(lang => {
+   *   const displayName = I18nService.getLanguageDisplayName(lang);
+   *   keyboard.text(displayName, `set_language_${lang}`);
+   * });
+   * ```
    */
   static getSupportedLanguages(): string[] {
     return ['en', 'es', 'ru', 'de'];
   }
 
   /**
-   * Get language display name.
-   * @param languageCode - Language code
-   * @returns Display name for the language
+   * Converts language code to user-friendly display name with flag emoji.
+   *
+   * @param languageCode - ISO language code
+   * @returns Formatted display name with country flag emoji
+   *
+   * @example
+   * ```typescript
+   * const displayName = I18nService.getLanguageDisplayName('es');
+   * console.log(displayName); // "🇪🇸 Spanish"
+   *
+   * // Use in language selection interface
+   * const languages = I18nService.getSupportedLanguages().map(code => ({
+   *   code,
+   *   name: I18nService.getLanguageDisplayName(code)
+   * }));
+   * ```
    */
   static getLanguageDisplayName(languageCode: string): string {
     const languageNames: Record<string, string> = {
@@ -101,6 +194,6 @@ export class I18nService {
       de: '🇩🇪 German',
     };
 
-    return languageNames[languageCode] || '🇺🇸 English';
+    return languageNames[languageCode] || '��🇸 English';
   }
 }

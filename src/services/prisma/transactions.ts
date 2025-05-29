@@ -1,3 +1,7 @@
+/**
+ * @category Services
+ */
+
 import { prisma } from '@/services/prisma/client';
 import { Transaction, TransactionType, TransactionStatus } from '@prisma/client/edge';
 
