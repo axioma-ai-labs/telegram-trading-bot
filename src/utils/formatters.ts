@@ -1,10 +1,29 @@
+/**
+ * @category Utils
+ */
 import { Transaction, TransactionStatus, TransactionType } from '@prisma/client/edge';
 
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { DcaOrderInfo, LimitOrderInfo } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 
-// format interval
+/**
+ * Converts time interval in seconds to human-readable format.
+ *
+ * Automatically selects the most appropriate time unit (seconds, hours, days, weeks, months)
+ * based on the duration to provide the most readable representation.
+ *
+ * @param seconds - Time interval in seconds
+ * @returns Human-readable time string
+ *
+ * @example
+ * ```typescript
+ * formatInterval(3600);    // "1 hours"
+ * formatInterval(86400);   // "1 days"
+ * formatInterval(604800);  // "1 weeks"
+ * formatInterval(1800);    // "1800 seconds"
+ * ```
+ */
 export const formatInterval = (seconds: number): string => {
   if (seconds < 3600) return `${seconds} seconds`;
   if (seconds < 86400) return `${seconds / 3600} hours`;
@@ -13,7 +32,24 @@ export const formatInterval = (seconds: number): string => {
   return `${seconds / 2592000} months`;
 };
 
-// order emoji status
+/**
+ * Returns appropriate emoji for order status display in Telegram.
+ *
+ * Maps order status strings to corresponding emoji icons for visual
+ * status indication in bot messages. Handles both text and numeric
+ * status representations.
+ *
+ * @param status - Order status string or number
+ * @returns Emoji character representing the status
+ *
+ * @example
+ * ```typescript
+ * getOrderStatusEmoji('active');    // "🟢"
+ * getOrderStatusEmoji('filled');    // "✅"
+ * getOrderStatusEmoji('cancelled'); // "❌"
+ * getOrderStatusEmoji('1');         // "🟢" (numeric status)
+ * ```
+ */
 export function getOrderStatusEmoji(status: string): string {
   switch (status.toLowerCase()) {
     case 'active':
@@ -38,7 +74,28 @@ export function getOrderStatusEmoji(status: string): string {
   }
 }
 
-// format limit order
+/**
+ * Formats a limit order object into a user-friendly display string.
+ *
+ * Creates a formatted message showing order details including:
+ * - Order status with emoji
+ * - Token pair and amounts
+ * - Creation and expiry dates
+ * - Truncated order hash for identification
+ *
+ * Uses internationalization for localized text.
+ *
+ * @param order - Limit order information object
+ * @param index - Order position in list (0-based)
+ * @param t - Translation function from bot context
+ * @returns Formatted order display string
+ *
+ * @example
+ * ```typescript
+ * const formattedOrder = formatLimitOrder(limitOrder, 0, ctx.t);
+ * // Returns: "🟢 Order #1: 1.0000 ETH → 2000.000000 USDC..."
+ * ```
+ */
 export function formatLimitOrder(order: LimitOrderInfo, index: number, t: BotContext['t']): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.data.createDateTime).toLocaleDateString();
@@ -60,7 +117,27 @@ export function formatLimitOrder(order: LimitOrderInfo, index: number, t: BotCon
   });
 }
 
-// format dca order
+/**
+ * Formats a DCA (Dollar Cost Averaging) order into a user-friendly display string.
+ *
+ * Creates a comprehensive formatted message showing:
+ * - Order status and progress
+ * - Token pair and amounts per interval
+ * - Execution schedule and progress
+ * - Price range constraints (if set)
+ * - Creation and expiry dates
+ *
+ * @param order - DCA order information object
+ * @param index - Order position in list (0-based)
+ * @param t - Translation function from bot context
+ * @returns Formatted DCA order display string
+ *
+ * @example
+ * ```typescript
+ * const formattedDca = formatDcaOrder(dcaOrder, 0, ctx.t);
+ * // Returns: "🟢 DCA #1: 0.1000 ETH → USDC every 1 hours (2/10 completed)..."
+ * ```
+ */
 export function formatDcaOrder(order: DcaOrderInfo, index: number, t: BotContext['t']): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.createDateTime).toLocaleDateString();
@@ -95,7 +172,22 @@ export function formatDcaOrder(order: DcaOrderInfo, index: number, t: BotContext
   });
 }
 
-// transaction status emoji
+/**
+ * Returns appropriate emoji for transaction status display.
+ *
+ * Maps Prisma TransactionStatus enum values to emoji icons for
+ * visual status indication in transaction lists and notifications.
+ *
+ * @param status - Transaction status from Prisma enum
+ * @returns Emoji character representing the transaction status
+ *
+ * @example
+ * ```typescript
+ * getTransactionStatusEmoji(TransactionStatus.PENDING);   // "🟡"
+ * getTransactionStatusEmoji(TransactionStatus.COMPLETED); // "✅"
+ * getTransactionStatusEmoji(TransactionStatus.FAILED);    // "❌"
+ * ```
+ */
 export function getTransactionStatusEmoji(status: TransactionStatus): string {
   switch (status) {
     case TransactionStatus.PENDING:
@@ -111,7 +203,23 @@ export function getTransactionStatusEmoji(status: TransactionStatus): string {
   }
 }
 
-// transaction type emoji
+/**
+ * Returns appropriate emoji for transaction type display.
+ *
+ * Maps Prisma TransactionType enum values to emoji icons for
+ * visual type indication showing the nature of the transaction.
+ *
+ * @param type - Transaction type from Prisma enum
+ * @returns Emoji character representing the transaction type
+ *
+ * @example
+ * ```typescript
+ * getTransactionTypeEmoji(TransactionType.BUY);         // "🟢"
+ * getTransactionTypeEmoji(TransactionType.SELL);        // "🔴"
+ * getTransactionTypeEmoji(TransactionType.DCA);         // "🔄"
+ * getTransactionTypeEmoji(TransactionType.LIMIT_ORDER); // "📊"
+ * ```
+ */
 export function getTransactionTypeEmoji(type: TransactionType): string {
   switch (type) {
     case TransactionType.BUY:
@@ -129,7 +237,30 @@ export function getTransactionTypeEmoji(type: TransactionType): string {
   }
 }
 
-// format transaction
+/**
+ * Formats a transaction object into a comprehensive display string.
+ *
+ * Creates a detailed formatted message showing:
+ * - Transaction type and status with emojis
+ * - Token amounts and symbols
+ * - Transaction details specific to type (buy/sell/DCA/limit/withdraw)
+ * - Creation date and time
+ * - Truncated transaction hash
+ *
+ * Handles different transaction types with appropriate formatting and
+ * uses internationalization for localized messages.
+ *
+ * @param transaction - Transaction object from database
+ * @param index - Transaction position in list (0-based)
+ * @param t - Translation function from bot context
+ * @returns Formatted transaction display string
+ *
+ * @example
+ * ```typescript
+ * const formattedTx = formatTransaction(transaction, 0, ctx.t);
+ * // Returns: "🟢✅ Buy Transaction #1: 0.100000 ETH → USDC (1000.000000 received)..."
+ * ```
+ */
 export function formatTransaction(
   transaction: Transaction,
   index: number,

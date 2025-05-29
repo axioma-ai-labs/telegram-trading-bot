@@ -1,3 +1,7 @@
+/**
+ * @category Services
+ */
+
 import { prisma } from '@/services/prisma/client';
 import { Transaction, TransactionType, TransactionStatus } from '@prisma/client/edge';
 
@@ -198,14 +202,17 @@ export class TransactionsService {
       orderDirection = 'desc',
     } = options;
 
-    const skip = (page - 1) * limit;
+    // Ensure page and limit are valid numbers
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
 
     const [transactions, total] = await Promise.all([
       prisma.transaction.findMany({
         where: { userId },
         orderBy: { [orderBy]: orderDirection },
         skip,
-        take: limit,
+        take: validLimit,
         include: {
           wallet: true,
         },
@@ -218,8 +225,8 @@ export class TransactionsService {
     return {
       transactions,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: validPage,
+      totalPages: Math.ceil(total / validLimit),
     };
   }
 
@@ -242,14 +249,17 @@ export class TransactionsService {
       orderDirection = 'desc',
     } = options;
 
-    const skip = (page - 1) * limit;
+    // Ensure page and limit are valid numbers
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
 
     const [transactions, total] = await Promise.all([
       prisma.transaction.findMany({
         where: { walletId },
         orderBy: { [orderBy]: orderDirection },
         skip,
-        take: limit,
+        take: validLimit,
       }),
       prisma.transaction.count({
         where: { walletId },
@@ -259,8 +269,8 @@ export class TransactionsService {
     return {
       transactions,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: validPage,
+      totalPages: Math.ceil(total / validLimit),
     };
   }
 
@@ -374,7 +384,11 @@ export class TransactionsService {
       orderDirection = 'desc',
     } = options;
 
-    const skip = (page - 1) * limit;
+    // Ensure page and limit are valid numbers
+    const validPage = Math.max(1, Number(page) || 1);
+    const validLimit = Math.max(1, Number(limit) || 10);
+    const skip = (validPage - 1) * validLimit;
+    
     const where: { userId: string; type?: TransactionType; status?: TransactionStatus } = {
       userId,
     };
@@ -387,7 +401,7 @@ export class TransactionsService {
         where,
         orderBy: { [orderBy]: orderDirection },
         skip,
-        take: limit,
+        take: validLimit,
         include: {
           wallet: true,
         },
@@ -400,8 +414,8 @@ export class TransactionsService {
     return {
       transactions,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: validPage,
+      totalPages: Math.ceil(total / validLimit),
     };
   }
 }

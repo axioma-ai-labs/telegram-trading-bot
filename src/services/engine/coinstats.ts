@@ -6,7 +6,32 @@ import { CacheManager } from '@/services/cache/cacheManager';
 import { CoinStatsBalance, CoinStatsBlockchainBalance, FormattedBalance } from '@/types/coinstats';
 
 /**
- * Service class for interacting with CoinStats API to fetch wallet balances
+ * @category Services
+ *
+ * Service class for interacting with CoinStats API to fetch wallet balances and portfolio data.
+ *
+ * Provides functionality for:
+ * - Fetching wallet balances across multiple blockchains
+ * - Getting token holdings with USD values and price changes
+ * - Calculating total portfolio value
+ * - Formatting balance data for display in Telegram bot
+ *
+ * Features built-in caching to optimize API usage and reduce latency.
+ *
+ * @example
+ * ```typescript
+ * const coinStats = CoinStatsService.getInstance();
+ *
+ * // Get all wallet balances
+ * const balances = await coinStats.getWalletBalances('0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c');
+ *
+ * // Get formatted balances for Base network
+ * const formatted = await coinStats.getFormattedBalances(
+ *   '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c',
+ *   'base',
+ *   10
+ * );
+ * ```
  */
 export class CoinStatsService {
   private static instance: CoinStatsService;
@@ -56,6 +81,18 @@ export class CoinStatsService {
 
   /**
    * Get singleton instance of CoinStatsService
+   *
+   * Implements the singleton pattern to ensure only one instance of the service
+   * exists throughout the application lifecycle. This helps maintain consistent
+   * caching and API rate limiting.
+   *
+   * @returns The singleton CoinStatsService instance
+   *
+   * @example
+   * ```typescript
+   * const coinStats = CoinStatsService.getInstance();
+   * const balances = await coinStats.getWalletBalances(walletAddress);
+   * ```
    */
   public static getInstance(): CoinStatsService {
     if (!CoinStatsService.instance) {
@@ -65,10 +102,23 @@ export class CoinStatsService {
   }
 
   /**
-   * Fetch wallet balances for a specific address across all networks
+   * Fetch wallet balances for a specific address across all supported networks.
    *
-   * @param address - The wallet address to fetch balances for
-   * @returns Promise<CoinStatsBlockchainBalance[]> - Array of blockchain balances
+   * Retrieves token balances from all blockchains supported by CoinStats API.
+   * Results are automatically cached for 2 minutes to optimize performance.
+   *
+   * @param address - The wallet address to fetch balances for (must be valid hex address)
+   * @returns Promise resolving to array of blockchain balance data
+   * @throws Error if API request fails or address is invalid
+   *
+   * @example
+   * ```typescript
+   * const balances = await coinStats.getWalletBalances('0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c');
+   *
+   * for (const blockchain of balances) {
+   *   console.log(`${blockchain.blockchain}: ${blockchain.balances.length} tokens`);
+   * }
+   * ```
    */
   async getWalletBalances(address: string): Promise<CoinStatsBlockchainBalance[]> {
     // cache key

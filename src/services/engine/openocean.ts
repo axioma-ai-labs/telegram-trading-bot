@@ -22,13 +22,42 @@ import {
 } from '@/types/openocean';
 
 /**
- * OpenOcean API client for interacting with OpenOcean DEX aggregator
- * Supports Base, Ethereum and BNB chains
+ * @category Services
  *
- * Includes endpoints:
- * General: swap, reverseQuote, getTokens, getGasPrice,
- * Limit Orders: createLimitOrder, cancelLimitOrder, listLimitOrders,
- * DCA: createDca, cancelDca, listDcaOrders, listAllDcaOrders
+ * OpenOcean API client for interacting with OpenOcean DEX aggregator.
+ *
+ * Provides comprehensive DEX aggregation services including:
+ * - Token swaps with optimal routing across multiple DEXes
+ * - Limit orders for automated trading at target prices
+ * - Dollar Cost Averaging (DCA) orders for recurring purchases
+ * - Gas price optimization
+ * - Multi-chain support (Base, Ethereum, BSC)
+ *
+ * Integrates with OpenOcean's Limit Order SDK for advanced order management
+ * and provides unified API access to all OpenOcean functionality.
+ *
+ * @example
+ * ```typescript
+ * const client = new OpenOceanClient('base');
+ *
+ * // Get a quote for token swap
+ * const quote = await client.quote({
+ *   inTokenAddress: '0x0000000000000000000000000000000000000000',
+ *   outTokenAddress: '0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e',
+ *   amountDecimals: '1000000000000000000', // 1 ETH
+ *   slippage: '1'
+ * });
+ *
+ * // Create a limit order
+ * client.initializeSdk(8453, web3Provider, walletAddress);
+ * const limitOrder = await client.createLimitOrder({
+ *   makerTokenAddress: '0x...',
+ *   takerTokenAddress: '0x...',
+ *   makerAmount: '1000000000000000000',
+ *   takerAmount: '2000000000',
+ *   expire: '1D'
+ * });
+ * ```
  */
 export class OpenOceanClient {
   private readonly axiosInstance: AxiosInstance;
@@ -38,8 +67,18 @@ export class OpenOceanClient {
   private dca: boolean = false;
 
   /**
-   * Creates a new OpenOcean client instance
-   * @param config - Configuration object containing RPC URL, addon ID and default chain
+   * Creates a new OpenOcean client instance for the specified blockchain network.
+   *
+   * Initializes the HTTP client with OpenOcean API base URL and sets up
+   * default headers for JSON communication.
+   *
+   * @param defaultChain - Target blockchain network for API operations
+   *
+   * @example
+   * ```typescript
+   * const baseClient = new OpenOceanClient('base');
+   * const ethClient = new OpenOceanClient('ethereum');
+   * ```
    */
   constructor(defaultChain: NeuroDexChain) {
     this.defaultChain = defaultChain;
@@ -52,10 +91,28 @@ export class OpenOceanClient {
   }
 
   /**
-   * Initializes the SDK with Web3 provider and account
-   * @param provider - Web3 provider instance
-   * @param account - Wallet address
-   * @param chainId - Chain ID
+   * Initializes the OpenOcean SDK with Web3 provider and account for advanced operations.
+   *
+   * Required for limit orders and DCA operations. Sets up the SDK with the specified
+   * chain, provider, and wallet address. Can be configured for regular limit orders
+   * or DCA (Dollar Cost Averaging) mode.
+   *
+   * @param chainId - Blockchain network chain ID (e.g., 8453 for Base, 1 for Ethereum)
+   * @param provider - Web3 provider instance for blockchain interaction
+   * @param address - Wallet address for order operations
+   * @param dca - Whether to initialize for DCA operations (default: false)
+   *
+   * @example
+   * ```typescript
+   * const web3 = new Web3('https://mainnet.base.org');
+   * const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+   *
+   * // Initialize for regular limit orders
+   * client.initializeSdk(8453, web3, account.address);
+   *
+   * // Initialize for DCA orders
+   * client.initializeSdk(8453, web3, account.address, true);
+   * ```
    */
   initializeSdk(chainId: number, provider: Web3, address: string, dca: boolean = false): void {
     this.chainId = chainId;

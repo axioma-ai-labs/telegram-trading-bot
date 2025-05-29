@@ -21,8 +21,35 @@ import { TokenInfo } from '@/types/neurodex';
 import { erc20Abi } from '@/utils/abis';
 
 /**
- * Viem service for executing smart contract transactions
- * Handles transaction execution, gas estimation, and receipt monitoring
+ * @category Services
+ *
+ * Viem service for executing smart contract transactions and blockchain interactions.
+ *
+ * Provides low-level blockchain interaction capabilities including:
+ * - Smart contract method execution with gas estimation
+ * - Native token transfers (ETH/BNB/etc.)
+ * - ERC20 token transfers and allowance management
+ * - Transaction monitoring and receipt handling
+ * - Token information retrieval (symbol, decimals, balance)
+ *
+ * Built on top of Viem library for type-safe and efficient blockchain operations.
+ * Supports multiple networks through configurable chain and RPC settings.
+ *
+ * @example
+ * ```typescript
+ * const viemService = new ViemService(base, 'https://mainnet.base.org');
+ *
+ * // Execute a transaction
+ * const receipt = await viemService.executeTransaction(account, {
+ *   to: '0x...',
+ *   data: '0x...',
+ *   value: '1000000000000000000',
+ *   gasPrice: '1000000000'
+ * });
+ *
+ * // Get token info
+ * const tokenInfo = await viemService.getTokenInfo('0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e');
+ * ```
  */
 export class ViemService {
   private readonly chain: Chain;
@@ -55,10 +82,34 @@ export class ViemService {
   }
 
   /**
-   * Execute a transaction
-   * @param account - Account to execute transaction from
-   * @param params - Transaction parameters
-   * @returns Transaction receipt
+   * Execute a blockchain transaction with automatic gas estimation and receipt monitoring.
+   *
+   * Sends a transaction to the blockchain using the provided account and parameters.
+   * Automatically waits for transaction confirmation and returns the receipt.
+   *
+   * @param account - Account to execute transaction from (must have sufficient balance)
+   * @param params - Transaction parameters including destination, data, value, and gas price
+   * @param params.to - Destination address for the transaction
+   * @param params.data - Transaction data (contract call data or '0x' for simple transfers)
+   * @param params.value - Amount of native token to send (in wei)
+   * @param params.gasPrice - Gas price for the transaction (in wei)
+   * @returns Promise resolving to transaction receipt with status and hash
+   * @throws Error if transaction execution fails or account has insufficient funds
+   *
+   * @example
+   * ```typescript
+   * const account = privateKeyToAccount('0x...');
+   *
+   * const receipt = await viemService.executeTransaction(account, {
+   *   to: '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c',
+   *   data: '0xa9059cbb000000000000000000000000742d35cc6cb3c0532c94c3e66d7e17b9d3d17b9c0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+   *   value: '0',
+   *   gasPrice: '1000000000'
+   * });
+   *
+   * console.log('Transaction hash:', receipt.transactionHash);
+   * console.log('Status:', receipt.status); // 'success' or 'reverted'
+   * ```
    */
   async executeTransaction(
     account: Account,

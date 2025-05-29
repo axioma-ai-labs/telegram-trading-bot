@@ -1,3 +1,6 @@
+/**
+ * @category Bot
+ */
 import { TransactionStatus } from '@prisma/client/edge';
 
 import { confirmBuyKeyboard } from '@/bot/commands/buy';
@@ -11,6 +14,18 @@ import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUser } from '@/utils/userValidation';
 
+/**
+ * Initiates the token buying process for a user.
+ *
+ * Sets up the buy operation in the user's session and prompts them to
+ * paste a token contract address for the token they want to purchase.
+ *
+ * @param ctx - Telegram bot context containing user information and chat state
+ * @throws Will return early if user validation fails
+ *
+ * @example
+ * User clicks "Buy" button → Bot prompts for token address
+ */
 export async function buyToken(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid } = await validateUser(ctx);
@@ -26,6 +41,21 @@ export async function buyToken(ctx: BotContext): Promise<void> {
   });
 }
 
+/**
+ * Processes the buy amount selection and prepares for transaction confirmation.
+ *
+ * Validates the amount, handles custom amount input, and stores the purchase
+ * details in the session for confirmation. Shows a confirmation dialog with
+ * transaction details before executing the buy order.
+ *
+ * @param ctx - Telegram bot context
+ * @param amount - Amount to buy (as string) or 'custom' for user input
+ * @throws Will show error message if token is not selected or amount is invalid
+ *
+ * @example
+ * User selects "0.1 ETH" → Bot shows confirmation dialog
+ * User selects "Custom" → Bot prompts for custom amount input
+ */
 export async function performBuy(ctx: BotContext, amount: string): Promise<void> {
   // validate user
   const { isValid } = await validateUser(ctx);
@@ -81,6 +111,38 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
   };
 }
 
+/**
+ * Executes the confirmed token purchase transaction.
+ *
+ * Performs the complete buy flow including:
+ * 1. Validates user and operation parameters
+ * 2. Retrieves user's private key from secure storage
+ * 3. Creates a pending transaction record in database
+ * 4. Executes the buy order via NeuroDex API
+ * 5. Updates transaction status based on result
+ * 6. Notifies user of success or failure
+ *
+ * Handles various error conditions including insufficient funds,
+ * missing private keys, and transaction failures.
+ *
+ * @param ctx - Telegram bot context
+ * @throws Will show error messages for various failure conditions
+ * @throws Will return early if user validation or parameters are invalid
+ *
+ * @example
+ * User confirms purchase → Transaction executes → Success/failure notification
+ *
+ * Success flow:
+ * - Creates pending transaction record
+ * - Executes buy via DEX aggregator
+ * - Updates transaction as completed
+ * - Shows success message with transaction hash
+ *
+ * Failure flow:
+ * - Updates transaction as failed
+ * - Shows appropriate error message
+ * - Resets operation state
+ */
 export async function buyConfirm(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid, user } = await validateUser(ctx);
@@ -177,6 +239,18 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
   }
 }
 
+/**
+ * Cancels the current buy operation and resets the user's session state.
+ *
+ * Cleans up the current operation from the user's session and shows
+ * a cancellation confirmation message.
+ *
+ * @param ctx - Telegram bot context
+ * @throws Will return early if user validation fails
+ *
+ * @example
+ * User clicks "Cancel" button → Operation cancelled → Session reset
+ */
 export async function buyCancel(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid } = await validateUser(ctx);

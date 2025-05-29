@@ -1,3 +1,6 @@
+/**
+ * @category Utils
+ */
 import { BotContext } from '@/types/telegram';
 
 import { deleteBotMessage } from './deleteMessage';
