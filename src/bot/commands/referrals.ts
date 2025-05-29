@@ -17,8 +17,7 @@ export const referralCommandHandler: CommandHandler = {
   description: 'Get your referral link',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user) return;
+    const user = await validateUser(ctx);
 
     const referralLink = user.referralCode || '';
 

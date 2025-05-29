@@ -6,8 +6,7 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function depositFunds(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx);
 
   const viemService = new ViemService();
   const coinStatsService = CoinStatsService.getInstance();

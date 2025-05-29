@@ -3,6 +3,7 @@ import { buyTokenKeyboard } from '@/bot/commands/buy';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { BotContext, OperationState } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
+import { isValidAmount } from '@/utils/validators';
 
 /**
  * Handles buy operation messages from users.
@@ -36,16 +37,16 @@ export async function handleBuyMessages(
     ctx.session.currentOperation = {
       type: 'buy',
       token: userInput,
-      tokenSymbol: tokenData.data?.symbol,
-      tokenName: tokenData.data?.name,
-      tokenChain: tokenData.data?.chain,
+      tokenSymbol: tokenData.data.symbol,
+      tokenName: tokenData.data.name,
+      tokenChain: tokenData.data.chain,
     };
 
     const message = ctx.t('buy_token_found_msg', {
-      tokenSymbol: tokenData.data?.symbol || '',
-      tokenName: tokenData.data?.name || '',
-      tokenPrice: tokenData.data?.price || 0,
-      tokenChain: tokenData.data?.chain || '',
+      tokenSymbol: tokenData.data.symbol,
+      tokenName: tokenData.data.name,
+      tokenPrice: tokenData.data.price,
+      tokenChain: tokenData.data.chain,
     });
 
     await ctx.reply(message, {
@@ -53,13 +54,13 @@ export async function handleBuyMessages(
       reply_markup: buyTokenKeyboard,
     });
   } else if (!currentOperation.amount) {
-    // Handle amount input
-    const parsedAmount = parseFloat(userInput);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      const invalid_amount_message = await ctx.reply(ctx.t('invalid_amount_msg'));
-      deleteBotMessage(ctx, invalid_amount_message.message_id);
+    // validate amount
+    if (!isValidAmount(userInput)) {
+      const message = await ctx.reply(ctx.t('invalid_amount_msg'));
+      deleteBotMessage(ctx, message.message_id, 5000);
       return;
     }
-    await performBuy(ctx, parsedAmount.toString());
+
+    await performBuy(ctx, userInput);
   }
 }

@@ -18,8 +18,7 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function sellToken(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   // sell
   ctx.session.currentOperation = {
@@ -53,8 +52,7 @@ export async function sellToken(ctx: BotContext): Promise<void> {
 
 export async function performSell(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token) {
@@ -72,16 +70,16 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
   }
 
   const coinStatsService = CoinStatsService.getInstance();
-  const balancesResponse = await coinStatsService.getWalletBalances(user.wallets[0].address);
+  const balances = await coinStatsService.getWalletBalances(user.wallets[0].address);
 
-  if (!balancesResponse || !balancesResponse.length) {
+  if (!balances || !balances.length) {
     const message = await ctx.reply(ctx.t('error_msg'));
     deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
   // Find the token in balances across all blockchains
-  const tokenBalance = balancesResponse
+  const tokenBalance = balances
     .flatMap((blockchain) => blockchain.balances)
     .find(
       (tokenItem: CoinStatsBalance) =>
@@ -131,7 +129,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
   // Calculate USD value using the new formatter
   const usdValue = await calculateTokenUsdValue(currentOperation.token, sellAmount, 'base');
 
-  // Store the amount in the session for confirmation
+  // set amount
   ctx.session.currentOperation = {
     ...currentOperation,
     amount: sellAmount,
@@ -162,8 +160,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
 
 export async function sellConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const { currentOperation } = ctx.session;
 
@@ -238,14 +235,13 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     // Update transaction with failed status
     await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
 
-    // check if no balance or other errors
-    const errorMessage = sellResult.error?.toLowerCase() || '';
-    if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
-      const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-      deleteBotMessage(ctx, message.message_id, 10000);
-    } else {
-      const message = await ctx.reply(ctx.t('error_msg'));
-      deleteBotMessage(ctx, message.message_id, 10000);
+    // edit confirmation message
+    if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+      await ctx.api.editMessageText(
+        ctx.session.currentMessage?.chatId,
+        ctx.session.currentMessage?.messageId,
+        ctx.t('sell_error_msg')
+      );
     }
     // reset
     ctx.session.currentOperation = null;
@@ -254,8 +250,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
 export async function sellCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // Delete confirmation message
   if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
@@ -270,7 +265,7 @@ export async function sellCancel(ctx: BotContext): Promise<void> {
 
   // Send cancel message
   const cancelMessage = await ctx.reply(ctx.t('sell_cancel_msg'));
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await ctx.api.deleteMessage(cancelMessage.chat.id, cancelMessage.message_id);
 
   // Send start message

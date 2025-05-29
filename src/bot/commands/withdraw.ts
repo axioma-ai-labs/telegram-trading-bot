@@ -28,8 +28,7 @@ export const withdrawCommandHandler: CommandHandler = {
   description: 'Withdraw tokens',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user) return;
+    const user = await validateUser(ctx);
 
     // Set current operation
     ctx.session.currentOperation = { type: 'withdraw' };

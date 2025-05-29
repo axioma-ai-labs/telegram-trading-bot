@@ -41,8 +41,7 @@ export const dcaCommandHandler: CommandHandler = {
   description: 'Create a DCA order',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUser(ctx);
-    if (!isValid) return;
+    await validateUser(ctx);
 
     ctx.session.currentOperation = { type: 'dca' };
 

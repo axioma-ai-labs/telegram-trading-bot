@@ -4,6 +4,9 @@ import logger from '@/config/logger';
 import { SettingsService } from '@/services/prisma/settings';
 import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
+import { getGasPriorityName } from '@/utils/settingsGetters';
+import { getLanguageName } from '@/utils/settingsGetters';
+import { getSlippageName } from '@/utils/settingsGetters';
 import { validateUser } from '@/utils/userValidation';
 
 export const settingsKeyboard = new InlineKeyboard()
@@ -45,8 +48,7 @@ export const settingsCommandHandler: CommandHandler = {
   description: 'Configure bot settings',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user) return;
+    const user = await validateUser(ctx);
 
     // If user has no settings, create default settings
     if (!user.settings) {
@@ -57,9 +59,9 @@ export const settingsCommandHandler: CommandHandler = {
       });
 
       const message = ctx.t('settings_msg', {
-        slippage: '0.5',
-        language: 'en',
-        gasPriority: 'standard',
+        slippage: getSlippageName('0.5'),
+        language: getLanguageName('en'),
+        gasPriority: getGasPriorityName('standard'),
       });
 
       await ctx.reply(message, {
@@ -71,9 +73,9 @@ export const settingsCommandHandler: CommandHandler = {
 
     // User has settings, use them directly with i18n
     const message = ctx.t('settings_msg', {
-      slippage: user.settings.slippage || '1',
-      language: user.settings.language || 'en',
-      gasPriority: user.settings.gasPriority || 'standard',
+      slippage: getSlippageName(user.settings.slippage),
+      language: getLanguageName(user.settings.language),
+      gasPriority: getGasPriorityName(user.settings.gasPriority),
     });
 
     logger.info('Settings message:', message);

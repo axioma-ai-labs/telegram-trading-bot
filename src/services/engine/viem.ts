@@ -341,16 +341,23 @@ export class ViemService {
   /**
    * Get native balance (ETH/BNB/BASE) for a wallet in readable format
    * @param address Wallet address
-   * @returns Balance in ETH as string with 6 decimal places (e.g., "0.123456")
+   * @returns Balance in ETH as number (guaranteed to be a valid number >= 0)
    */
-  async getNativeBalance(address: Address): Promise<string> {
+  async getNativeBalance(address: Address): Promise<number> {
     try {
       const publicClient = this.createPublicClient();
       const balance = await publicClient.getBalance({ address });
-      return Number(formatEther(balance)).toFixed(6);
+      const ethBalance = Number(formatEther(balance));
+
+      // Handle edge cases like NaN, Infinity, or negative values
+      if (!Number.isFinite(ethBalance) || ethBalance < 0) {
+        return 0;
+      }
+
+      return ethBalance;
     } catch (error) {
       logger.error('Error fetching native balance:', error);
-      return '0.000000';
+      return 0;
     }
   }
 

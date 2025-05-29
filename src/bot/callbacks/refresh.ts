@@ -8,18 +8,17 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function handleRefresh(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx, { forceRefresh: true });
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx, { forceRefresh: true });
 
   const callbackData = ctx.callbackQuery?.data;
   const telegramId = ctx.from?.id?.toString();
   if (!callbackData || !telegramId) return;
 
-  const walletAddress = user.wallets[0].address;
+  const walletAddress = user.wallets[0].address as `0x${string}`;
   const viemService = new ViemService();
 
   try {
-    const balance = await viemService.getNativeBalance(walletAddress as `0x${string}`);
+    const balance = await viemService.getNativeBalance(walletAddress);
     const ethBalance = balance || '0.000';
 
     // Refresh deposit
@@ -39,7 +38,7 @@ export async function handleRefresh(ctx: BotContext): Promise<void> {
     else if (callbackData === 'refresh_wallet') {
       const coinStatsService = CoinStatsService.getInstance();
       const walletHoldings = await coinStatsService.getWalletTokenHoldings(
-        walletAddress as `0x${string}`,
+        walletAddress,
         'base',
         0.1
       );

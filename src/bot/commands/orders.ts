@@ -27,8 +27,7 @@ export const ordersCommandHandler: CommandHandler = {
   command: 'orders',
   description: 'View your limit & DCAorders',
   handler: async (ctx: BotContext): Promise<void> => {
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user?.wallets?.[0]) return;
+    const user = await validateUser(ctx);
 
     const walletAddress = user.wallets[0].address;
     const neurodex = new NeuroDexApi();

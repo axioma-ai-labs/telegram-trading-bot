@@ -30,8 +30,7 @@ export const transactionsCommandHandler: CommandHandler = {
   command: 'transactions',
   description: 'View your transaction history',
   handler: async (ctx: BotContext): Promise<void> => {
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user?.id) return;
+    const user = await validateUser(ctx);
 
     try {
       const stats = await TransactionsService.getUserTransactionStats(user.id);

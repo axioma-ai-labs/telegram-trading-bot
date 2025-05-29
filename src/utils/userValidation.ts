@@ -23,11 +23,23 @@ type UserWithRelations = User & {
 const userCache = new CacheManager(500, 5 * 60 * 1000); // 500 users, 5min TTL
 
 /**
- * Validates user and returns user data with caching support
+ * Custom error class for user validation failures.
+ * Thrown when user validation fails for any reason.
+ */
+export class UserValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UserValidationError';
+  }
+}
+
+/**
+ * Validates user and returns user data if valid, throws UserValidationError if invalid.
  *
- * @param ctx - The bot context containing user information
+ * @param ctx - Telegram bot context
  * @param options - Validation options
- * @returns Validation result with user data
+ * @returns User data if validation succeeds
+ * @throws UserValidationError if validation fails
  */
 export async function validateUser(
   ctx: BotContext,
@@ -37,10 +49,7 @@ export async function validateUser(
     skipMessages?: boolean;
     forceRefresh?: boolean;
   } = {}
-): Promise<{
-  isValid: boolean;
-  user: UserWithRelations | null;
-}> {
+): Promise<UserWithRelations> {
   const {
     allowStale = true,
     cacheOnly = false,
@@ -50,7 +59,7 @@ export async function validateUser(
 
   // check telegram id
   if (!ctx.from?.id) {
-    return { isValid: false, user: null };
+    throw new UserValidationError('No telegram ID provided');
   }
 
   const telegramId = ctx.from.id.toString();
@@ -60,7 +69,10 @@ export async function validateUser(
   if (cacheOnly) {
     const cachedUser = userCache.get<UserWithRelations>(cacheKey);
     const isValid = !!(cachedUser && cachedUser.termsAccepted && cachedUser.wallets?.length > 0);
-    return { isValid, user: isValid ? cachedUser : null };
+    if (!isValid) {
+      throw new UserValidationError('User validation failed (cache-only mode)');
+    }
+    return cachedUser;
   }
 
   // get user data with smart caching
@@ -92,7 +104,7 @@ export async function validateUser(
         parse_mode: 'Markdown',
       });
     }
-    return { isValid: false, user: null };
+    throw new UserValidationError('User not registered');
   }
 
   // check terms accepted
@@ -104,7 +116,7 @@ export async function validateUser(
         reply_markup: acceptTermsConditionsKeyboard,
       });
     }
-    return { isValid: false, user: null };
+    throw new UserValidationError('Terms not accepted');
   }
 
   // check has wallet
@@ -116,10 +128,10 @@ export async function validateUser(
         reply_markup: createWalletKeyboard,
       });
     }
-    return { isValid: false, user: null };
+    throw new UserValidationError('No wallet found');
   }
 
-  return { isValid: true, user };
+  return user;
 }
 
 /**

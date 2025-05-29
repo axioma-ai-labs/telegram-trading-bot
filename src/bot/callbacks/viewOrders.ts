@@ -13,8 +13,7 @@ import { validateUser } from '@/utils/userValidation';
 
 // view limit orders
 export async function viewLimitOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();
@@ -67,8 +66,7 @@ export async function viewLimitOrders(ctx: BotContext): Promise<void> {
 }
 
 export async function viewDcaOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();
@@ -121,8 +119,7 @@ export async function viewDcaOrders(ctx: BotContext): Promise<void> {
 }
 
 export async function showOrders(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const walletAddress = user.wallets[0].address;
   const neurodex = new NeuroDexApi();

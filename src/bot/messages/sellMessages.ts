@@ -36,8 +36,7 @@ export async function handleSellMessages(
     }
 
     // Get user wallet to fetch balance
-    const { user } = await validateUser(ctx);
-    if (!user) return;
+    const user = await validateUser(ctx);
 
     // Get user's balance for this specific token
     const coinStatsService = CoinStatsService.getInstance();

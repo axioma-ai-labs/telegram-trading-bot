@@ -13,11 +13,11 @@ import { validateUser } from '@/utils/userValidation';
 import { validatePK } from '@/utils/validators';
 
 import { limitConfirmKeyboard, limitExpiryKeyboard } from '../commands/limit';
+import { startKeyboard } from '../commands/start';
 
 // limit token callback
 export async function limitToken(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   ctx.session.currentOperation = { type: 'limit' };
 
@@ -28,8 +28,7 @@ export async function limitToken(ctx: BotContext): Promise<void> {
 
 // retrieve limit amount callback
 export async function retrieveLimitAmount(ctx: BotContext, amount: string): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token) {
@@ -132,8 +131,7 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
 
 // confirm limit order
 export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
@@ -188,7 +186,7 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   } catch (error) {
     logger.error('Error creating transaction record:', error);
     const message = await ctx.reply(ctx.t('error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 10000);
+    deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
@@ -223,18 +221,29 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
 
 // cancel limit order
 export async function limitCancel(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
+  // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply(ctx.t('limit_cancel_msg'));
-  deleteBotMessage(ctx, message.message_id, 5000);
+
+  // Send cancel message
+  const cancelMessage = await ctx.reply(ctx.t('limit_cancel_msg'));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await ctx.api.deleteMessage(cancelMessage.chat.id, cancelMessage.message_id);
+
+  // send start message
+  await ctx.reply(ctx.t('start_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: startKeyboard,
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
 }
 
 // cancel limit order
 export async function cancelLimitOrder(ctx: BotContext, orderHash: string): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const privateKey = await PrivateStorageService.getPrivateKey(user.wallets[0].address);
   if (!privateKey) {
