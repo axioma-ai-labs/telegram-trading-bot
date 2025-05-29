@@ -90,17 +90,25 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
   };
 
   // confirmation
-  const message = ctx.t('buy_confirm_msg', {
-    token: currentOperation.token,
-    tokenSymbol: currentOperation.tokenSymbol || '',
-    tokenName: currentOperation.tokenName || '',
-    amount: parsedAmount,
-  });
+  const confirmMessage = await ctx.reply(
+    ctx.t('buy_confirm_msg', {
+      token: currentOperation.token,
+      tokenSymbol: currentOperation.tokenSymbol || '',
+      tokenName: currentOperation.tokenName || '',
+      amount: parsedAmount,
+    }),
+    {
+      parse_mode: 'Markdown',
+      reply_markup: confirmBuyKeyboard,
+    }
+  );
 
-  await ctx.reply(message, {
-    parse_mode: 'Markdown',
-    reply_markup: confirmBuyKeyboard,
-  });
+  // set current message for deletion
+  ctx.session.currentMessage = {
+    messageId: confirmMessage.message_id,
+    chatId: confirmMessage.chat.id,
+    type: 'confirmation',
+  };
 }
 
 /**
@@ -180,7 +188,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
   } catch (error) {
     logger.error('Error creating transaction record:', error);
     const message = await ctx.reply(ctx.t('buy_error_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return;
   }
 
@@ -190,6 +198,14 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
 
   // if success
   if (buyResult.success && buyResult.data?.txHash) {
+    // Delete confirmation message
+    if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+      await ctx.api.deleteMessage(
+        ctx.session.currentMessage.chatId,
+        ctx.session.currentMessage.messageId
+      );
+    }
+
     // Update transaction with success status and txHash
     await TransactionsService.updateTransactionStatus(
       transaction.id,
@@ -239,6 +255,14 @@ export async function buyCancel(ctx: BotContext): Promise<void> {
   // validate user
   const { isValid } = await validateUser(ctx);
   if (!isValid) return;
+
+  // Delete confirmation message
+  if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+    await ctx.api.deleteMessage(
+      ctx.session.currentMessage.chatId,
+      ctx.session.currentMessage.messageId
+    );
+  }
 
   // reset operation
   ctx.session.currentOperation = null;

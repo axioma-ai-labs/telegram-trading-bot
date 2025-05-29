@@ -207,11 +207,11 @@ withdraw_confirm_msg =
 withdraw_success_msg =
     🎊 *Withdrawal Successful!*
 
-    Amount: { $amount } ETH
-    To Address: `{ $recipientAddress }`
-    Transaction: https://basescan.org/tx/{ $txHash }
+    • *Amount:* { $amount } ETH
+    • *From:* { $walletAddress }
+    • *To Address:* `{ $recipientAddress }`
 
-    Your withdrawal has been submitted to the network and should confirm within minutes.
+    Your withdrawal has been submitted to the network and should be confirmed within minutes.
 
     Check your transaction on [BaseScan](https://basescan.org/tx/{ $txHash })
 
@@ -219,13 +219,18 @@ withdraw_success_msg =
 sell_cancel_msg = ⭕ Sell order has been successfully cancelled!
 
 sell_confirm_msg =
-    🔍 *Confirm Sell Order*
+    🎯 *Confirm Your Sell Order*
 
-    Token: *{ $tokenSymbol }* | { $tokenName }
-    CA: `{ $tokenAddress }`
-    Amount: *{ $amount } { $tokenSymbol }*
+    📊 **Details:**
+    • *Symbol:* **${ $tokenSymbol }** | { $tokenName }
+    • *Contract:* `{ $tokenAddress }`
 
-    Are you sure you want to proceed with this sale?
+    💰 **Transaction Summary:**
+    • *Selling:* **{ $amount } { $tokenSymbol }** (≈ { $usdValue })
+
+    Important: This action cannot be undone. Please review carefully.
+
+    Do you want to proceed with this sale?
 
 sell_custom_amount_msg = Please enter the amount of tokens you want to sell:
 sell_error_msg = ❌ Something went wrong during the sell operation. Please try again.
@@ -233,26 +238,37 @@ sell_insufficient_balance_msg = ⚠️ Insufficient balance. You only have { $ba
 sell_invalid_operation_msg = ⚠️ Invalid sell operation. Please try again.
 sell_no_balance_msg = ⚠️ You have no balance of this token to sell.
 sell_success_msg =
-    🎊 *Congratulations! Your sell order for { $amount } { $tokenSymbol } has been created successfully!*
+    🎊 *Sell Order Successful!*
 
-    Transaction details:
-    • Amount: { $amount } { $tokenSymbol }
-    • Token: { $token }
-    • Transaction: https://basescan.org/tx/{ $txHash }
+    Transaction Details:
+    • Token: *{ $tokenSymbol }*
+    • Amount Sold: *{ $amount } { $tokenSymbol }*
+    • Contract: `{ $token }`
+    
+    View on [BaseScan](https://basescan.org/tx/{ $txHash })
+
+    Need help? Use /help to see common issues and solutions.
 
 sell_token_found_msg = 
-    ✅ *Token Found*
+    ✅ *${ $tokenSymbol }* | *{ $tokenName }* on *{ $tokenChain }*
 
-    Symbol: *${ $tokenSymbol }*
-    Name: *{ $tokenName }*
+    Balance: *{ $balance } { $tokenSymbol }*
+
     Price: *${ $tokenPrice }*
-    Chain: *{ $tokenChain }*
 
-    Please select how much { $tokenSymbol } you want to sell.
+    Select how much *${ $tokenSymbol }* you want to sell.
 
     Go to /settings to adjust slippage and gas if the transaction fails.
 
-sell_token_msg = Enter token contract address of a token you want to sell:
+sell_token_msg = 
+    💵 *Sell Token*
+
+    🔹 *ETH Balance:* { $ethBalance } ETH
+
+    🔹 *Token Balances:*
+    { $formattedSellBalances }
+
+    Enter token contract address of a token you want to sell:
 
 # transactions
 transactions_overview_msg =
@@ -467,10 +483,9 @@ set_slippage_msg =
 settings_msg =
     ⚙️ *Settings*
 
-    Current Settings:
-    • Slippage: { $slippage }
-    • Language: { $language }
-    • Gas Priority: { $gasPriority }
+    • *Slippage:* { $slippage }
+    • *Language:* { $language }
+    • *Gas Priority:* { $gasPriority }
 
     Best Practices:
     - Increase *slippage* to 1% for less liquid tokens
@@ -525,26 +540,11 @@ referral_msg =
     3. You can earn unlimited rewards!
 
     Your Referral Link:
-    `{ $referral_link }`
-
-    Learn more about rewards and tiers in our official [documentation](https://docs.neurodex.xyz/referral-program)
-
-referral_stats_msg =
-    📊 *Referral Statistics*
-
-    Referred Users: { $totalReferrals } users
-    Referral Trades: { $totalTrades } trades
-    Referral Volume: { $totalVolume }
-    Total Referral Earnings: { $totalEarned }
-
-    Keep spreading the word and watch your earnings grow! 🚀
-
-referral_success_notification_msg = 🥳 *Congratulations!* You just referred a new user to Neurodex! You're growing with us (and so are your rewards)!
-
-
+    `
 
 # buy
 buy_amount_msg = Please enter the amount of ETH you want to spend:
+buy_cancel_msg = ⭕ Buy order has been successfully cancelled!
 buy_confirm_msg =
     🔍 *Confirm Buy Order*
 

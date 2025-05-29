@@ -3,6 +3,7 @@
  */
 import { Transaction, TransactionStatus, TransactionType } from '@prisma/client/edge';
 
+import { NeuroDexApi } from '@/services/engine/neurodex';
 import { DcaOrderInfo, LimitOrderInfo } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 
@@ -341,4 +342,111 @@ export function formatTransaction(
     txHash,
     chain: transaction.chain,
   });
+}
+
+/**
+ * Calculate sell amount based on user input (percentage or custom amount)
+ *
+ * @param amount - User input amount (e.g., "50%", "50", "140.045", "custom")
+ * @param tokenBalance - Available token balance
+ * @param tokenSymbol - Token symbol for error messages
+ * @returns Object with success status, calculated amount, and error message if any
+ */
+export function calculateSellAmount(
+  amount: string,
+  tokenBalance: number,
+  tokenSymbol: string
+): {
+  success: boolean;
+  sellAmount?: number;
+  error?: string;
+  isCustomAmountRequest?: boolean;
+} {
+  // Handle custom amount request
+  if (amount === 'custom') {
+    return {
+      success: true,
+      isCustomAmountRequest: true,
+    };
+  }
+
+  // Handle percentage amounts (either "50%" or "50" for buttons)
+  if (amount.endsWith('%')) {
+    const percentage = parseInt(amount.replace('%', ''));
+    if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+      return {
+        success: false,
+        error: 'Invalid percentage. Please enter a percentage between 1% and 100%.',
+      };
+    }
+
+    // Calculate the exact amount of tokens to sell based on percentage
+    const sellAmount = (tokenBalance * percentage) / 100;
+    return {
+      success: true,
+      sellAmount,
+    };
+  }
+
+  // Handle numeric percentage values from button callbacks (like "25", "50", "75", "100")
+  const numericValue = parseInt(amount);
+  if (!isNaN(numericValue) && numericValue > 0 && numericValue <= 100 && amount.length <= 3) {
+    // This is likely a percentage value from button callback
+    const sellAmount = (tokenBalance * numericValue) / 100;
+    return {
+      success: true,
+      sellAmount,
+    };
+  }
+
+  // Handle custom numeric amount (decimal values)
+  const sellAmount = parseFloat(amount);
+  if (isNaN(sellAmount) || sellAmount <= 0) {
+    return {
+      success: false,
+      error: 'Invalid amount. Please enter a valid positive number.',
+    };
+  }
+
+  // Check if user has enough balance
+  if (sellAmount > tokenBalance) {
+    return {
+      success: false,
+      error: `Insufficient balance. You only have ${tokenBalance.toFixed(6)} ${tokenSymbol} but want to sell ${sellAmount.toFixed(6)} ${tokenSymbol}.`,
+    };
+  }
+
+  return {
+    success: true,
+    sellAmount,
+  };
+}
+
+/**
+ * Calculate and format USD value for a token amount
+ *
+ * @param tokenAddress - Token contract address
+ * @param tokenAmount - Amount of tokens
+ * @param chain - Blockchain network (defaults to 'base')
+ * @returns Promise with formatted USD value string or 'N/A' if unavailable
+ */
+export async function calculateTokenUsdValue(
+  tokenAddress: string,
+  tokenAmount: number,
+  chain: 'base' | 'ethereum' | 'bsc' = 'base'
+): Promise<string> {
+  try {
+    const neurodex = new NeuroDexApi();
+    const tokenData = await neurodex.getTokenDataByContractAddress(tokenAddress, chain);
+
+    if (tokenData.success && tokenData.data?.price) {
+      const usdValue = tokenAmount * tokenData.data.price;
+      return usdValue > 0 ? `$${usdValue.toFixed(2)}` : 'N/A';
+    }
+
+    return 'N/A';
+  } catch (error) {
+    // Silent fail - USD value is not critical for functionality
+    return 'N/A';
+  }
 }

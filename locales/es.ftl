@@ -175,60 +175,105 @@ deposit_msg =
     - Los depósitos de ETH usualmente se confirman en minutos
     - Nunca compartas tu clave privada con nadie
 
-withdraw_msg =
-    📤 *Retirar ETH u otros tokens*
+withdraw_select_amount_msg =
+    📤 *Retirar ETH*
 
-    Tu saldo:
-    - ETH: { $ethBalance }
+    Tu balance: { $ethBalance } ETH
+
+    Por favor selecciona cuánto ETH quieres retirar:
 
     Importante:
     - Verifica dos veces la dirección de destino
     - Los retiros usualmente se confirman en minutos
     - Nunca compartas tu clave privada con nadie
 
+withdraw_custom_amount_msg = Por favor ingresa la cantidad de ETH que quieres retirar:
+withdraw_recipient_address_msg = Por favor ingresa la dirección de la billetera destinataria (0x...):
+withdraw_insufficient_balance_msg = ⚠️ Balance insuficiente. Solo tienes { $balance } ETH pero quieres retirar { $amount } ETH.
+withdraw_invalid_operation_msg = ⚠️ Operación de retiro inválida. Por favor intenta de nuevo.
+withdraw_error_msg = ❌ Algo salió mal durante el retiro. Por favor intenta de nuevo.
+withdraw_cancel_msg = ⭕ El retiro ha sido cancelado.
+invalid_address_msg = ⚠️ Formato de dirección inválido. Por favor ingresa una dirección Ethereum válida que comience con 0x.
+invalid_input_msg = ⚠️ Entrada inválida. Por favor intenta de nuevo.
+
+withdraw_confirm_msg =
+    🔍 *Confirmar Retiro*
+
+    Cantidad: *{ $amount } ETH*
+    A la Dirección: `{ $recipientAddress }`
+
+    ¿Estás seguro que quieres proceder con este retiro?
+
+withdraw_success_msg =
+    🎊 *¡Retiro Exitoso!*
+
+    • *Cantidad:* { $amount } ETH
+    • *Desde:* { $walletAddress }
+    • *A la Dirección:* `{ $recipientAddress }`
+
+    Tu retiro ha sido enviado a la red y debería confirmarse en minutos.
+
+    Revisa tu transacción en [BaseScan](https://basescan.org/tx/{ $txHash })
+
 # sell
 sell_cancel_msg = ⭕ ¡La orden de venta ha sido cancelada exitosamente!
 
 sell_confirm_msg =
-    🔍 *Confirmar Orden de Venta*
+    🎯 *Confirmar Orden de Venta*
 
-    Token: *{ $tokenSymbol }* | { $tokenName }
-    CA: `{ $tokenAddress }`
-    Cantidad: *{ $amount } { $tokenSymbol }*
+    📊 **Detalles:**
+    • *Símbolo:* **${ $tokenSymbol }** | { $tokenName }
+    • *Contrato:* `{ $tokenAddress }`
 
-    ¿Estás seguro de que quieres proceder con esta venta?
+    💰 **Resumen de Transacción:**
+    • *Vendiendo:* **{ $amount } { $tokenSymbol }** (≈ { $usdValue })
+
+    Importante: Esta acción no se puede deshacer. Por favor revisa cuidadosamente.
+
+    ¿Quieres proceder con esta venta?
 
 sell_custom_amount_msg = Por favor ingresa la cantidad de tokens que quieres vender:
 sell_error_msg = ❌ Algo salió mal durante la operación de venta. Por favor intenta de nuevo.
-sell_insufficient_balance_msg = ⚠️ Saldo insuficiente. Solo tienes { $balance } { $tokenSymbol }.
+sell_insufficient_balance_msg = ⚠️ Balance insuficiente. Solo tienes { $balance } { $tokenSymbol }.
 sell_invalid_operation_msg = ⚠️ Operación de venta inválida. Por favor intenta de nuevo.
-sell_no_balance_msg = ⚠️ No tienes saldo de este token para vender.
+sell_no_balance_msg = ⚠️ No tienes balance de este token para vender.
 sell_success_msg =
-    🎊 *¡Felicitaciones! ¡Tu orden de venta de { $amount } { $tokenSymbol } ha sido creada exitosamente!*
+    🎊 *¡Orden de Venta Exitosa!*
 
-    Detalles de la transacción:
-    • Cantidad: { $amount } { $tokenSymbol }
-    • Token: { $token }
-    • Transacción: https://basescan.org/tx/{ $txHash }
+    Detalles de la Transacción:
+    • Token: *{ $tokenSymbol }*
+    • Cantidad Vendida: *{ $amount } { $tokenSymbol }*
+    • Contrato: `{ $token }`
+    
+    Ver en [BaseScan](https://basescan.org/tx/{ $txHash })
+
+    ¿Necesitas ayuda? Usa /help para ver problemas comunes y soluciones.
 
 sell_token_found_msg = 
-    ✅ *Token Encontrado*
+    ✅ *${ $tokenSymbol }* | *{ $tokenName }* en *{ $tokenChain }*
 
-    Símbolo: *{ $tokenSymbol }*
-    Nombre: *{ $tokenName }*
-    Precio: *{ $tokenPrice }*
-    Cadena: { $tokenChain }
+    Balance: *{ $balance } { $tokenSymbol }*
 
-    Por favor selecciona cuánto { $tokenSymbol } quieres vender.
+    Precio: *${ $tokenPrice }*
+
+    Selecciona cuánto *${ $tokenSymbol }* quieres vender.
 
     Ve a /settings para ajustar slippage y gas si la transacción falla.
 
-sell_token_msg = Ingresa la dirección del contrato de un token que quieras vender:
+sell_token_msg = 
+    💵 *Vender Token*
+
+    🔹 *Balance ETH:* { $ethBalance } ETH
+
+    🔹 *Balances de Tokens:*
+    { $formattedSellBalances }
+
+    Ingresa la dirección del contrato de un token que quieras vender:
 
 # transactions
 transactions_overview_msg =
     💳 *Historial de Transacciones*
-    📊 *Total Transacciones:* { $totalTransactions }
+    📊 *Total de Transacciones:* { $totalTransactions }
     ✅ *Exitosas:* { $successfulTrades }
     ❌ *Fallidas:* { $failedTrades }
     🟡 *Pendientes:* { $pendingTrades }
@@ -252,7 +297,7 @@ no_transactions_msg =
     
     Aún no has realizado ninguna transacción.
     
-    ¡Comienza a operar con /buy, /sell, /dca o /limit!
+    ¡Comienza a operar con /buy, /sell, /dca, o /limit!
 no_transactions_of_type_msg = 
     📋 *Sin Transacciones { $type }*
     
@@ -272,11 +317,11 @@ transaction_item_msg =
     { $details }
     🕒 { $createdDate } { $createdTime }
     🔗 { $txHash } | ⛓️ { $chain }
-transaction_buy_details_msg = Gastado { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
-transaction_sell_details_msg = Vendido { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_buy_details_msg = Gastó { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
+transaction_sell_details_msg = Vendió { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount })
 transaction_dca_details_msg = DCA { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } | { $times } veces | { $expire }
 transaction_limit_details_msg = Límite { $tokenInAmount } { $tokenInSymbol } → { $tokenOutSymbol } ({ $tokenOutAmount }) | { $expire }
-transaction_withdraw_details_msg = Retirado { $tokenInAmount } { $tokenInSymbol } a { $toAddress }
+transaction_withdraw_details_msg = Retiró { $tokenInAmount } { $tokenInSymbol } a { $toAddress }
 transaction_unknown_details_msg = Tipo de transacción desconocido
 
 # orders
@@ -515,6 +560,7 @@ referral_success_notification_msg = 🥳 *¡Felicitaciones!* ¡Acabas de referir
 
 # buy
 buy_amount_msg = Por favor ingresa la cantidad de ETH que deseas gastar:
+buy_cancel_msg = ⭕ ¡La orden de compra ha sido cancelada exitosamente!
 buy_confirm_msg =
     🔍 *Confirmar Orden de Compra*
 

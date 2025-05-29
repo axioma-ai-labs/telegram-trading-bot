@@ -1,5 +1,4 @@
 import { TransactionStatus } from '@prisma/client/edge';
-import { InlineKeyboard } from 'grammy';
 
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
@@ -12,6 +11,8 @@ import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUser } from '@/utils/userValidation';
 import { validatePK } from '@/utils/validators';
+
+import { limitConfirmKeyboard, limitExpiryKeyboard } from '../commands/limit';
 
 // limit token callback
 export async function limitToken(ctx: BotContext): Promise<void> {
@@ -83,13 +84,7 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
 
   await ctx.reply(ctx.t('limit_expiry_msg'), {
     parse_mode: 'Markdown',
-    reply_markup: new InlineKeyboard()
-      .text('1 Hour', 'limit_expiry_1H')
-      .text('1 Day', 'limit_expiry_1D')
-      .text('1 Week', 'limit_expiry_7D')
-      .row()
-      .text('1 Month', 'limit_expiry_30D')
-      .text('Custom', 'limit_expiry_custom'),
+    reply_markup: limitExpiryKeyboard,
   });
 }
 
@@ -131,9 +126,7 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
 
   await ctx.reply(message, {
     parse_mode: 'Markdown',
-    reply_markup: new InlineKeyboard()
-      .text('✅ Confirm', 'limit_confirm')
-      .text('❌ Cancel', 'limit_cancel'),
+    reply_markup: limitConfirmKeyboard,
   });
 }
 
