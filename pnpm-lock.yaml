@@ -32,12 +32,6 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.49.8
         version: 2.49.8(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      '@types/crypto-js':
-        specifier: ^4.2.2
-        version: 4.2.2
-      '@types/js-yaml':
-        specifier: ^4.0.8
-        version: 4.0.9
       argon2:
         specifier: ^0.43.0
         version: 0.43.0
@@ -93,6 +87,12 @@ importers:
       '@types/argon2':
         specifier: ^0.15.4
         version: 0.15.4
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
+      '@types/js-yaml':
+        specifier: ^4.0.8
+        version: 4.0.9
       '@types/libsodium-wrappers':
         specifier: ^0.7.14
         version: 0.7.14
