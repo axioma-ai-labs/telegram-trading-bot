@@ -1,3 +1,6 @@
+/**
+ * @category Bot
+ */
 import { InlineKeyboard } from 'grammy';
 
 import logger from '@/config/logger';
@@ -8,6 +11,10 @@ import { CommandHandler } from '@/types/commands';
 import { BotContext } from '@/types/telegram';
 import { createNewUser, validateUser } from '@/utils/userValidation';
 
+/**
+ * Main navigation keyboard displayed to users after starting the bot.
+ * Provides access to all core trading and wallet management functions.
+ */
 export const startKeyboard = new InlineKeyboard()
   .text('Buy', 'buy')
   .text('Sell', 'sell')
@@ -26,13 +33,38 @@ export const startKeyboard = new InlineKeyboard()
   .text('⚙️ Settings', 'open_settings')
   .text('💬 Help', 'get_help');
 
+/**
+ * Keyboard shown to new users to begin their trading journey.
+ */
 export const startTradingKeyboard = new InlineKeyboard().text('Start Trading 🚀', 'start_trading');
 
+/**
+ * Keyboard for accepting terms and conditions for new users.
+ */
 export const acceptTermsConditionsKeyboard = new InlineKeyboard().text(
   '✅ Accept',
   'accept_terms_conditions'
 );
 
+/**
+ * Start command handler - entry point for all bot interactions.
+ *
+ * Handles both new and existing users with the following flow:
+ * 1. Extracts referral information from command payload
+ * 2. Checks if user exists in database
+ * 3. For new users: creates account, handles referrals, shows terms
+ * 4. For existing users: validates account and shows main menu
+ *
+ * Supports referral system where new users can be referred by existing users
+ * using referral links with format: /start r-{referralCode}
+ *
+ * @example
+ * User interactions:
+ * - New user: /start → Terms & Conditions
+ * - New user with referral: /start r-username → Terms & Conditions + referral credit
+ * - Existing user: /start → Main trading menu
+ * - Existing user without wallet: /start → Wallet creation flow
+ */
 export const startCommandHandler: CommandHandler = {
   command: 'start',
   description: 'Start the bot',

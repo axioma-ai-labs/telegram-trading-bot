@@ -1,3 +1,6 @@
+/**
+ * @category Utils
+ */
 import { ReferralStats, Settings, User, Wallet } from '@prisma/client/edge';
 
 import { bot } from '@/bot';

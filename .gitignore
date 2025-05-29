@@ -6,6 +6,7 @@ docker-compose.override.yaml
 dist/
 build/
 lib/
+docs/auto/
 
 # Environment variables
 .env

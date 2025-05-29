@@ -1,3 +1,6 @@
+/**
+ * @category Bot
+ */
 import { InlineKeyboard } from 'grammy';
 
 import { CommandHandler } from '@/types/commands';
@@ -18,6 +21,16 @@ export const confirmBuyKeyboard = new InlineKeyboard()
   .text('✅ Confirm', 'buy_confirm')
   .text('❌ Cancel', 'buy_cancel');
 
+/**
+ * Command handler for buying tokens through the Telegram bot interface.
+ *
+ * Initiates the token purchase flow by validating the user and setting up
+ * the current operation state for the buy process.
+ *
+ * @example
+ * User types: /buy
+ * Bot responds with token selection interface
+ */
 export const buyCommandHandler: CommandHandler = {
   command: 'buy',
   description: 'Buy a token',

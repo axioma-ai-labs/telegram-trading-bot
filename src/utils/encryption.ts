@@ -1,3 +1,6 @@
+/**
+ * @category Utils
+ */
 import argon2 from 'argon2';
 import _sodium from 'libsodium-wrappers';
 
@@ -8,8 +11,28 @@ interface EncryptedData {
 }
 
 /**
- * Utility class for handling encryption and decryption of sensitive data
- * using Argon2id for key derivation and XChaCha20-Poly1305 for encryption
+ * Encryption service for secure data handling using both AES and Sodium encryption.
+ *
+ * Provides dual encryption capabilities:
+ * - AES encryption for general purpose data protection
+ * - Sodium (libsodium) encryption for high-security applications
+ *
+ * Supports encryption/decryption operations with configurable algorithms
+ * and secure key management for protecting sensitive user data.
+ *
+ * @example
+ * ```typescript
+ * const encryptionService = new EncryptionService();
+ *
+ * // AES encryption
+ * const encrypted = encryptionService.encryptAES('sensitive data', 'secret-key');
+ * const decrypted = encryptionService.decryptAES(encrypted, 'secret-key');
+ *
+ * // Sodium encryption
+ * const key = encryptionService.generateSodiumKey();
+ * const encryptedSodium = encryptionService.encryptSodium('sensitive data', key);
+ * const decryptedSodium = encryptionService.decryptSodium(encryptedSodium, key);
+ * ```
  */
 export class EncryptionService {
   /**
