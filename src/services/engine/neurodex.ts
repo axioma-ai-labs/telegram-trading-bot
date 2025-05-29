@@ -1,4 +1,3 @@
-import { BalancesResponse, Chain, GoldRushClient } from '@covalenthq/client-sdk';
 import { Address } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import Web3 from 'web3';
@@ -187,25 +186,6 @@ export class NeuroDexApi {
       logger.error('Error retrieving private key:', error);
       return null;
     }
-  }
-
-  /**
-   * Get token balances for a given address. Uses Covalent API.
-   *
-   * @param chain - Chain name
-   * @param address - Wallet address
-   * @returns BalancesResponse
-   */
-  async getTokenBalances(
-    chain: string = 'eth-mainnet',
-    address: string
-  ): Promise<BalancesResponse | null> {
-    const client = new GoldRushClient(config.covalenthqApiKey);
-    const response = await client.BalanceService.getTokenBalancesForWalletAddress(
-      chain as Chain,
-      address
-    );
-    return response.data;
   }
 
   /**

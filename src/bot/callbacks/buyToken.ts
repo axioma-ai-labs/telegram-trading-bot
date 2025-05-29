@@ -1,6 +1,9 @@
+import { TransactionStatus } from '@prisma/client/edge';
+
 import { confirmBuyKeyboard } from '@/bot/commands/buy';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
 import { BuyParams } from '@/types/neurodex';
@@ -99,12 +102,38 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
   };
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createBuyTransaction(user.id, user.wallets[0].id, {
+      chain: 'base',
+      tokenInAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+      tokenInSymbol: 'ETH',
+      tokenInAmount: currentOperation.amount,
+      tokenOutAddress: currentOperation.token,
+      tokenOutSymbol: currentOperation.tokenSymbol || 'TOKEN',
+      status: TransactionStatus.PENDING,
+    });
+    logger.info('Created pending buy transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('buy_error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   const neurodex = new NeuroDexApi();
   const buyResult = await neurodex.buy(params, 'base');
   logger.info('BUY RESULT:', buyResult);
 
   // if success
   if (buyResult.success && buyResult.data?.txHash) {
+    // Update transaction with success status and txHash
+    await TransactionsService.updateTransactionStatus(
+      transaction.id,
+      TransactionStatus.COMPLETED,
+      buyResult.data.txHash
+    );
     const message = ctx.t('buy_success_msg', {
       amount: currentOperation.amount,
       token: currentOperation.token,
@@ -115,6 +144,9 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     });
     ctx.session.currentOperation = null;
   } else {
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     // check if no mooooooooney
     const message = buyResult.error?.toLowerCase() || '';
     if (message.includes('insufficient funds')) {

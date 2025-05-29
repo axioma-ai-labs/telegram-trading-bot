@@ -1,7 +1,12 @@
+import { TransactionStatus } from '@prisma/client/edge';
+
 import { confirmSellKeyboard } from '@/bot/commands/sell';
 import logger from '@/config/logger';
+import { CoinStatsService } from '@/services/engine/coinstats';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
+import { CoinStatsBalance } from '@/types/coinstats';
 import { GasPriority } from '@/types/config';
 import { SellParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
@@ -44,35 +49,32 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
   }
 
   try {
-    const neurodex = new NeuroDexApi();
+    const coinStatsService = CoinStatsService.getInstance();
 
-    // Get user's token balance using Covalent API
-    const balancesResponse = await neurodex.getTokenBalances(
-      'base-mainnet',
-      user.wallets[0].address
-    );
+    const balancesResponse = await coinStatsService.getWalletBalances(user.wallets[0].address);
 
-    if (!balancesResponse || !balancesResponse.items) {
+    if (!balancesResponse || !balancesResponse.length) {
       const message = await ctx.reply(ctx.t('error_msg'));
       deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
-    // Find the token in balances
-    const tokenBalance = balancesResponse.items.find(
-      (tokenItem) =>
-        tokenItem?.contract_address?.toLowerCase() === currentOperation.token!.toLowerCase()
-    );
+    // Find the token in balances across all blockchains
+    const tokenBalance = balancesResponse
+      .flatMap((blockchain) => blockchain.balances)
+      .find(
+        (tokenItem: CoinStatsBalance) =>
+          tokenItem?.contractAddress?.toLowerCase() === currentOperation.token!.toLowerCase()
+      );
 
-    if (!tokenBalance || !tokenBalance.balance || tokenBalance.balance === 0n) {
+    if (!tokenBalance || !tokenBalance.amount || tokenBalance.amount === 0) {
       const message = await ctx.reply(ctx.t('sell_no_balance_msg'));
       deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
-    // Convert balance from bigint to number (considering decimals)
-    const decimals = tokenBalance.contract_decimals || 18;
-    const balanceNumber = parseFloat(tokenBalance.balance.toString()) / Math.pow(10, decimals);
+    // Convert balance from number (CoinStats already provides amount in decimal form)
+    const balanceNumber = tokenBalance.amount;
 
     let sellAmount: number;
 
@@ -99,7 +101,7 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
         const message = await ctx.reply(
           ctx.t('sell_insufficient_balance_msg', {
             balance: balanceNumber.toFixed(6),
-            tokenSymbol: tokenBalance.contract_ticker_symbol || 'tokens',
+            tokenSymbol: tokenBalance.symbol || 'tokens',
           })
         );
         deleteBotMessage(ctx, message.message_id, 10000);
@@ -116,8 +118,8 @@ export async function performSell(ctx: BotContext, amount: string): Promise<void
     // Show confirmation dialog
     const confirmMessage = ctx.t('sell_confirm_msg', {
       token: currentOperation.token,
-      tokenSymbol: currentOperation.tokenSymbol || tokenBalance.contract_ticker_symbol || '',
-      tokenName: currentOperation.tokenName || tokenBalance.contract_name || 'Unknown',
+      tokenSymbol: currentOperation.tokenSymbol || tokenBalance.symbol || '',
+      tokenName: currentOperation.tokenName || tokenBalance.name || 'Unknown',
       amount: sellAmount,
     });
 
@@ -152,6 +154,26 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     return;
   }
 
+  // Create pending transaction record
+  let transaction;
+  try {
+    transaction = await TransactionsService.createSellTransaction(user.id, user.wallets[0].id, {
+      chain: 'base',
+      tokenInAddress: currentOperation.token,
+      tokenInSymbol: currentOperation.tokenSymbol || 'TOKEN',
+      tokenInAmount: currentOperation.amount,
+      tokenOutAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+      tokenOutSymbol: 'ETH',
+      status: TransactionStatus.PENDING,
+    });
+    logger.info('Created pending sell transaction:', transaction.id);
+  } catch (error) {
+    logger.error('Error creating transaction record:', error);
+    const message = await ctx.reply(ctx.t('error_msg'));
+    await deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
   try {
     const params: SellParams = {
       fromTokenAddress: currentOperation.token,
@@ -169,6 +191,13 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
 
     // if success
     if (sellResult.success && sellResult.data?.txHash) {
+      // Update transaction with success status and txHash
+      await TransactionsService.updateTransactionStatus(
+        transaction.id,
+        TransactionStatus.COMPLETED,
+        sellResult.data.txHash
+      );
+
       const message = ctx.t('sell_success_msg', {
         amount: currentOperation.amount,
         tokenSymbol: currentOperation.tokenSymbol || 'tokens',
@@ -181,6 +210,9 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       });
       ctx.session.currentOperation = null;
     } else {
+      // Update transaction with failed status
+      await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
       // check if no balance or other errors
       const errorMessage = sellResult.error?.toLowerCase() || '';
       if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
@@ -194,6 +226,9 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
       ctx.session.currentOperation = null;
     }
   } catch (error) {
+    // Update transaction with failed status
+    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
+
     logger.error('Error during sell transaction:', error);
     const errorMessage = error instanceof Error ? error.message.toLowerCase() : '';
     if (errorMessage.includes('insufficient') || errorMessage.includes('balance')) {
