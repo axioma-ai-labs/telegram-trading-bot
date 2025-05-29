@@ -14,14 +14,14 @@ export async function validatePK(ctx: BotContext, privateKey: string | null): Pr
   // check if private key exists
   if (!privateKey) {
     const message = await ctx.reply(ctx.t('no_private_key_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return false;
   }
 
   // check if private key matches basic format
   if (!isValidPrivateKey(privateKey)) {
     const message = await ctx.reply(ctx.t('invalid_private_key_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return false;
   }
 
@@ -31,7 +31,7 @@ export async function validatePK(ctx: BotContext, privateKey: string | null): Pr
   // check length
   if (cleanPrivateKey.length !== 64) {
     const message = await ctx.reply(ctx.t('invalid_private_key_length_msg'));
-    await deleteBotMessage(ctx, message.message_id, 5000);
+    deleteBotMessage(ctx, message.message_id, 5000);
     return false;
   }
 
