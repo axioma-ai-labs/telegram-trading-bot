@@ -44,6 +44,12 @@ pnpm prisma generate --no-engine
 make dev
 ```
 
+7. Generate documentation:
+
+```bash
+pnpm run docs
+```
+
 ## Documentation
 
 ### 📚 API Documentation
@@ -74,8 +80,8 @@ Comprehensive TypeDoc-generated documentation with 100% codebase coverage:
 ### 📱 Generate Documentation
 
 ```bash
-npm run docs        # Generate documentation  
-npm run docs:watch  # Generate and watch for changes
+pnpm run docs        # Generate documentation  
+pnpm run docs:watch  # Generate and watch for changes
 ```
 
 ---
