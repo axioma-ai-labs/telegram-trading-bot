@@ -1,6 +1,7 @@
 import { TransactionStatus } from '@prisma/client/edge';
 
 import { confirmWithdrawKeyboard, withdrawAmountKeyboard } from '@/bot/commands/withdraw';
+import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ViemService } from '@/services/engine/viem';
@@ -12,10 +13,11 @@ import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUser } from '@/utils/userValidation';
 
+import { startKeyboard } from '../commands/start';
+
 export async function withdrawFunds(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx);
 
   // Set current operation
   ctx.session.currentOperation = { type: 'withdraw' };
@@ -38,8 +40,7 @@ export async function withdrawFunds(ctx: BotContext): Promise<void> {
 
 export async function performWithdraw(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (!currentOperation || currentOperation.type !== 'withdraw') {
@@ -65,13 +66,12 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
 
   // Check if user has sufficient balance
   const viemService = new ViemService();
-  const ethBalance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
-  const balanceNumber = parseFloat(ethBalance);
+  const balance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
 
-  if (parsedAmount > balanceNumber) {
+  if (parsedAmount > balance) {
     const insufficientBalanceMessage = await ctx.reply(
       ctx.t('withdraw_insufficient_balance_msg', {
-        balance: ethBalance,
+        balance: balance,
         amount: parsedAmount,
       })
     );
@@ -119,8 +119,7 @@ export async function performWithdraw(ctx: BotContext, amount: string): Promise<
 
 export async function setRecipientAddress(ctx: BotContext, address: string): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (!currentOperation || currentOperation.type !== 'withdraw') {
@@ -170,8 +169,7 @@ export async function setRecipientAddress(ctx: BotContext, address: string): Pro
 
 export async function withdrawConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (
@@ -218,7 +216,7 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
       gasPriority: user?.settings?.gasPriority as GasPriority,
       walletAddress: user.wallets[0].address,
       privateKey: privateKey,
-      referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
+      referrer: config.referrerWalletAddress,
     };
 
     const neurodex = new NeuroDexApi();
@@ -289,8 +287,7 @@ export async function withdrawConfirm(ctx: BotContext): Promise<void> {
 
 export async function withdrawCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // Delete confirmation message
   if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
@@ -302,6 +299,18 @@ export async function withdrawCancel(ctx: BotContext): Promise<void> {
 
   // reset operation
   ctx.session.currentOperation = null;
+
+  // Send cancel message
   const cancelMessage = await ctx.reply(ctx.t('withdraw_cancel_msg'));
-  deleteBotMessage(ctx, cancelMessage.message_id, 5000);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await ctx.api.deleteMessage(cancelMessage.chat.id, cancelMessage.message_id);
+
+  // Send start message
+  await ctx.reply(ctx.t('start_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: startKeyboard,
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
 }

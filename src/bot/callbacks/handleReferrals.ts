@@ -6,8 +6,7 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function getReferralLink(ctx: BotContext): Promise<void> {
   //validate user
-  const { isValid, user } = await validateUser(ctx, { allowStale: true });
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx, { allowStale: true });
 
   const referral_link = user.referralCode || '';
   await ReferralService.initializeReferralStats(user.id);
@@ -24,8 +23,7 @@ export async function getReferralLink(ctx: BotContext): Promise<void> {
 
 export async function getReferralStats(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx, { allowStale: true });
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx, { allowStale: true });
 
   const referralStatistics = await ReferralService.getReferralStats(user.id);
   if (!referralStatistics) return;

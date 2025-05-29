@@ -243,19 +243,22 @@ export interface TokenInfo {
 
 /**
  * Extended token data with additional information
+ *
+ * Note: When returned by getTokenDataByContractAddress(), name, symbol, chain, and price
+ * are guaranteed to be defined (with safe defaults if not available from the API).
  */
 export interface TokenData extends TokenInfo {
-  /** Token name */
+  /** Token name (guaranteed to be defined when from getTokenDataByContractAddress) */
   name: string;
-  /** Current price in USD */
-  price?: number;
+  /** Current price in USD (guaranteed to be defined when from getTokenDataByContractAddress, defaults to 0) */
+  price: number;
   /** Total supply */
   totalSupply?: number;
   /** Market cap */
   marketCap?: number;
   /** Token logo URL */
   logo?: string;
-  /** Chain ID */
+  /** Chain ID (guaranteed to be defined when from getTokenDataByContractAddress) */
   chain: string;
 }
 

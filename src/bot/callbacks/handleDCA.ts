@@ -1,6 +1,7 @@
 import { TransactionStatus } from '@prisma/client/edge';
 
 import { confirmDcaKeyboard, intervalKeyboard, timesKeyboard } from '@/bot/commands/dca';
+import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { TransactionsService } from '@/services/prisma/transactions';
@@ -13,9 +14,10 @@ import { deleteBotMessage } from '@/utils/deleteMessage';
 import { formatInterval } from '@/utils/formatters';
 import { validateUser } from '@/utils/userValidation';
 
+import { startKeyboard } from '../commands/start';
+
 export async function dcaToken(ctx: BotContext): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // DCA
   ctx.session.currentOperation = {
@@ -28,8 +30,7 @@ export async function dcaToken(ctx: BotContext): Promise<void> {
 }
 
 export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   const { currentOperation } = ctx.session;
 
@@ -64,8 +65,7 @@ export async function retrieveDcaAmount(ctx: BotContext, amount: string): Promis
 }
 
 export async function retrieveDcaInterval(ctx: BotContext, interval: string): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   const { currentOperation } = ctx.session;
 
@@ -95,8 +95,7 @@ export async function retrieveDcaInterval(ctx: BotContext, interval: string): Pr
 }
 
 export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<void> {
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   const { currentOperation } = ctx.session;
 
@@ -140,8 +139,7 @@ export async function retrieveDcaTimes(ctx: BotContext, times: string): Promise<
 
 export async function dcaConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   const settings = user?.settings;
   const { currentOperation } = ctx.session;
@@ -201,7 +199,7 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       gasPriority: 'standard',
       walletAddress: wallet.address,
       privateKey: privateKey,
-      referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
+      referrer: config.referrerWalletAddress,
     };
 
     // create dca order
@@ -256,19 +254,29 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
 
 export async function dcaCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply(ctx.t('dca_cancel_msg'));
-  deleteBotMessage(ctx, message.message_id, 5000);
+
+  // Send cancel message
+  const cancelMessage = await ctx.reply(ctx.t('dca_cancel_msg'));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await ctx.api.deleteMessage(cancelMessage.chat.id, cancelMessage.message_id);
+
+  // send start message
+  await ctx.reply(ctx.t('start_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: startKeyboard,
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
 }
 
 export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   try {
     const neurodex = new NeuroDexApi();
@@ -364,8 +372,7 @@ export async function cancelDcaOrder(ctx: BotContext): Promise<void> {
 
 export async function getDcaOrders(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
 
   // get DCA orders
   const neurodex = new NeuroDexApi();

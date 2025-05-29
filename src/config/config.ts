@@ -12,9 +12,6 @@ export const config = {
   projectName: 'Neurodex',
   environment: process.env.ENVIRONMENT || 'production',
 
-  // Telegram Bot Settings
-  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN!,
-
   // Node RPCs
   node: {
     ethereumMainnetRpc: process.env.ETHEREUM_MAINNET_RPC!,
@@ -22,6 +19,12 @@ export const config = {
     baseSepoliaRpc: process.env.BASE_SEPOLIA_RPC!,
     bncRpc: process.env.BNC_RPC!,
   },
+
+  // Telegram Bot Settings
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN!,
+
+  // Referrer Wallet Address
+  referrerWalletAddress: process.env.REFERRER_WALLET_ADDRESS!,
 
   // Trading Settings
   trading: {

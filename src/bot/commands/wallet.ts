@@ -66,8 +66,7 @@ export const walletCommandHandler: CommandHandler = {
   description: 'Manage your wallet',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user?.wallets?.[0]) return;
+    const user = await validateUser(ctx);
 
     const viemService = new ViemService();
     const coinStatsService = CoinStatsService.getInstance();

@@ -36,8 +36,7 @@ export const buyCommandHandler: CommandHandler = {
   description: 'Buy a token',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUser(ctx);
-    if (!isValid) return;
+    await validateUser(ctx);
 
     ctx.session.currentOperation = { type: 'buy' };
 

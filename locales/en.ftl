@@ -107,7 +107,7 @@ already_up_to_date_msg = ✨ Already up to date!
 rate_limit_second_msg = Please slow down! Maximum 3 requests per second.
 rate_limit_minute_msg = You have exceeded the limit of 50 requests per minute. Please wait.
 rate_limit_15min_msg = You have exceeded the limit of 300 requests per 15 minutes. Please wait.
-token_not_found_msg = ❌ Token not found. Please check the token contract address and try again.
+token_not_found_msg = ⚠️ No token found. Please check the token contract address and try again.
 
 # dca
 dca_cancel_msg = ⭕ DCA order has been successfully cancelled!

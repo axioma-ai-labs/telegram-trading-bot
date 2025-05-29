@@ -32,8 +32,7 @@ export const limitCommandHandler: CommandHandler = {
   description: 'Create a limit order',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUser(ctx);
-    if (!isValid) return;
+    await validateUser(ctx);
 
     ctx.session.currentOperation = { type: 'limit' };
 

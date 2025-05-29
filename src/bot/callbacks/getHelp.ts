@@ -4,8 +4,7 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function handleGetHelp(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   const message = ctx.t('help_msg');
 

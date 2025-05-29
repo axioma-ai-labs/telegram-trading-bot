@@ -17,7 +17,7 @@ export async function handleCreateWallet(ctx: BotContext): Promise<void> {
     if (!telegramId) return;
 
     // validate user
-    const { user } = await validateUser(ctx, {
+    const user = await validateUser(ctx, {
       skipMessages: true,
       allowStale: true,
     });

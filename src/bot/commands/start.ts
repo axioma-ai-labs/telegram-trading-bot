@@ -106,22 +106,17 @@ export const startCommandHandler: CommandHandler = {
     }
 
     // validate user (existing user)
-    const { isValid } = await validateUser(ctx, { allowStale: true });
+    await validateUser(ctx, { allowStale: true });
+    logger.info('Existing user:', telegramId);
 
-    if (isValid) {
-      // Existing user with wallet & accepted terms conditions
-      logger.info('Existing user:', telegramId);
-      const message = ctx.t('start_msg');
-      await ctx.reply(message, {
-        parse_mode: 'Markdown',
-        reply_markup: startKeyboard,
-        link_preview_options: {
-          is_disabled: true,
-        },
-      });
-    } else {
-      // validate user (existing user)
-      await validateUser(ctx);
-    }
+    // show main menu
+    const message = ctx.t('start_msg');
+    await ctx.reply(message, {
+      parse_mode: 'Markdown',
+      reply_markup: startKeyboard,
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   },
 };

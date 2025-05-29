@@ -25,8 +25,7 @@ export const sellCommandHandler: CommandHandler = {
   description: 'Sell a token',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user?.wallets?.[0]) return;
+    const user = await validateUser(ctx);
 
     ctx.session.currentOperation = { type: 'sell' };
 

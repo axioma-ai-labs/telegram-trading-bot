@@ -13,13 +13,12 @@ import { validateUser } from '@/utils/userValidation';
 
 export async function handleConfigureSettings(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid) return;
+  const user = await validateUser(ctx);
 
   const message = ctx.t('settings_msg', {
-    slippage: getSlippageName(user?.settings?.slippage || '1'),
-    language: getLanguageName(user?.settings?.language || 'en'),
-    gasPriority: getGasPriorityName(user?.settings?.gasPriority || 'standard'),
+    slippage: getSlippageName(user.settings?.slippage || '1'),
+    language: getLanguageName(user.settings?.language || 'en'),
+    gasPriority: getGasPriorityName(user.settings?.gasPriority || 'standard'),
   });
 
   await ctx.editMessageText(message, {
@@ -57,8 +56,7 @@ export async function handleSetGas(ctx: BotContext): Promise<void> {
 // Update slippage
 export const updateSlippage = async (ctx: BotContext, slippage: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx);
 
   await SettingsService.updateSlippage(user.id, slippage);
   logger.info(`Slippage set to ${getSlippageName(slippage)}`);
@@ -81,8 +79,7 @@ export const updateSlippage = async (ctx: BotContext, slippage: string): Promise
 // Update gas priority
 export const updateGasPriority = async (ctx: BotContext, gasPriority: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx);
 
   await SettingsService.updateGasPriority(user.id, gasPriority);
   await ctx.answerCallbackQuery(
@@ -104,8 +101,7 @@ export const updateGasPriority = async (ctx: BotContext, gasPriority: string): P
 // Update language
 export const updateLanguage = async (ctx: BotContext, language: string): Promise<void> => {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user) return;
+  const user = await validateUser(ctx);
 
   // upd language
   await SettingsService.updateLanguage(user.id, language);

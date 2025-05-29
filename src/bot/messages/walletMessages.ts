@@ -22,9 +22,7 @@ export async function handlePkVerificationMessages(
 ): Promise<void> {
   try {
     // Validate user and get wallet
-    const { isValid, user } = await validateUser(ctx);
-    if (!isValid || !user) return;
-
+    const user = await validateUser(ctx);
     const walletAddress = user.wallets[0].address;
 
     // Get private key from secure storage

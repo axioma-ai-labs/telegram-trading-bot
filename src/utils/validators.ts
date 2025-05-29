@@ -60,3 +60,65 @@ export function isValidDcaTimes(times: number): boolean {
 export function isValidDcaAmount(amount: number): boolean {
   return amount > 0 && amount <= 10000;
 }
+
+//////////////////////////////////////////////////////////
+// Amount validators
+//////////////////////////////////////////////////////////
+
+/**
+ * Validates if the provided amount is a valid positive number.
+ *
+ * Checks for:
+ * - Valid number format (string or number input)
+ * - Not NaN, Infinity, or -Infinity
+ * - Greater than 0
+ * - Within reasonable bounds (not exceeding 1 billion)
+ * - Not null, undefined, or empty string
+ *
+ * @param amount - The amount to validate (string or number)
+ * @returns True if the amount is valid, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isValidAmount("0.1")     // true
+ * isValidAmount("100")     // true
+ * isValidAmount("0")       // false (must be > 0)
+ * isValidAmount("-5")      // false (negative)
+ * isValidAmount("abc")     // false (not a number)
+ * isValidAmount("")        // false (empty string)
+ * isValidAmount(null)      // false (null)
+ * isValidAmount(Infinity)  // false (not finite)
+ * ```
+ */
+export function isValidAmount(amount: string | number | null | undefined): boolean {
+  // Check for null, undefined, or empty string
+  if (amount === null || amount === undefined || amount === '') {
+    return false;
+  }
+
+  // Convert to number if it's a string
+  const numericAmount = typeof amount === 'string' ? Number(amount.trim()) : amount;
+
+  // Check if conversion resulted in NaN
+  if (isNaN(numericAmount)) {
+    return false;
+  }
+
+  // Check if it's a finite number (excludes Infinity and -Infinity)
+  if (!Number.isFinite(numericAmount)) {
+    return false;
+  }
+
+  // Check if it's positive (greater than 0)
+  if (numericAmount <= 0) {
+    return false;
+  }
+
+  // Check for reasonable upper bound (1 billion)
+  // This prevents unrealistic amounts and potential overflow issues
+  if (numericAmount > 1_000_000_000) {
+    return false;
+  }
+
+  return true;
+}

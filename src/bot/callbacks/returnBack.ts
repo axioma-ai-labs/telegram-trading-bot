@@ -29,8 +29,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_settings: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUser(ctx, { cacheOnly: true });
-      if (!isValid) return '';
+      const user = await validateUser(ctx, { cacheOnly: true });
 
       const message = ctx.t('settings_msg', {
         slippage: getSlippageName(user?.settings?.slippage || '1'),
@@ -44,8 +43,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_orders: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUser(ctx, { cacheOnly: true });
-      if (!isValid || !user?.wallets?.[0]) return '';
+      const user = await validateUser(ctx, { cacheOnly: true });
 
       const walletAddress = user.wallets[0].address;
       const neurodex = new NeuroDexApi();
@@ -70,8 +68,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_referrals: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUser(ctx);
-      if (!isValid || !user) return '';
+      const user = await validateUser(ctx);
 
       const referral_link = user.referralCode || '';
       const message = ctx.t('referral_msg', { referral_link });
@@ -81,14 +78,14 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_wallet: {
     message: async (ctx: BotContext) => {
-      const { user } = await validateUser(ctx, { cacheOnly: true });
+      const user = await validateUser(ctx, { cacheOnly: true });
 
       const viemService = new ViemService();
       const coinStatsService = CoinStatsService.getInstance();
-      const walletAddress = user?.wallets[0].address as `0x${string}`;
+      const walletAddress = user.wallets[0].address as `0x${string}`;
 
       const [balance, walletHoldings] = await Promise.all([
-        viemService.getNativeBalance(walletAddress),
+        viemService.getNativeBalance(user.wallets[0].address as `0x${string}`),
         coinStatsService.getWalletTokenHoldings(walletAddress, 'base', 0.1),
       ]);
 
@@ -107,8 +104,7 @@ export const BACK_HANDLERS: Record<string, BackHandlerConfig> = {
   },
   back_transactions: {
     message: async (ctx: BotContext) => {
-      const { isValid, user } = await validateUser(ctx, { cacheOnly: true });
-      if (!isValid || !user?.wallets?.[0]) return '';
+      await validateUser(ctx, { cacheOnly: true });
 
       const message = ctx.t('transactions_msg');
       return message;

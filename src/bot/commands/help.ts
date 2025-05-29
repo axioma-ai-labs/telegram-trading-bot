@@ -15,8 +15,7 @@ export const helpCommandHandler: CommandHandler = {
   description: 'Get help',
   handler: async (ctx: BotContext): Promise<void> => {
     // validate user
-    const { isValid } = await validateUser(ctx);
-    if (!isValid) return;
+    await validateUser(ctx);
 
     const message = ctx.t('help_msg');
     logger.info('Help message:', message);

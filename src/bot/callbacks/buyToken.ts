@@ -4,8 +4,11 @@
 import { TransactionStatus } from '@prisma/client/edge';
 
 import { confirmBuyKeyboard } from '@/bot/commands/buy';
+import { startKeyboard } from '@/bot/commands/start';
+import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
+import { ViemService } from '@/services/engine/viem';
 import { TransactionsService } from '@/services/prisma/transactions';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { GasPriority } from '@/types/config';
@@ -13,6 +16,7 @@ import { BuyParams } from '@/types/neurodex';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
 import { validateUser } from '@/utils/userValidation';
+import { isValidAmount } from '@/utils/validators';
 
 /**
  * Initiates the token buying process for a user.
@@ -28,13 +32,10 @@ import { validateUser } from '@/utils/userValidation';
  */
 export async function buyToken(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // buy
-  ctx.session.currentOperation = {
-    type: 'buy',
-  };
+  ctx.session.currentOperation = { type: 'buy' };
 
   await ctx.reply(ctx.t('buy_token_msg'), {
     parse_mode: 'Markdown',
@@ -58,15 +59,8 @@ export async function buyToken(ctx: BotContext): Promise<void> {
  */
 export async function performBuy(ctx: BotContext, amount: string): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
-
-  if (!currentOperation?.token) {
-    const message = await ctx.reply(ctx.t('invalid_token_msg'));
-    deleteBotMessage(ctx, message.message_id, 10000);
-    return;
-  }
 
   // custom amount
   if (amount === 'custom') {
@@ -76,9 +70,27 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
     return;
   }
 
-  const parsedAmount = parseFloat(amount);
-  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+  // validate amount
+  if (!isValidAmount(amount)) {
     const message = await ctx.reply(ctx.t('invalid_amount_msg'));
+    deleteBotMessage(ctx, message.message_id, 5000);
+    return;
+  }
+
+  // parse amount after validation
+  const parsedAmount = Number(amount);
+
+  // get user eth balance
+  const viemService = new ViemService();
+  const ethBalance = await viemService.getNativeBalance(user.wallets[0].address as `0x${string}`);
+  if (ethBalance < parsedAmount) {
+    const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
+    deleteBotMessage(ctx, message.message_id, 10000);
+    return;
+  }
+
+  if (!currentOperation?.token) {
+    const message = await ctx.reply(ctx.t('invalid_token_msg'));
     deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
@@ -145,8 +157,7 @@ export async function performBuy(ctx: BotContext, amount: string): Promise<void>
  */
 export async function buyConfirm(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.wallets?.[0]) return;
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
 
   if (!currentOperation?.token || !currentOperation?.amount) {
@@ -169,32 +180,31 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     gasPriority: user?.settings?.gasPriority as GasPriority,
     walletAddress: user.wallets[0].address,
     privateKey: privateKey,
-    referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
+    referrer: config.referrerWalletAddress,
   };
 
-  // Create pending transaction record
-  let transaction;
-  try {
-    transaction = await TransactionsService.createBuyTransaction(user.id, user.wallets[0].id, {
-      chain: 'base',
-      tokenInAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
-      tokenInSymbol: 'ETH',
-      tokenInAmount: currentOperation.amount,
-      tokenOutAddress: currentOperation.token,
-      tokenOutSymbol: currentOperation.tokenSymbol || 'TOKEN',
-      status: TransactionStatus.PENDING,
-    });
-    logger.info('Created pending buy transaction:', transaction.id);
-  } catch (error) {
-    logger.error('Error creating transaction record:', error);
-    const message = await ctx.reply(ctx.t('buy_error_msg'));
-    deleteBotMessage(ctx, message.message_id, 5000);
-    return;
-  }
+  // save to db
+  const TransactionData = {
+    chain: 'base',
+    tokenInAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+    tokenInSymbol: 'ETH',
+    tokenInAmount: currentOperation.amount,
+    tokenOutAddress: currentOperation.token,
+    tokenOutSymbol: currentOperation.tokenSymbol || 'TOKEN',
+    status: TransactionStatus.PENDING,
+  };
 
+  const transaction = await TransactionsService.createBuyTransaction(
+    user.id,
+    user.wallets[0].id,
+    TransactionData
+  );
+  logger.info('Created pending buy transaction:', transaction.id);
+
+  // buy
   const neurodex = new NeuroDexApi();
   const buyResult = await neurodex.buy(params, 'base');
-  logger.info('BUY RESULT:', buyResult);
+  logger.info(`BUY RESULT: ${JSON.stringify(buyResult, null, 2)}`);
 
   // if success
   if (buyResult.success && buyResult.data?.txHash) {
@@ -222,18 +232,26 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
     });
     ctx.session.currentOperation = null;
   } else {
-    // Update transaction with failed status
+    // update db with failed status
     await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
 
-    // check if no mooooooooney
-    const message = buyResult.error?.toLowerCase() || '';
-    if (message.includes('insufficient funds')) {
-      const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-      deleteBotMessage(ctx, message.message_id, 10000);
-    } else {
-      const message = await ctx.reply(ctx.t('buy_error_msg'));
-      deleteBotMessage(ctx, message.message_id, 10000);
+    // edit confirmation message
+    if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
+      if (buyResult.error?.toLowerCase().includes('insufficient funds')) {
+        await ctx.api.editMessageText(
+          ctx.session.currentMessage?.chatId,
+          ctx.session.currentMessage?.messageId,
+          ctx.t('insufficient_funds_msg')
+        );
+      } else {
+        await ctx.api.editMessageText(
+          ctx.session.currentMessage?.chatId,
+          ctx.session.currentMessage?.messageId,
+          ctx.t('buy_error_msg')
+        );
+      }
     }
+
     // reset
     ctx.session.currentOperation = null;
   }
@@ -253,8 +271,7 @@ export async function buyConfirm(ctx: BotContext): Promise<void> {
  */
 export async function buyCancel(ctx: BotContext): Promise<void> {
   // validate user
-  const { isValid } = await validateUser(ctx);
-  if (!isValid) return;
+  await validateUser(ctx);
 
   // Delete confirmation message
   if (ctx.session.currentMessage?.messageId && ctx.session.currentMessage?.chatId) {
@@ -266,6 +283,18 @@ export async function buyCancel(ctx: BotContext): Promise<void> {
 
   // reset operation
   ctx.session.currentOperation = null;
-  const message = await ctx.reply(ctx.t('buy_cancel_msg'));
-  deleteBotMessage(ctx, message.message_id, 5000);
+
+  // Send cancel message
+  const cancelMessage = await ctx.reply(ctx.t('buy_cancel_msg'));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await ctx.api.deleteMessage(cancelMessage.chat.id, cancelMessage.message_id);
+
+  // send start message
+  await ctx.reply(ctx.t('start_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: startKeyboard,
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
 }

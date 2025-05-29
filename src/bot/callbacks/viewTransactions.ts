@@ -12,8 +12,7 @@ import { validateUser } from '@/utils/userValidation';
  * View transactions menu
  */
 export async function viewTransactions(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.id) return;
+  const user = await validateUser(ctx);
 
   try {
     const stats = await TransactionsService.getUserTransactionStats(user.id);
@@ -43,8 +42,7 @@ export async function viewTransactions(ctx: BotContext): Promise<void> {
  * View recent transactions
  */
 export async function viewRecentTransactions(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.id) return;
+  const user = await validateUser(ctx);
 
   try {
     const transactions = await TransactionsService.getRecentTransactions(user.id, 10);
@@ -83,8 +81,7 @@ export async function viewRecentTransactions(ctx: BotContext): Promise<void> {
  * View all transactions with pagination
  */
 export async function viewAllTransactions(ctx: BotContext, page: number = 1): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.id) return;
+  const user = await validateUser(ctx);
 
   try {
     const result = await TransactionsService.getUserTransactions(user.id, {
@@ -156,8 +153,7 @@ export async function viewTransactionsOfType(
   type: TransactionType,
   page: number = 1
 ): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.id) return;
+  const user = await validateUser(ctx);
 
   try {
     const result = await TransactionsService.getTransactionsByTypeAndStatus(
@@ -221,8 +217,7 @@ export async function viewTransactionsOfType(
  * View transaction statistics
  */
 export async function viewTransactionStats(ctx: BotContext): Promise<void> {
-  const { isValid, user } = await validateUser(ctx);
-  if (!isValid || !user?.id) return;
+  const user = await validateUser(ctx);
 
   try {
     const stats = await TransactionsService.getUserTransactionStats(user.id);
