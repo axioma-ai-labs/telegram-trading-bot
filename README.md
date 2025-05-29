@@ -1,15 +1,21 @@
 # Neurodex Bot
+[![Build and Push Docker image](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/docker.yml/badge.svg)](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/docker.yml)
+[![CI](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/ci.yml)
 
-A scalable Telegram trading bot built with TypeScript, featuring OpenOcean integration for cryptocurrency trading, functional programming approach, and robust error handling.
+![neurodex](https://github.com/user-attachments/assets/8a0850ef-02ab-4390-b717-887ea0aae82c)
+
+A scalable Telegram trading bot built to make money.
 
 ## Prerequisites
 
 - Node.js (v18 or higher)
 - pnpm
 - A Telegram bot token (get it from [@BotFather](https://t.me/BotFather))
-- QuickNode account with OpenOcean addon
-- Make (for using the Makefile)
+- Blockchain RPCs
 - Prisma (PostgreSQL) Database
+- Supabase
+- Coinstats API
+- Betterstack (for logging)
 
 ## Quickstart
 
