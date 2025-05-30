@@ -67,11 +67,14 @@ import {
 } from './bot/callbacks/handleDCA';
 import {
   cancelLimitOrder,
-  confirmLimitOrder,
+  confirmLimitBuyOrder,
+  confirmLimitSellOrder,
+  handleLimitBuyAmount,
+  handleLimitBuyTargetAmount,
+  handleLimitExpiry,
+  handleLimitSellAmount,
+  handleLimitType,
   limitCancel,
-  limitToken,
-  retrieveLimitAmount,
-  retrieveLimitExpiry,
 } from './bot/callbacks/handleLimitOrders';
 import { dcaCommandHandler } from './bot/commands/dca';
 import { limitCommandHandler } from './bot/commands/limit';
@@ -161,6 +164,7 @@ async function initializeBot(): Promise<void> {
     get_referral_stats: getReferralStats,
     accept_terms_conditions: acceptTermsConditions,
     dca: dcaToken,
+    limit: limitCommandHandler.handler,
     orders: showOrders,
     get_dca_orders: getDcaOrders,
     dca_confirm: dcaConfirm,
@@ -171,8 +175,10 @@ async function initializeBot(): Promise<void> {
     sell_cancel: sellCancel,
     withdraw_confirm: withdrawConfirm,
     withdraw_cancel: withdrawCancel,
-    limit: limitToken,
-    limit_confirm: confirmLimitOrder,
+    limit_type_buy: (ctx) => handleLimitType(ctx, 'buy'),
+    limit_type_sell: (ctx) => handleLimitType(ctx, 'sell'),
+    limit_buy_confirm: confirmLimitBuyOrder,
+    limit_sell_confirm: confirmLimitSellOrder,
     limit_cancel: limitCancel,
     lang_en: (ctx) => updateLanguage(ctx, 'en'),
     lang_ru: (ctx) => updateLanguage(ctx, 'ru'),
@@ -212,11 +218,20 @@ async function initializeBot(): Promise<void> {
     dca_times: async (ctx, param) => {
       await retrieveDcaTimes(ctx, param);
     },
-    limit_amount: async (ctx, param) => {
-      await retrieveLimitAmount(ctx, param);
+    limit_buy_amount: async (ctx, param) => {
+      await handleLimitBuyAmount(ctx, param);
+    },
+    limit_sell_amount: async (ctx, param) => {
+      await handleLimitSellAmount(ctx, param);
+    },
+    limit_price_market: async (ctx, ...params) => {
+      await handleLimitBuyTargetAmount(ctx, `market_${params.join('_')}`);
+    },
+    limit_price: async (ctx, param) => {
+      await handleLimitBuyTargetAmount(ctx, param);
     },
     limit_expiry: async (ctx, param) => {
-      await retrieveLimitExpiry(ctx, param);
+      await handleLimitExpiry(ctx, param);
     },
     cancel_limit: async (ctx, param) => {
       await cancelLimitOrder(ctx, param);

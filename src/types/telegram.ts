@@ -74,11 +74,17 @@ export type OperationType =
 
 export interface OperationState {
   type: OperationType;
+  subType?: 'buy' | 'sell'; // For limit orders: buy vs sell
   token?: string;
   tokenSymbol?: string;
   tokenName?: string;
   tokenChain?: string;
+  tokenPrice?: number; // Current market price of the token
+  tokenBalance?: string; // User's balance of the token (for sell orders)
   amount?: number;
+  fromAmount?: number; // Amount to spend/sell
+  toAmount?: number; // Amount to receive/buy
+  unitPrice?: number; // Price per token (for sell orders)
   interval?: number;
   times?: number;
   price?: number;

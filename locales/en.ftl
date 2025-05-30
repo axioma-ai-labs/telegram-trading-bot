@@ -400,6 +400,92 @@ no_limit_orders_msg =
 
 
 # Limit Order Messages
+limit_type_selection_msg = 
+    📋 *Create Limit Order*
+
+    Choose what type of limit order you want to create:
+
+    🟢 **Buy Token** - Set a price to buy tokens when market price drops
+    🔴 **Sell Token** - Set a price to sell your tokens when market price rises
+
+    Select your preferred option below:
+
+limit_buy_token_msg = 
+    🟢 *Buy Limit Order*
+
+    Enter the token contract address you want to buy:
+
+limit_sell_token_msg = 
+    🔴 *Sell Limit Order*
+
+    Enter the token contract address you want to sell:
+
+limit_sell_no_balance_msg = 
+    ⚠️ *No Balance Found*
+
+    You don't have any { $tokenSymbol } tokens to sell.
+
+    Please select a different token or buy some { $tokenSymbol } first.
+
+limit_buy_custom_amount_msg = Please enter the amount of ETH you want to spend on your buy limit order:
+limit_buy_target_amount_msg = 
+    🎯 *Set Target Amount*
+
+    Please choose how many tokens you want to receive, or select a price relative to current market:
+
+limit_buy_custom_target_amount_msg = Please enter how many tokens you want to receive:
+limit_sell_custom_amount_msg = Please enter the amount of tokens you want to sell:
+limit_sell_target_price_msg = Please enter the price per token (in ETH) you want to receive:
+limit_sell_insufficient_balance_msg = ⚠️ Insufficient balance. You only have { $balance } { $tokenSymbol }.
+
+limit_buy_confirm_msg =
+    🔍 *Confirm Buy Limit Order*
+
+    Token: { $tokenSymbol } | { $tokenName }
+    CA: `{ $token }`
+    Spending: { $fromAmount } ETH
+    To Receive: { $toAmount } { $tokenSymbol }
+    Expiry: { $expiry }
+
+    Please confirm the creation of your buy limit order:
+
+limit_sell_confirm_msg =
+    🔍 *Confirm Sell Limit Order*
+
+    Token: { $tokenSymbol } | { $tokenName }
+    CA: `{ $token }`
+    Selling: { $fromAmount } { $tokenSymbol }
+    To Receive: { $toAmount } ETH
+    Price per Token: { $unitPrice } ETH
+    Expiry: { $expiry }
+
+    Please confirm the creation of your sell limit order:
+
+limit_buy_order_created_msg =
+    🎊 *Buy Limit Order Created Successfully!*
+
+    Token: { $tokenSymbol }
+    Spending: { $fromAmount } ETH
+    To Receive: { $toAmount } { $tokenSymbol }
+    Expiry: { $expiry }
+
+    Your buy limit order has been submitted to the network. It will be executed when the market price reaches your target.
+
+    Use /orders to view all your orders.
+
+limit_sell_order_created_msg =
+    🎊 *Sell Limit Order Created Successfully!*
+
+    Token: { $tokenSymbol }
+    Selling: { $fromAmount } { $tokenSymbol }
+    To Receive: { $toAmount } ETH
+    Price per Token: { $unitPrice } ETH
+    Expiry: { $expiry }
+
+    Your sell limit order has been submitted to the network. It will be executed when the market price reaches your target.
+
+    Use /orders to view all your orders.
+
 limit_token_msg = Please send the token contract address for which you want to create a limit order:
 limit_custom_amount_msg = Please enter the amount of tokens you want to buy:
 limit_invalid_price_msg = ❌ Invalid price. Please enter a valid number greater than 0.
@@ -426,7 +512,7 @@ limit_token_found_msg =
     Price: *${ $tokenPrice }*
     Chain: *{ $tokenChain }*
 
-    Please select how many { $tokenSymbol } you want to buy in your limit order.
+    Please select how much you want to trade in your limit order.
 
     Go to /settings to adjust slippage and gas if the transaction fails.
 
@@ -448,18 +534,6 @@ limit_order_cancel_success_msg =
     Your limit order for { $makerSymbol } → { $takerSymbol } has been successfully cancelled.
 
     Use /orders to view your remaining orders.
-
-limit_confirm_msg =
-    🔍 *Confirm Limit Order*
-
-    Token: { $tokenSymbol } | { $tokenName }
-    CA: `{ $token }`
-    Amount: { $amount } { $tokenSymbol }
-    Price: { $price } ETH per token
-    Total Value: { $totalValue } ETH
-    Expiry: { $expiry }
-
-    Please confirm the creation of your limit order:
 
 # settings
 gas_priority_updated_msg = Gas priority set to { $gasPriority }

@@ -1,15 +1,19 @@
-import { retrieveLimitExpiry, retrieveLimitPrice } from '@/bot/callbacks/handleLimitOrders';
-import { limitAmountKeyboard } from '@/bot/commands/limit';
-import { NeuroDexApi } from '@/services/engine/neurodex';
+import {
+  handleCustomExpiry,
+  handleLimitBuyTargetAmount,
+  handleLimitSellTargetPrice,
+  handleLimitTokenInput,
+} from '@/bot/callbacks/handleLimitOrders';
 import { BotContext, OperationState } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
+import { validateExpiryTime } from '@/utils/validators';
 
 /**
  * Handles limit order operation messages from users.
  *
- * This function processes user input for limit order operations, handling
- * token contract address input, amount input, price input, and expiry input
- * based on the current operation state.
+ * This function processes user input for limit order operations based on the
+ * current operation state and subType (buy vs sell). It routes messages to
+ * appropriate handlers for each step of the limit order creation process.
  *
  * @param ctx - The bot context containing session and message data
  * @param userInput - The user's text input
@@ -20,40 +24,18 @@ export async function handleLimitMessages(
   userInput: string,
   currentOperation: OperationState
 ): Promise<void> {
-  if (!currentOperation.token) {
-    // Handle token input
-    const neurodex = new NeuroDexApi();
-    const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+  // Handle token address input
+  if (!currentOperation.token && currentOperation.subType) {
+    await handleLimitTokenInput(ctx, userInput.trim());
+    return;
+  }
 
-    if (!tokenData.success || !tokenData.data) {
-      const message = await ctx.reply(ctx.t('token_not_found_msg'), {
-        parse_mode: 'Markdown',
-      });
-      await deleteBotMessage(ctx, message.message_id, 10000);
-      return;
-    }
-
-    ctx.session.currentOperation = {
-      type: 'limit',
-      token: userInput,
-      tokenSymbol: tokenData.data?.symbol,
-      tokenName: tokenData.data?.name,
-      tokenChain: tokenData.data?.chain,
-    };
-
-    const message = ctx.t('limit_token_found_msg', {
-      tokenSymbol: tokenData.data?.symbol || '',
-      tokenName: tokenData.data?.name || '',
-      tokenPrice: tokenData.data?.price || 0,
-      tokenChain: tokenData.data?.chain || '',
-    });
-
-    await ctx.reply(message, {
-      parse_mode: 'Markdown',
-      reply_markup: limitAmountKeyboard,
-    });
-  } else if (!currentOperation.amount) {
-    // Handle amount input
+  // Handle custom amount input for buy orders
+  if (
+    currentOperation.subType === 'buy' &&
+    currentOperation.token &&
+    !currentOperation.fromAmount
+  ) {
     const parsedAmount = parseFloat(userInput);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
       const message = await ctx.reply(ctx.t('invalid_amount_msg'));
@@ -63,31 +45,86 @@ export async function handleLimitMessages(
 
     ctx.session.currentOperation = {
       ...currentOperation,
-      amount: parsedAmount,
+      fromAmount: parsedAmount,
     };
 
-    await ctx.reply(ctx.t('limit_price_msg'), {
+    await ctx.reply(ctx.t('limit_buy_target_amount_msg'), {
       parse_mode: 'Markdown',
     });
-  } else if (!currentOperation.price) {
-    // Handle price input
-    const parsedPrice = parseFloat(userInput);
-    if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      const message = await ctx.reply(ctx.t('limit_invalid_price_msg'));
+    return;
+  }
+
+  // Handle custom amount input for sell orders
+  if (
+    currentOperation.subType === 'sell' &&
+    currentOperation.token &&
+    !currentOperation.fromAmount
+  ) {
+    const parsedAmount = parseFloat(userInput);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      const message = await ctx.reply(ctx.t('invalid_amount_msg'));
       deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
-    await retrieveLimitPrice(ctx, parsedPrice.toString());
-  } else if (!currentOperation.expiry) {
-    // Handle expiry input
-    const expiryPattern = /^(\d+)([HDWM])$/i;
-    if (!expiryPattern.test(userInput)) {
+    // Check if user has enough balance
+    const totalBalance = parseFloat(currentOperation.tokenBalance || '0');
+    if (parsedAmount > totalBalance) {
+      const message = await ctx.reply(
+        ctx.t('limit_sell_insufficient_balance_msg', {
+          balance: totalBalance.toString(),
+          tokenSymbol: currentOperation.tokenSymbol || 'TOKEN',
+        })
+      );
+      deleteBotMessage(ctx, message.message_id, 10000);
+      return;
+    }
+
+    ctx.session.currentOperation = {
+      ...currentOperation,
+      fromAmount: parsedAmount,
+    };
+
+    await ctx.reply(ctx.t('limit_sell_target_price_msg'), {
+      parse_mode: 'Markdown',
+    });
+    return;
+  }
+
+  // Handle custom target amount input for buy orders
+  if (
+    currentOperation.subType === 'buy' &&
+    currentOperation.fromAmount &&
+    !currentOperation.toAmount
+  ) {
+    await handleLimitBuyTargetAmount(ctx, userInput.trim());
+    return;
+  }
+
+  // Handle custom target price input for sell orders
+  if (
+    currentOperation.subType === 'sell' &&
+    currentOperation.fromAmount &&
+    !currentOperation.toAmount
+  ) {
+    await handleLimitSellTargetPrice(ctx, userInput.trim());
+    return;
+  }
+
+  // Handle custom expiry input
+  if (currentOperation.toAmount && !currentOperation.expiry) {
+    const validation = validateExpiryTime(userInput.trim());
+    if (!validation.isValid) {
       const message = await ctx.reply(ctx.t('limit_invalid_expiry_msg'));
       deleteBotMessage(ctx, message.message_id, 10000);
       return;
     }
 
-    await retrieveLimitExpiry(ctx, userInput.toUpperCase());
+    await handleCustomExpiry(ctx, userInput.trim());
+    return;
   }
+
+  // If we reach here, the input doesn't match expected flow
+  const message = await ctx.reply(ctx.t('invalid_input_msg'));
+  deleteBotMessage(ctx, message.message_id, 10000);
 }

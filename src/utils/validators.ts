@@ -62,6 +62,97 @@ export function isValidDcaAmount(amount: number): boolean {
 }
 
 //////////////////////////////////////////////////////////
+// Expiration time validators
+//////////////////////////////////////////////////////////
+
+/**
+ * Validates expiration time format and converts to valid format.
+ *
+ * Accepts formats like: 1H, 2D, 30M, 1W, etc.
+ *
+ * @param expiry - The expiry string to validate
+ * @returns Object with isValid boolean and normalized expiry string
+ *
+ * @example
+ * ```typescript
+ * validateExpiryTime("1H")    // { isValid: true, expiry: "1H" }
+ * validateExpiryTime("2d")    // { isValid: true, expiry: "2D" }
+ * validateExpiryTime("30m")   // { isValid: true, expiry: "30M" }
+ * validateExpiryTime("1week") // { isValid: false, expiry: null }
+ * validateExpiryTime("abc")   // { isValid: false, expiry: null }
+ * ```
+ */
+export function validateExpiryTime(expiry: string): { isValid: boolean; expiry: string | null } {
+  if (!expiry || typeof expiry !== 'string') {
+    return { isValid: false, expiry: null };
+  }
+
+  // Clean and normalize the input
+  const cleanExpiry = expiry.trim().toUpperCase();
+
+  // Regex pattern for valid expiry formats: number + unit (M, H, D, W)
+  const expiryRegex = /^(\d+)([MHDW])$/;
+  const match = cleanExpiry.match(expiryRegex);
+
+  if (!match) {
+    return { isValid: false, expiry: null };
+  }
+
+  const [, numberStr, unit] = match;
+  const number = parseInt(numberStr, 10);
+
+  // Validate number range based on unit
+  switch (unit) {
+    case 'M': // Minutes
+      if (number < 1 || number > 60 * 24 * 30) return { isValid: false, expiry: null }; // Max 30 days in minutes
+      break;
+    case 'H': // Hours
+      if (number < 1 || number > 24 * 30) return { isValid: false, expiry: null }; // Max 30 days in hours
+      break;
+    case 'D': // Days
+      if (number < 1 || number > 30) return { isValid: false, expiry: null }; // Max 30 days
+      break;
+    case 'W': // Weeks
+      if (number < 1 || number > 4) return { isValid: false, expiry: null }; // Max 4 weeks
+      break;
+    default:
+      return { isValid: false, expiry: null };
+  }
+
+  return { isValid: true, expiry: `${number}${unit}` };
+}
+
+/**
+ * Converts human-readable expiry time to a user-friendly description.
+ *
+ * @param expiry - The normalized expiry string (e.g., "1H", "2D")
+ * @returns Human-readable description
+ *
+ * @example
+ * ```typescript
+ * getExpiryDescription("1H")  // "1 Hour"
+ * getExpiryDescription("2D")  // "2 Days"
+ * getExpiryDescription("30M") // "30 Minutes"
+ * ```
+ */
+export function getExpiryDescription(expiry: string): string {
+  const match = expiry.match(/^(\d+)([MHDW])$/);
+  if (!match) return expiry;
+
+  const [, numberStr, unit] = match;
+  const number = parseInt(numberStr, 10);
+
+  const unitNames = {
+    M: number === 1 ? 'Minute' : 'Minutes',
+    H: number === 1 ? 'Hour' : 'Hours',
+    D: number === 1 ? 'Day' : 'Days',
+    W: number === 1 ? 'Week' : 'Weeks',
+  };
+
+  return `${number} ${unitNames[unit as keyof typeof unitNames]}`;
+}
+
+//////////////////////////////////////////////////////////
 // Amount validators
 //////////////////////////////////////////////////////////
 
