@@ -14,7 +14,7 @@ on:
 
 jobs:
   Frontend-Lint:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

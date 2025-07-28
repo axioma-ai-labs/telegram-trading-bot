@@ -10,7 +10,7 @@ env:
 
 jobs:
   docker-build:
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
