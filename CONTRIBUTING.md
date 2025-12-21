@@ -1,6 +1,11 @@
 # Contributing to Neurodex Bot
 
-Thank you for your interest in contributing to Neurodex Bot! This document provides guidelines and instructions for contributing.
+> [!CAUTION]
+> **ARCHIVED PROJECT** - This repository is no longer maintained. Contributions are not being accepted. You are welcome to fork the repository and modify it for your own use under the MIT license.
+
+---
+
+The following guidelines are preserved for historical reference and for anyone who forks this project.
 
 ## Code of Conduct
 
@@ -20,7 +25,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/neurodex-bot.git
+   git clone https://github.com/axioma-ai-labs/neurodex-bot.git
    cd neurodex-bot
    ```
 3. Install dependencies:
@@ -168,4 +173,6 @@ If you have questions, feel free to:
 - Open a GitHub issue
 - Check existing documentation in `/docs`
 
-Thank you for contributing!
+---
+
+Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.

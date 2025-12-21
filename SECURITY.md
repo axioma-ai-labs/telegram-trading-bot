@@ -1,36 +1,21 @@
 # Security Policy
 
+> [!CAUTION]
+> **ARCHIVED PROJECT** - This repository is no longer maintained. Security vulnerabilities will not be addressed. If you are using this codebase, you are responsible for your own security audits and fixes.
+
+---
+
+The following information is preserved for historical reference.
+
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security issue, please report it responsibly.
+Since this project is archived, we are no longer accepting security reports. If you discover a security issue in your fork:
 
-### How to Report
+1. **Do NOT open a public GitHub issue** with sensitive vulnerability details
+2. Fix the issue in your own fork
+3. Consider contributing your fix back to the community by documenting it (without exploitable details)
 
-**Do NOT open a public GitHub issue for security vulnerabilities.**
-
-Instead, please email us at: **security@axioma-ai-labs.com**
-
-Include the following in your report:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Any suggested fixes (optional)
-
-### What to Expect
-
-- **Acknowledgment**: We will acknowledge your report within 48 hours
-- **Assessment**: We will assess the vulnerability and determine its severity
-- **Updates**: We will keep you informed of our progress
-- **Resolution**: We aim to resolve critical issues within 7 days
-- **Credit**: We will credit you in our security acknowledgments (unless you prefer anonymity)
-
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-
-## Security Measures
+## Security Measures (Historical)
 
 ### Encryption
 
@@ -51,15 +36,9 @@ Include the following in your report:
 - Regular dependency updates for security patches
 - Input validation on all user inputs
 
-## Security Advisories
+## Scope (Historical)
 
-Security advisories will be published through:
-- GitHub Security Advisories
-- Release notes for patched versions
-
-## Scope
-
-The following are in scope for security reports:
+The following were in scope for security reports:
 - Authentication/authorization bypasses
 - Private key exposure or theft
 - SQL injection or database vulnerabilities
@@ -73,4 +52,6 @@ Out of scope:
 - Physical attacks
 - Issues in third-party dependencies (report to the dependency maintainer)
 
-Thank you for helping keep Neurodex Bot secure!
+---
+
+Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.

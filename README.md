@@ -1,9 +1,11 @@
 # Neurodex Bot
 
-[![Build and Push Docker image](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/docker.yml/badge.svg)](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/docker.yml)
-[![CI](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/ci.yml/badge.svg)](https://github.com/axioma-ai-labs/neurodex-bot/actions/workflows/ci.yml)
+> [!CAUTION]
+> **ARCHIVED PROJECT** - This repository is no longer maintained. This was part of the first version of [Neurodex](https://neurodex.ai) made by [Neurobro](https://neurobro.ai).
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
+[![Archived](https://img.shields.io/badge/Status-Archived-red.svg)]()
 
 ![neurodex](https://github.com/user-attachments/assets/8a0850ef-02ab-4390-b717-887ea0aae82c)
 
@@ -148,21 +150,10 @@ pnpm run start
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run checks (`make format && make check && make test`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+> [!NOTE]
+> This project is **archived and no longer maintained**. While contributions are not being accepted, you are welcome to fork the repository and modify it for your own use under the MIT license.
 
-### Code Style
-
-- Use TypeScript strict mode
-- Follow existing patterns in the codebase
-- Add type annotations to all functions
-- Use async/await for asynchronous operations
-- Run `make format` before committing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for historical contribution guidelines.
 
 ## Security
 
@@ -172,7 +163,8 @@ pnpm run start
 - Rate limiting prevents abuse (3 req/sec per user)
 - Never commit `.env` files or expose API keys
 
-For security vulnerability reports, please see [SECURITY.md](SECURITY.md).
+> [!WARNING]
+> This project is **archived**. Security vulnerabilities will not be addressed. See [SECURITY.md](SECURITY.md) for details.
 
 ## License
 
@@ -187,4 +179,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Built with love by [Axioma AI Labs](https://github.com/axioma-ai-labs)
+Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.
