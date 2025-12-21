@@ -765,24 +765,9 @@ export class NeuroDexApi {
       const result = await this.openOceanClient.cancelLimitOrderAPI(params.orderHash, chain);
 
       if (!result.success) {
-        // If the order is not cancelled onchain, try to cancel it onchain
-        // TODO: This doesn't work atm!!!
-        const gasPrice = await this.getGasPrice(chain, params.gasPriority);
-        const onchainResult = await this.openOceanClient.cancelLimitOrderOnchain(
-          {
-            orderData: params.orderData,
-            gasPrice: gasPrice,
-          },
-          chain
-        );
-        if (!onchainResult.success) {
-          throw new Error(
-            'Failed to cancel limit order: ' + (onchainResult.error || 'Unknown error')
-          );
-        }
         return {
-          success: true,
-          data: onchainResult.data,
+          success: false,
+          error: result.error || 'Failed to cancel limit order via API',
         };
       }
 

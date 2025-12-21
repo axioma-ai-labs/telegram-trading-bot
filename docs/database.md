@@ -3,19 +3,10 @@
 We use Prisma with PostgreSQL and Accelerate.
 
 Basic usage is very simple:
-1. All the database operations are in `src/services/db/`. Here we isolate logic of interacting with the database.
+1. All the database operations are in `src/services/prisma/`. Here we isolate logic of interacting with the database.
 2. Definition of models is in `prisma/schema.prisma`. There you'll find migrations as well.
-3. Database instance is in `src/services/db/prisma.ts`. Very minimalistic, so don't touch it.
-4. If we change the models, we need to run `make prisma-migrate-dev` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database. [More details below]
-
-> [!IMPORTANT]
-> We currently have only development database. Production one comes soon.
-
-Example usage (script for testing db ops):
-
-```bash
-make run CMD="scripts/db-connection.ts"
-```
+3. Database instance is in `src/services/prisma/client.ts`. Very minimalistic, so don't touch it.
+4. If we change the models, we need to run `make migrate` to update the migrations. It will automatically create a new migration file in `prisma/migrations` and apply it to the database. [More details below]
 
 ## Prisma Client
 

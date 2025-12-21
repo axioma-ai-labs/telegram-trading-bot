@@ -1,4 +1,5 @@
 import { startTradingKeyboard } from '@/bot/commands/start';
+import logger from '@/config/logger';
 import { PrivateStorageService } from '@/services/supabase/privateKeys';
 import { BotContext, OperationState } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
@@ -69,7 +70,7 @@ export async function handlePkVerificationMessages(
       deleteBotMessage(ctx, message.message_id, 3000);
     }
   } catch (error) {
-    console.error('Error in private key verification:', error);
+    logger.error('Error in private key verification:', error);
     await ctx.reply(ctx.t('error_msg'));
   }
 }

@@ -1,7 +1,46 @@
+# Git and GitHub
 .github
 .git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
 .env.*
+
+# Dependencies and build output
 node_modules
 generated
 dist
+
+# Documentation (not needed in container)
 README.md
+CONTRIBUTING.md
+SECURITY.md
+CLAUDE.md
+docs/
+
+# Development tools config
+.claude/
+.eslintrc.json
+.prettierrc
+.prettierignore
+tsconfig.dev.json
+typedoc.json
+jest.config.js
+
+# Logs
+*.log
+combined.log
+error.log
+
+# Scripts (development only)
+scripts/
+
+# Tests
+tests/
+
+# Editor files
+.DS_Store
+*.swp
+*.swo

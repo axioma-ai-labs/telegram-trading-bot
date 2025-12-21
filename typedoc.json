@@ -1,5 +1,7 @@
 {
-    "entryPoints": ["src/**/*.ts"],
+    "entryPoints": [
+        "src/**/*.ts"
+    ],
     "entryPointStrategy": "expand",
     "out": "docs/auto",
     "tsconfig": "tsconfig.json",
@@ -7,11 +9,21 @@
     "excludeInternal": true,
     "name": "NeuroDex Bot Documentation",
     "readme": "README.md",
-    "projectDocuments": ["docs/*.md"],
+    "projectDocuments": [
+        "docs/*.md"
+    ],
     "theme": "default",
     "categorizeByGroup": true,
-    "categoryOrder": ["Core", "Services", "Bot", "Utils", "*"],
-    "sort": ["source-order"],
+    "categoryOrder": [
+        "Core",
+        "Services",
+        "Bot",
+        "Utils",
+        "*"
+    ],
+    "sort": [
+        "source-order"
+    ],
     "navigationLinks": {
         "GitHub": "https://github.com/axioma-ai-labs/neurodex-bot"
     },

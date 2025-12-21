@@ -306,46 +306,6 @@ export interface NeuroDexResponse<T> {
 }
 
 /**
- * Trading pair information
- */
-export interface TradingPair {
-  /** Base token */
-  baseToken: TokenInfo;
-  /** Quote token */
-  quoteToken: TokenInfo;
-  /** Current price in quote token */
-  price: number;
-  /** 24h volume */
-  volume24h: number;
-  /** 24h price change percentage */
-  priceChange24h: number;
-}
-
-/**
- * Order information
- */
-export interface OrderInfo {
-  /** Order ID */
-  id: string;
-  /** Order type */
-  type: 'limit' | 'dca';
-  /** Order status */
-  status: OrderStatus;
-  /** Token being traded */
-  token: TokenInfo;
-  /** Amount to trade */
-  amount: number;
-  /** Target price (for limit orders) */
-  targetPrice?: number;
-  /** Created timestamp */
-  createdAt: Date;
-  /** Expiration timestamp */
-  expiresAt?: Date;
-  /** Transaction hash if executed */
-  txHash?: string;
-}
-
-/**
  * Wallet information
  */
 export interface WalletInfo {
