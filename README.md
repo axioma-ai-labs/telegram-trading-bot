@@ -134,6 +134,8 @@ pnpm run docs
 
 ## Deployment
 
+Replace in @docker-compose.yaml `your-dockerhub-username` with your actual Docker Hub username.
+
 ### Docker
 
 ```bash
@@ -152,8 +154,6 @@ pnpm run start
 
 > [!NOTE]
 > This project is **archived and no longer maintained**. While contributions are not being accepted, you are welcome to fork the repository and modify it for your own use under the MIT license.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for historical contribution guidelines.
 
 ## Security
 
@@ -180,3 +180,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.
+
+> “The market is a pendulum that forever swings between unsustainable optimism and unjustified pessimism.”
+>
+> * Benjamin Graham, The Intelligent Investor

@@ -136,7 +136,7 @@ bot.command('mycommand', myCommand);
 
 3. Add i18n keys to `locales/en.ftl`:
 
-```ftl
+```text
 my-command-response = Your command response here
 ```
 
