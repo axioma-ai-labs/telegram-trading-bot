@@ -26,7 +26,7 @@ A scalable Telegram trading bot for cryptocurrency trading on multiple blockchai
 - **Database**: PostgreSQL via [Prisma](https://www.prisma.io/) with Accelerate
 - **Blockchain**: Viem, Ethers.js, Web3.js
 - **DEX Integration**: OpenOcean SDK
-- **Security**: Supabase + AES-256-GCM encryption
+- **Security**: Supabase + XChaCha20-Poly1305 encryption with Argon2id key derivation
 
 ## Quick Start
 
@@ -166,12 +166,13 @@ pnpm run start
 
 ## Security
 
-- Private keys are stored encrypted in Supabase, not in the main database
-- All sensitive fields use AES-256-GCM encryption
+- Private keys are stored encrypted in Supabase, separate from the main database
+- Encryption uses XChaCha20-Poly1305 with Argon2id key derivation (NIST-recommended parameters)
+- Database fields are encrypted with Prisma field encryption
 - Rate limiting prevents abuse (3 req/sec per user)
 - Never commit `.env` files or expose API keys
 
-To report security vulnerabilities, please email security@axioma-ai-labs.com.
+For security vulnerability reports, please see [SECURITY.md](SECURITY.md).
 
 ## License
 
