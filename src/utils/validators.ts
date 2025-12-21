@@ -53,10 +53,6 @@ export function isValidDcaInterval(interval: number): boolean {
   return interval > 0 && interval <= 10000;
 }
 
-export function isValidDcaTimes(times: number): boolean {
-  return times > 0 && times <= 100;
-}
-
 export function isValidDcaAmount(amount: number): boolean {
   return amount > 0 && amount <= 10000;
 }

@@ -2,6 +2,7 @@ import { TransactionStatus } from '@prisma/client/edge';
 
 import { confirmSellKeyboard } from '@/bot/commands/sell';
 import { startKeyboard } from '@/bot/commands/start';
+import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { CoinStatsService } from '@/services/engine/coinstats';
 import { NeuroDexApi } from '@/services/engine/neurodex';
@@ -196,7 +197,7 @@ export async function sellConfirm(ctx: BotContext): Promise<void> {
     gasPriority: (user?.settings?.gasPriority as GasPriority) || 'standard',
     walletAddress: user.wallets[0].address,
     privateKey: privateKey,
-    referrer: '0x8159F8156cD0F89114f72cD915b7b4BD7e83Ad4D',
+    referrer: config.referrerWalletAddress,
   };
 
   const neurodex = new NeuroDexApi();

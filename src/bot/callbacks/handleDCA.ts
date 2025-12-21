@@ -232,14 +232,14 @@ export async function dcaConfirm(ctx: BotContext): Promise<void> {
       // Update transaction with failed status
       await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.FAILED);
 
-      // check if no mooooooooney
-      const message = dcaOrderResult.error?.toLowerCase() || '';
-      if (message.includes('insufficient funds')) {
-        const message = await ctx.reply(ctx.t('insufficient_funds_msg'));
-        deleteBotMessage(ctx, message.message_id, 10000);
+      // Check for insufficient funds error
+      const errorMessage = dcaOrderResult.error?.toLowerCase() || '';
+      if (errorMessage.includes('insufficient funds')) {
+        const insufficientFundsMsg = await ctx.reply(ctx.t('insufficient_funds_msg'));
+        deleteBotMessage(ctx, insufficientFundsMsg.message_id, 10000);
       } else {
-        const message = await ctx.reply(ctx.t('error_msg'));
-        deleteBotMessage(ctx, message.message_id, 10000);
+        const errorMsg = await ctx.reply(ctx.t('error_msg'));
+        deleteBotMessage(ctx, errorMsg.message_id, 10000);
       }
     }
   } catch (error) {

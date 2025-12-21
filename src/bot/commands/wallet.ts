@@ -99,5 +99,14 @@ export const walletCommandHandler: CommandHandler = {
       });
       return;
     }
+
+    // User has no wallet - show create wallet message
+    await ctx.reply(createWalletMessage, {
+      parse_mode: 'Markdown',
+      reply_markup: createWalletKeyboard,
+      link_preview_options: {
+        is_disabled: true,
+      },
+    });
   },
 };
