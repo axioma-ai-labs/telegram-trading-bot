@@ -78,7 +78,7 @@ import { dcaCommandHandler } from './bot/commands/dca';
 import { limitCommandHandler } from './bot/commands/limit';
 import { ordersCommandHandler } from './bot/commands/orders';
 
-export const bot = new Bot<BotContext>(config.telegramBotToken);
+export const bot = new Bot<BotContext>(config.telegram.botToken);
 
 // initialize bot
 async function initializeBot(): Promise<void> {

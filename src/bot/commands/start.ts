@@ -3,6 +3,7 @@
  */
 import { InlineKeyboard } from 'grammy';
 
+import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { ReferralService } from '@/services/prisma/referrals';
@@ -87,7 +88,7 @@ export const startCommandHandler: CommandHandler = {
 
       // Handle referral if payload exists
       if (payload && payload.startsWith('r-')) {
-        const referralCode = 'https://t.me/neuro_bro_test_bot?start=' + payload.trim();
+        const referralCode = `https://t.me/${config.telegram.botUsername}?start=${payload.trim()}`;
         referrer = await ReferralService.getUserByReferralCode(referralCode);
       }
 

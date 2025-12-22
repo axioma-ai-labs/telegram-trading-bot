@@ -21,7 +21,10 @@ export const config = {
   },
 
   // Telegram Bot Settings
-  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN!,
+  telegram: {
+    botToken: process.env.TELEGRAM_BOT_TOKEN!,
+    botUsername: process.env.TELEGRAM_BOT_USERNAME!,
+  },
 
   // Referrer Wallet Address
   referrerWalletAddress: process.env.REFERRER_WALLET_ADDRESS!,
