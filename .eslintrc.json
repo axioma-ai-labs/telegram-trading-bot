@@ -19,7 +19,8 @@
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-console": "error"
   },
   "ignorePatterns": ["prisma/generated/**/*", "dist/**/*"]
 } 
