@@ -54,6 +54,7 @@ import { handleWithdrawMessages } from '@/bot/messages/withdrawMessages';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { I18nService } from '@/services/i18n/i18n';
+import { prisma } from '@/services/prisma/client';
 import { BotContext, SessionData } from '@/types/telegram';
 
 import {
@@ -345,6 +346,34 @@ async function initializeBot(): Promise<void> {
   });
 }
 
+/**
+ * Gracefully shuts down the bot and database connections.
+ * Called when the process receives SIGTERM or SIGINT signals.
+ *
+ * @param signal - The signal that triggered the shutdown
+ */
+async function gracefulShutdown(signal: string): Promise<void> {
+  logger.info(`Received ${signal}. Starting graceful shutdown...`);
+
+  try {
+    // Stop the bot
+    logger.info('Stopping bot...');
+    await bot.stop();
+    logger.info('Bot stopped successfully.');
+
+    // Disconnect Prisma
+    logger.info('Disconnecting from database...');
+    await prisma.$disconnect();
+    logger.info('Database disconnected successfully.');
+
+    logger.info('Graceful shutdown completed.');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+}
+
 // Run the bot
 const main = async (): Promise<void> => {
   try {
@@ -352,10 +381,14 @@ const main = async (): Promise<void> => {
     await initializeBot();
 
     if (config.environment === 'development') {
-      logger.info(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`Starting ${config.projectName} in ${config.environment} mode...`);
     } else {
-      logger.info(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`Starting ${config.projectName} in ${config.environment} mode...`);
     }
+
+    // Register graceful shutdown handlers
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     // Start the bot
     await bot.start();
