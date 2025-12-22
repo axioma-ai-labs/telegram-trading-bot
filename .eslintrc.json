@@ -19,7 +19,16 @@
     "@typescript-eslint/explicit-function-return-type": "warn",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-console": "error"
   },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.ts", "tests/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
+    }
+  ],
   "ignorePatterns": ["prisma/generated/**/*", "dist/**/*"]
 } 

@@ -54,6 +54,7 @@ import { handleWithdrawMessages } from '@/bot/messages/withdrawMessages';
 import { config } from '@/config/config';
 import logger from '@/config/logger';
 import { I18nService } from '@/services/i18n/i18n';
+import { prisma } from '@/services/prisma/client';
 import { BotContext, SessionData } from '@/types/telegram';
 
 import {
@@ -78,7 +79,7 @@ import { dcaCommandHandler } from './bot/commands/dca';
 import { limitCommandHandler } from './bot/commands/limit';
 import { ordersCommandHandler } from './bot/commands/orders';
 
-export const bot = new Bot<BotContext>(config.telegramBotToken);
+export const bot = new Bot<BotContext>(config.telegram.botToken);
 
 // initialize bot
 async function initializeBot(): Promise<void> {
@@ -99,23 +100,23 @@ async function initializeBot(): Promise<void> {
   // i18n middleware
   bot.use(i18n);
 
-  // Rate limiting middleware
-  // 1. 3 requests per second
+  // Rate limiting middleware (configurable via environment variables)
+  // 1. Requests per second
   bot.use(
     limit({
       timeFrame: 1000,
-      limit: 3,
+      limit: config.rateLimit.perSecond,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_second_msg'));
       },
     })
   );
 
-  // 2. 50 requests per minute
+  // 2. Requests per minute
   bot.use(
     limit({
       timeFrame: 60 * 1000, // 1 minute in ms
-      limit: 50,
+      limit: config.rateLimit.perMinute,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_minute_msg'));
       },
@@ -123,11 +124,11 @@ async function initializeBot(): Promise<void> {
     })
   );
 
-  // 3. 300 requests per 15 minutes
+  // 3. Requests per 15 minutes
   bot.use(
     limit({
       timeFrame: 15 * 60 * 1000, // 15 minutes in ms
-      limit: 300,
+      limit: config.rateLimit.per15Minutes,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_15min_msg'));
       },
@@ -345,6 +346,34 @@ async function initializeBot(): Promise<void> {
   });
 }
 
+/**
+ * Gracefully shuts down the bot and database connections.
+ * Called when the process receives SIGTERM or SIGINT signals.
+ *
+ * @param signal - The signal that triggered the shutdown
+ */
+async function gracefulShutdown(signal: string): Promise<void> {
+  logger.info(`Received ${signal}. Starting graceful shutdown...`);
+
+  try {
+    // Stop the bot
+    logger.info('Stopping bot...');
+    await bot.stop();
+    logger.info('Bot stopped successfully.');
+
+    // Disconnect Prisma
+    logger.info('Disconnecting from database...');
+    await prisma.$disconnect();
+    logger.info('Database disconnected successfully.');
+
+    logger.info('Graceful shutdown completed.');
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+}
+
 // Run the bot
 const main = async (): Promise<void> => {
   try {
@@ -352,10 +381,14 @@ const main = async (): Promise<void> => {
     await initializeBot();
 
     if (config.environment === 'development') {
-      logger.info(`🚧 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`Starting ${config.projectName} in ${config.environment} mode...`);
     } else {
-      logger.info(`🚀 Starting ${config.projectName} in ${config.environment} mode...`);
+      logger.info(`Starting ${config.projectName} in ${config.environment} mode...`);
     }
+
+    // Register graceful shutdown handlers
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     // Start the bot
     await bot.start();

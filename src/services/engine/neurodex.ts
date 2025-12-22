@@ -274,7 +274,7 @@ export class NeuroDexApi {
    */
   async generateReferralLink(userId: number, username: string): Promise<string> {
     const referralCode = username || `id${userId}`;
-    const referralLink = `https://t.me/neuro_bro_test_bot?start=r-${referralCode}`;
+    const referralLink = `https://t.me/${config.telegram.botUsername}?start=r-${referralCode}`;
     return referralLink;
   }
 
