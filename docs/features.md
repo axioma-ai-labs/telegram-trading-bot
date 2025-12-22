@@ -109,9 +109,9 @@ Automated recurring purchases to average entry price:
 - Pre-commit hooks for linting
 
 ### Security
-- AES-256-GCM encryption for private keys
+- XChaCha20-Poly1305 encryption for private keys with Argon2id key derivation
 - Field-level encryption in database (Prisma)
-- Rate limiting (3 req/sec, 50 req/min per user)
+- Configurable rate limiting (default: 3 req/sec, 50 req/min, 300 req/15min per user)
 - No private keys stored in main database
 
 ### Internationalization (i18n)

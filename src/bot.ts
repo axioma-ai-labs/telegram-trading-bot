@@ -100,23 +100,23 @@ async function initializeBot(): Promise<void> {
   // i18n middleware
   bot.use(i18n);
 
-  // Rate limiting middleware
-  // 1. 3 requests per second
+  // Rate limiting middleware (configurable via environment variables)
+  // 1. Requests per second
   bot.use(
     limit({
       timeFrame: 1000,
-      limit: 3,
+      limit: config.rateLimit.perSecond,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_second_msg'));
       },
     })
   );
 
-  // 2. 50 requests per minute
+  // 2. Requests per minute
   bot.use(
     limit({
       timeFrame: 60 * 1000, // 1 minute in ms
-      limit: 50,
+      limit: config.rateLimit.perMinute,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_minute_msg'));
       },
@@ -124,11 +124,11 @@ async function initializeBot(): Promise<void> {
     })
   );
 
-  // 3. 300 requests per 15 minutes
+  // 3. Requests per 15 minutes
   bot.use(
     limit({
       timeFrame: 15 * 60 * 1000, // 15 minutes in ms
-      limit: 300,
+      limit: config.rateLimit.per15Minutes,
       onLimitExceeded: async (ctx) => {
         await ctx.reply(ctx.t('rate_limit_15min_msg'));
       },

@@ -80,6 +80,13 @@ export const config = {
     bsc: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
   },
 
+  // Rate Limiting
+  rateLimit: {
+    perSecond: Number(process.env.RATE_LIMIT_PER_SECOND) || 3,
+    perMinute: Number(process.env.RATE_LIMIT_PER_MINUTE) || 50,
+    per15Minutes: Number(process.env.RATE_LIMIT_PER_15MIN) || 300,
+  },
+
   // Constants
   MAX_UINT256: '115792089237316195423570985008687907853269984665640564039457584007913129639935',
   defaultReferrerFee: 1,
