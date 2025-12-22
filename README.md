@@ -125,6 +125,7 @@ src/
 | [i18n Guide](./docs/i18n.md) | Multi-language support |
 | [Testing Guide](./docs/testing.md) | Testing methods |
 | [Makefile Commands](./docs/makefile.md) | Available make commands |
+| [Claude Code Setup](./docs/claude-code.md) | AI-assisted development with Claude Code |
 | [API Docs](./docs/auto/) | Auto-generated TypeDoc |
 
 Generate API documentation:

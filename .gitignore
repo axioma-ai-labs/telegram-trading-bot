@@ -59,4 +59,8 @@ keys/
 
 # User-specific files
 *.sublime-*
-.history/ 
+.history/
+
+# Claude Code local files
+.claude/settings.local.json
+CLAUDE.local.md 
