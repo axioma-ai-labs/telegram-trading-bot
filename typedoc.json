@@ -7,7 +7,7 @@
     "tsconfig": "tsconfig.json",
     "excludePrivate": true,
     "excludeInternal": true,
-    "name": "NeuroDex Bot Documentation",
+    "name": "Telegram Trading Bot Documentation",
     "readme": "README.md",
     "projectDocuments": [
         "docs/*.md"
@@ -25,7 +25,7 @@
         "source-order"
     ],
     "navigationLinks": {
-        "GitHub": "https://github.com/axioma-ai-labs/neurodex-bot"
+        "GitHub": "https://github.com/axioma-ai-labs/telegram-trading-bot"
     },
     "searchInComments": true,
     "excludeExternals": true,

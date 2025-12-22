@@ -1,5 +1,5 @@
 ---
-description: Debug trading execution issues in the NeuroDex bot
+description: Debug trading execution issues in the Telegram Trading bot
 allowed-tools: Read, Grep, Bash(make test:*)
 ---
 

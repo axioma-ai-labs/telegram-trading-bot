@@ -1,4 +1,4 @@
-# Neurodex Bot
+# Telegram Trading Bot
 
 # Variables
 NODE_BIN = ./node_modules/.bin
