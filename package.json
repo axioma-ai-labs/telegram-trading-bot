@@ -1,5 +1,5 @@
 {
-  "name": "neurodex-bot",
+  "name": "telegram-trading-bot",
   "version": "1.0.0",
   "description": "A scalable Telegram trading bot built with TypeScript",
   "main": "dist/bot.js",

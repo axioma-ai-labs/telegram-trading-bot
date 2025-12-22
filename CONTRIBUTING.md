@@ -1,4 +1,4 @@
-# Contributing to Neurodex Bot
+# Contributing to Telegram Neurotrading Bot
 
 > [!CAUTION]
 > **ARCHIVED PROJECT** - This repository is no longer maintained. Contributions are not being accepted. You are welcome to fork the repository and modify it for your own use under the MIT license.
@@ -25,8 +25,8 @@ This is an archived project. We expect all interactions to be respectful and con
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/axioma-ai-labs/neurodex-bot.git
-   cd neurodex-bot
+   git clone https://github.com/axioma-ai-labs/telegram-trading-bot.git
+   cd telegram-trading-bot
    ```
 3. Install dependencies:
    ```bash
@@ -175,4 +175,4 @@ If you have questions, feel free to:
 
 ---
 
-Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.
+Originally built by [Neurobro](https://neurobro.ai).

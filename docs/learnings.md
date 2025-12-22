@@ -1,6 +1,6 @@
 # Learnings
 
-Summary of learnings for Neurodex trading bot. Kinda super important!
+Summary of learnings for Telegram Neurotrading Bot. Kinda super important!
 
 ## 🔐 Security Learnings
 

@@ -461,7 +461,7 @@ The bot is stateless - all data is in the database. To restore:
 
 3. Check logs for errors:
    ```bash
-   pm2 logs neurodex-bot --lines 100
+   pm2 logs telegram-trading-bot --lines 100
    ```
 
 #### Database Connection Failed

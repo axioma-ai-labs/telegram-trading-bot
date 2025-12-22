@@ -6,7 +6,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
 
-![neurodex](https://github.com/user-attachments/assets/8a0850ef-02ab-4390-b717-887ea0aae82c)
+![Telegram Neurotrading Bot](https://github.com/user-attachments/assets/8a0850ef-02ab-4390-b717-887ea0aae82c)
 
 A scalable Telegram trading bot for cryptocurrency trading on multiple blockchain networks. Trade tokens, manage portfolios, set limit orders, and automate DCA strategies - all through Telegram.
 
@@ -139,7 +139,7 @@ Replace in @docker-compose.yaml `your-dockerhub-username` with your actual Docke
 ### Docker
 
 ```bash
-docker build -t neurodex-bot .
+docker build -t telegram-trading-bot .
 docker-compose up -d
 ```
 

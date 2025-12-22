@@ -1,6 +1,6 @@
-# NeuroDex API Reference
+# Trading API Reference
 
-This document provides comprehensive API documentation for the NeuroDex trading service, which enables token swaps, limit orders, DCA orders, and wallet management across multiple blockchain networks.
+This document provides comprehensive API documentation for the Telegram Neurotrading Bot trading service, which enables token swaps, limit orders, DCA orders, and wallet management across multiple blockchain networks.
 
 ## Table of Contents
 
@@ -21,7 +21,7 @@ This document provides comprehensive API documentation for the NeuroDex trading 
 
 ## Overview
 
-The NeuroDex API provides a unified interface for DeFi trading operations through the OpenOcean DEX aggregator. It handles:
+The Trading API provides a unified interface for DeFi trading operations through the OpenOcean DEX aggregator. It handles:
 
 - Token swaps (buy/sell) with optimal routing
 - Limit orders for automated trading at target prices
@@ -648,7 +648,7 @@ if (result.success) {
 
 | Error Message                              | Cause                                    | Solution                              |
 |--------------------------------------------|------------------------------------------|---------------------------------------|
-| `Chain mismatch between token and NeuroDexApi instance` | Token chain differs from API instance | Create API instance for correct chain |
+| `Chain mismatch between token and API instance` | Token chain differs from API instance | Create API instance for correct chain |
 | `Failed to get token info`                 | Token contract not found or invalid      | Verify token address                  |
 | `Quote data is undefined`                  | OpenOcean quote failed                   | Check token liquidity                 |
 | `Swap data is undefined`                   | OpenOcean swap preparation failed        | Check token addresses and amounts     |
