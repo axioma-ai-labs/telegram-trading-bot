@@ -85,6 +85,10 @@ export interface OperationState {
   expiry?: string;
   walletAddress?: string;
   recipientAddress?: string;
+  // Target token for limit orders (what user wants to receive)
+  targetToken?: string;
+  targetTokenSymbol?: string;
+  targetTokenName?: string;
 }
 
 export type MessageType = 'verification' | 'temporary' | 'confirmation';

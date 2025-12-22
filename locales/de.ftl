@@ -368,6 +368,7 @@ limit_order_item_msg =
     • *Ziel:* { $takerAmount } { $takerSymbol }
     • *Zeitraum:* { $createdDate } → { $expiryDate }
     • *Hash:* `{ $orderHash }`
+    • [Auf OpenOcean anzeigen]({ $openOceanLink })
 
 dca_orders_header_msg = 📋 *DCA-Orders*
 
@@ -447,16 +448,23 @@ limit_token_found_msg =
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
 limit_order_created_msg =
-    🎊 Herzlichen Glückwunsch! Ihre Limit-Order wurde erfolgreich erstellt!
+    🎊 *Herzlichen Glückwunsch! Ihre Limit-Order wurde erfolgreich erstellt!*
 
-    Verkauf: { $amount } { $tokenSymbol }
-    Erhalt: { $targetTokenSymbol }
-    Preis: { $price } { $targetTokenSymbol } pro Token
-    Ablauf: { $expiry }
+    📊 *Order-Details:*
+    • *Verkauf:* { $amount } { $tokenSymbol }
+    • *Erhalt:* { $targetTokenSymbol }
+    • *Preis:* { $price } { $targetTokenSymbol } pro Token
+    • *Ablauf:* { $expiry }
 
-    Ihre Limit-Order wurde an das Netzwerk übermittelt. Sie wird ausgeführt, wenn der Marktpreis Ihren Zielpreis erreicht.
+    🔑 *Order-Hash:*
+    `{ $orderHash }`
 
-    Verwenden Sie /orders, um alle Ihre Orders anzuzeigen.
+    📋 *Nächste Schritte:*
+    • Verwenden Sie /orders, um Ihre Orders anzuzeigen und zu verwalten
+    • Anzeigen auf [OpenOcean]({ $openOceanLink })
+    • Order wird ausgeführt, wenn der Marktpreis Ihren Zielpreis erreicht
+
+    💡 _Ihre Order ist jetzt live und wird überwacht_
     
 limit_order_cancel_success_msg =
     ✅ *Limit-Order storniert*

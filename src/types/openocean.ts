@@ -585,6 +585,33 @@ export interface LimitOrderResponse {
 }
 
 /**
+ * Limit order creation response from OpenOcean API
+ */
+export interface LimitOrderCreateResponse {
+  /** Response code (200 = success) */
+  code: number;
+  /** Order hash (unique identifier) */
+  orderHash?: string;
+  /** Order data */
+  data?: {
+    /** Order hash */
+    orderHash: string;
+    /** Order maker address */
+    orderMaker: string;
+    /** Creation timestamp */
+    createDateTime: string;
+    /** Expiration timestamp */
+    expireTime: string;
+    /** Maker amount */
+    makerAmount: string;
+    /** Taker amount */
+    takerAmount: string;
+    /** Order data */
+    data: LimitOrderAssetData;
+  };
+}
+
+/**
  * DCA order asset data
  */
 export interface DcaOrderAssetData {

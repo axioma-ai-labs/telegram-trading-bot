@@ -290,17 +290,25 @@ export class TransactionsService {
 
   /**
    * Update transaction status
+   * @param transactionId - Transaction ID
+   * @param status - New status
+   * @param txHashOrOrderHash - Transaction hash or order hash (for limit orders/DCA)
    */
   static async updateTransactionStatus(
     transactionId: string,
     status: TransactionStatus,
-    txHash?: string
+    txHashOrOrderHash?: string
   ): Promise<Transaction> {
+    // Determine if this is a txHash (starts with 0x and is ~66 chars) or orderHash
+    const isTxHash =
+      txHashOrOrderHash?.startsWith('0x') && txHashOrOrderHash.length === 66;
+
     return prisma.transaction.update({
       where: { id: transactionId },
       data: {
         status,
-        ...(txHash && { txHash }),
+        ...(txHashOrOrderHash && isTxHash && { txHash: txHashOrOrderHash }),
+        ...(txHashOrOrderHash && !isTxHash && { orderHash: txHashOrOrderHash }),
       },
     });
   }
