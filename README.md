@@ -155,6 +155,28 @@ pnpm run start
 > [!NOTE]
 > This project is **archived and no longer maintained**. While contributions are not being accepted, you are welcome to fork the repository and modify it for your own use under the MIT license.
 
+## Wallet Management Model
+
+Neurodex Bot uses a **non-custodial wallet model** - you control your own private keys.
+
+### How It Works
+
+1. **Key Generation**: Wallets are generated locally on the server using [Viem](https://viem.sh/)'s cryptographically secure random number generator
+2. **Encryption**: Private keys are encrypted using **XChaCha20-Poly1305** with **Argon2id** key derivation (64MB memory cost, 3 iterations)
+3. **Separate Storage**: Encrypted keys are stored in Supabase, completely separate from the main PostgreSQL database
+4. **One-Time Display**: Your private key is shown **once** when the wallet is created - you must verify you've saved it
+5. **On-Demand Retrieval**: The bot only decrypts your key when executing transactions, then discards it from memory
+
+### What This Means For You
+
+- **You own your keys**: Export your private key anytime and use it in any compatible wallet
+- **We cannot access your funds**: Without your master password, encrypted keys are useless
+- **No recovery possible**: If you lose your private key, we cannot recover it - there is no "forgot password" option
+- **Message auto-deletion**: Private keys displayed in Telegram are auto-deleted to minimize exposure
+
+> [!IMPORTANT]
+> Always back up your private key when prompted. Store it securely offline. Never share it with anyone.
+
 ## Security
 
 - Private keys are stored encrypted in Supabase, separate from the main database
