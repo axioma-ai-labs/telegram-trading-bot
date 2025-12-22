@@ -1,5 +1,9 @@
-import { retrieveLimitExpiry, retrieveLimitPrice } from '@/bot/callbacks/handleLimitOrders';
-import { limitAmountKeyboard } from '@/bot/commands/limit';
+import {
+  retrieveLimitExpiry,
+  retrieveLimitPrice,
+  retrieveLimitTargetToken,
+} from '@/bot/callbacks/handleLimitOrders';
+import { limitAmountKeyboard, limitTargetTokenKeyboard } from '@/bot/commands/limit';
 import { NeuroDexApi } from '@/services/engine/neurodex';
 import { BotContext, OperationState } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
@@ -8,8 +12,10 @@ import { deleteBotMessage } from '@/utils/deleteMessage';
  * Handles limit order operation messages from users.
  *
  * This function processes user input for limit order operations, handling
- * token contract address input, amount input, price input, and expiry input
- * based on the current operation state.
+ * token contract address input, amount input, target token input, price input,
+ * and expiry input based on the current operation state.
+ *
+ * Flow: token -> amount -> target token -> price -> expiry -> confirm
  *
  * @param ctx - The bot context containing session and message data
  * @param userInput - The user's text input
@@ -21,7 +27,7 @@ export async function handleLimitMessages(
   currentOperation: OperationState
 ): Promise<void> {
   if (!currentOperation.token) {
-    // Handle token input
+    // Handle token input (token to sell)
     const neurodex = new NeuroDexApi();
     const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
 
@@ -66,9 +72,25 @@ export async function handleLimitMessages(
       amount: parsedAmount,
     };
 
-    await ctx.reply(ctx.t('limit_price_msg'), {
+    // Ask for target token (what user wants to receive)
+    await ctx.reply(ctx.t('limit_target_token_msg'), {
       parse_mode: 'Markdown',
+      reply_markup: limitTargetTokenKeyboard,
     });
+  } else if (!currentOperation.targetToken) {
+    // Handle custom target token input
+    const neurodex = new NeuroDexApi();
+    const tokenData = await neurodex.getTokenDataByContractAddress(userInput, 'base');
+
+    if (!tokenData.success || !tokenData.data) {
+      const message = await ctx.reply(ctx.t('token_not_found_msg'), {
+        parse_mode: 'Markdown',
+      });
+      await deleteBotMessage(ctx, message.message_id, 10000);
+      return;
+    }
+
+    await retrieveLimitTargetToken(ctx, userInput);
   } else if (!currentOperation.price) {
     // Handle price input
     const parsedPrice = parseFloat(userInput);

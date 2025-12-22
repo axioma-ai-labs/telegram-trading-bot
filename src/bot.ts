@@ -72,6 +72,7 @@ import {
   limitToken,
   retrieveLimitAmount,
   retrieveLimitExpiry,
+  retrieveLimitTargetToken,
 } from './bot/callbacks/handleLimitOrders';
 import { dcaCommandHandler } from './bot/commands/dca';
 import { limitCommandHandler } from './bot/commands/limit';
@@ -214,6 +215,9 @@ async function initializeBot(): Promise<void> {
     },
     limit_amount: async (ctx, param) => {
       await retrieveLimitAmount(ctx, param);
+    },
+    limit_target: async (ctx, param) => {
+      await retrieveLimitTargetToken(ctx, param);
     },
     limit_expiry: async (ctx, param) => {
       await retrieveLimitExpiry(ctx, param);

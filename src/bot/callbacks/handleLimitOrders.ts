@@ -9,10 +9,15 @@ import { LimitOrderParams } from '@/types/neurodex';
 import { LimitOrderAssetData } from '@/types/openocean';
 import { BotContext } from '@/types/telegram';
 import { deleteBotMessage } from '@/utils/deleteMessage';
+import { getOpenOceanLimitOrderLink, shortenHash } from '@/utils/formatters';
 import { validateUser } from '@/utils/userValidation';
 import { validatePK } from '@/utils/validators';
 
-import { limitConfirmKeyboard, limitExpiryKeyboard } from '../commands/limit';
+import {
+  limitConfirmKeyboard,
+  limitExpiryKeyboard,
+  limitTargetTokenKeyboard,
+} from '../commands/limit';
 import { startKeyboard } from '../commands/start';
 
 // limit token callback
@@ -57,6 +62,71 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
     amount: parsedAmount,
   };
 
+  // Ask for target token (what user wants to receive)
+  await ctx.reply(ctx.t('limit_target_token_msg'), {
+    parse_mode: 'Markdown',
+    reply_markup: limitTargetTokenKeyboard,
+  });
+}
+
+// retrieve limit target token callback
+export async function retrieveLimitTargetToken(
+  ctx: BotContext,
+  targetAddress: string
+): Promise<void> {
+  await validateUser(ctx);
+  const { currentOperation } = ctx.session;
+
+  if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.amount) {
+    await ctx.reply(ctx.t('limit_restart_msg'));
+    return;
+  }
+
+  // custom target token
+  if (targetAddress === 'custom') {
+    await ctx.reply(ctx.t('limit_custom_target_token_msg'), {
+      parse_mode: 'Markdown',
+    });
+    return;
+  }
+
+  // Map of known token addresses to their symbols and names
+  const knownTokens: Record<string, { symbol: string; name: string }> = {
+    '0x4200000000000000000000000000000000000006': { symbol: 'WETH', name: 'Wrapped Ether' },
+    '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': { symbol: 'USDC', name: 'USD Coin' },
+    '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2': { symbol: 'USDT', name: 'Tether USD' },
+    '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb': { symbol: 'DAI', name: 'Dai Stablecoin' },
+  };
+
+  const tokenInfo = knownTokens[targetAddress];
+  if (!tokenInfo) {
+    // For unknown tokens, fetch from API
+    const neurodex = new NeuroDexApi();
+    const tokenData = await neurodex.getTokenDataByContractAddress(targetAddress, 'base');
+
+    if (!tokenData.success || !tokenData.data) {
+      const message = await ctx.reply(ctx.t('token_not_found_msg'), {
+        parse_mode: 'Markdown',
+      });
+      await deleteBotMessage(ctx, message.message_id, 10000);
+      return;
+    }
+
+    ctx.session.currentOperation = {
+      ...currentOperation,
+      targetToken: targetAddress,
+      targetTokenSymbol: tokenData.data.symbol,
+      targetTokenName: tokenData.data.name,
+    };
+  } else {
+    ctx.session.currentOperation = {
+      ...currentOperation,
+      targetToken: targetAddress,
+      targetTokenSymbol: tokenInfo.symbol,
+      targetTokenName: tokenInfo.name,
+    };
+  }
+
   await ctx.reply(ctx.t('limit_price_msg'), {
     parse_mode: 'Markdown',
   });
@@ -64,7 +134,12 @@ export async function retrieveLimitAmount(ctx: BotContext, amount: string): Prom
 
 export async function retrieveLimitPrice(ctx: BotContext, price: string): Promise<void> {
   const { currentOperation } = ctx.session;
-  if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.amount) {
+  if (
+    !currentOperation ||
+    currentOperation.type !== 'limit' ||
+    !currentOperation.amount ||
+    !currentOperation.targetToken
+  ) {
     await ctx.reply(ctx.t('limit_restart_msg'));
     return;
   }
@@ -88,8 +163,14 @@ export async function retrieveLimitPrice(ctx: BotContext, price: string): Promis
 }
 
 export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Promise<void> {
+  const user = await validateUser(ctx);
   const { currentOperation } = ctx.session;
-  if (!currentOperation || currentOperation.type !== 'limit' || !currentOperation.price) {
+  if (
+    !currentOperation ||
+    currentOperation.type !== 'limit' ||
+    !currentOperation.price ||
+    !currentOperation.targetToken
+  ) {
     await ctx.reply(ctx.t('limit_restart_msg'));
     return;
   }
@@ -112,15 +193,53 @@ export async function retrieveLimitExpiry(ctx: BotContext, expiry: string): Prom
   const price = currentOperation.price ?? 0;
   const totalValue = (amount * price).toFixed(6);
 
-  // Show confirmation message
+  // Estimate gas fees
+  const neurodex = new NeuroDexApi();
+  const feeInfo = {
+    gasEth: '',
+    gasUsd: '',
+    feeEstimationFailed: false,
+  };
+
+  try {
+    const feeEstimation = await neurodex.estimateLimitOrderFee(
+      {
+        fromTokenAddress: currentOperation.token || '',
+        toTokenAddress: currentOperation.targetToken,
+        fromAmount: amount,
+        toAmount: amount * price,
+        walletAddress: user.wallets[0].address,
+        gasPriority: (user?.settings?.gasPriority as GasPriority) || 'standard',
+      },
+      'base'
+    );
+
+    if (feeEstimation.success && feeEstimation.data) {
+      feeInfo.gasEth = feeEstimation.data.gasEth;
+      feeInfo.gasUsd = feeEstimation.data.gasUsd;
+    } else {
+      logger.warn('Fee estimation failed:', feeEstimation.error);
+      feeInfo.feeEstimationFailed = true;
+    }
+  } catch (error) {
+    logger.error('Error during fee estimation:', error);
+    feeInfo.feeEstimationFailed = true;
+  }
+
+  // Show confirmation message with both tokens and fee information
   const message = ctx.t('limit_confirm_msg', {
     token: currentOperation.token || '',
     tokenSymbol: currentOperation.tokenSymbol || '',
     tokenName: currentOperation.tokenName || '',
+    targetTokenSymbol: currentOperation.targetTokenSymbol || '',
+    targetTokenName: currentOperation.targetTokenName || '',
     amount: amount,
     price: price,
     totalValue: totalValue,
     expiry: expiryValue,
+    gasEth: feeInfo.gasEth,
+    gasUsd: feeInfo.gasUsd,
+    feeEstimationFailed: feeInfo.feeEstimationFailed ? 'true' : 'false',
   });
 
   await ctx.reply(message, {
@@ -141,19 +260,20 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
     !currentOperation?.amount ||
     !currentOperation?.price ||
     !currentOperation?.token ||
-    !currentOperation?.expiry
+    !currentOperation?.expiry ||
+    !currentOperation?.targetToken
   ) {
     const message = await ctx.reply(ctx.t('error_msg'));
     deleteBotMessage(ctx, message.message_id, 10000);
     return;
   }
 
-  // Calculate the amount of WETH to receive based on price
+  // Calculate the amount of target token to receive based on price
   const toAmount = currentOperation.amount * currentOperation.price;
 
   const params: LimitOrderParams = {
     fromTokenAddress: currentOperation.token, // Token to sell
-    toTokenAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
+    toTokenAddress: currentOperation.targetToken, // User-selected target token
     fromAmount: currentOperation.amount,
     toAmount: toAmount,
     expire: currentOperation.expiry,
@@ -175,8 +295,8 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
         tokenInAddress: currentOperation.token, // Token to sell
         tokenInSymbol: currentOperation.tokenSymbol || 'TOKEN',
         tokenInAmount: currentOperation.amount,
-        tokenOutAddress: '0x4200000000000000000000000000000000000006', // WETH on Base
-        tokenOutSymbol: 'ETH',
+        tokenOutAddress: currentOperation.targetToken, // User-selected target token
+        tokenOutSymbol: currentOperation.targetTokenSymbol || 'TOKEN',
         tokenOutAmount: toAmount,
         expire: currentOperation.expiry,
         status: TransactionStatus.PENDING,
@@ -194,19 +314,35 @@ export async function confirmLimitOrder(ctx: BotContext): Promise<void> {
   const result = await neurodex.createLimitOrder(params, 'base');
   logger.info('LIMIT ORDER RESULT:', result);
 
-  if (result.success) {
-    // Update transaction with success status
-    await TransactionsService.updateTransactionStatus(transaction.id, TransactionStatus.COMPLETED);
+  if (result.success && result.data) {
+    // Extract order hash from result
+    const orderHash = result.data.orderHash || '';
+    const shortOrderHash = shortenHash(orderHash, 10, 8);
+    const openOceanLink = getOpenOceanLimitOrderLink('base');
+
+    // Update transaction with success status and order hash
+    await TransactionsService.updateTransactionStatus(
+      transaction.id,
+      TransactionStatus.COMPLETED,
+      orderHash
+    );
 
     const message = ctx.t('limit_order_created_msg', {
       tokenSymbol: currentOperation?.tokenSymbol || '',
+      targetTokenSymbol: currentOperation?.targetTokenSymbol || '',
       amount: currentOperation.amount,
       price: currentOperation.price,
       expiry: currentOperation.expiry,
+      orderHash: orderHash,
+      shortOrderHash: shortOrderHash,
+      openOceanLink: openOceanLink,
     });
 
     await ctx.reply(message, {
       parse_mode: 'Markdown',
+      link_preview_options: {
+        is_disabled: true,
+      },
     });
     ctx.session.currentOperation = null;
   } else {

@@ -96,13 +96,19 @@ export function getOrderStatusEmoji(status: string): string {
  * // Returns: "🟢 Order #1: 1.0000 ETH → 2000.000000 USDC..."
  * ```
  */
-export function formatLimitOrder(order: LimitOrderInfo, index: number, t: BotContext['t']): string {
+export function formatLimitOrder(
+  order: LimitOrderInfo,
+  index: number,
+  t: BotContext['t'],
+  chain: 'base' | 'ethereum' | 'bsc' = 'base'
+): string {
   const statusEmoji = getOrderStatusEmoji(order.status);
   const createdDate = new Date(order.data.createDateTime).toLocaleDateString();
   const expiryDate = new Date(order.data.expiry).toLocaleDateString();
   const makerAmount = parseFloat(order.data.makerAssetAmount).toFixed(4);
   const takerAmount = parseFloat(order.data.takerAssetAmount).toFixed(6);
-  const orderHash = order.orderHash.slice(0, 10) + '...';
+  const shortOrderHash = shortenHash(order.orderHash, 10, 6);
+  const openOceanLink = getOpenOceanLimitOrderLink(chain);
 
   return t('limit_order_item_msg', {
     statusEmoji,
@@ -113,7 +119,9 @@ export function formatLimitOrder(order: LimitOrderInfo, index: number, t: BotCon
     takerAmount,
     createdDate,
     expiryDate,
-    orderHash,
+    orderHash: shortOrderHash,
+    fullOrderHash: order.orderHash,
+    openOceanLink,
   });
 }
 
@@ -449,4 +457,101 @@ export async function calculateTokenUsdValue(
     // Silent fail - USD value is not critical for functionality
     return 'N/A';
   }
+}
+
+/**
+ * Block explorer URLs for supported chains
+ */
+const EXPLORER_URLS: Record<string, string> = {
+  base: 'https://basescan.org',
+  ethereum: 'https://etherscan.io',
+  bsc: 'https://bscscan.com',
+};
+
+/**
+ * OpenOcean Limit Order URLs for supported chains
+ */
+const OPENOCEAN_LIMIT_ORDER_URLS: Record<string, string> = {
+  base: 'https://openocean.finance/limit-order/base',
+  ethereum: 'https://openocean.finance/limit-order/eth',
+  bsc: 'https://openocean.finance/limit-order/bsc',
+};
+
+/**
+ * Generates a block explorer link for a transaction hash
+ *
+ * @param txHash - Transaction hash
+ * @param chain - Blockchain network (defaults to 'base')
+ * @returns Block explorer URL for the transaction
+ *
+ * @example
+ * ```typescript
+ * getTransactionExplorerLink('0x123...', 'base');
+ * // Returns: "https://basescan.org/tx/0x123..."
+ * ```
+ */
+export function getTransactionExplorerLink(
+  txHash: string,
+  chain: 'base' | 'ethereum' | 'bsc' = 'base'
+): string {
+  const baseUrl = EXPLORER_URLS[chain] || EXPLORER_URLS.base;
+  return `${baseUrl}/tx/${txHash}`;
+}
+
+/**
+ * Generates a block explorer link for an address
+ *
+ * @param address - Wallet or contract address
+ * @param chain - Blockchain network (defaults to 'base')
+ * @returns Block explorer URL for the address
+ *
+ * @example
+ * ```typescript
+ * getAddressExplorerLink('0x742d35...', 'base');
+ * // Returns: "https://basescan.org/address/0x742d35..."
+ * ```
+ */
+export function getAddressExplorerLink(
+  address: string,
+  chain: 'base' | 'ethereum' | 'bsc' = 'base'
+): string {
+  const baseUrl = EXPLORER_URLS[chain] || EXPLORER_URLS.base;
+  return `${baseUrl}/address/${address}`;
+}
+
+/**
+ * Generates an OpenOcean limit order page link
+ *
+ * @param chain - Blockchain network (defaults to 'base')
+ * @returns OpenOcean limit order page URL
+ *
+ * @example
+ * ```typescript
+ * getOpenOceanLimitOrderLink('base');
+ * // Returns: "https://openocean.finance/limit-order/base"
+ * ```
+ */
+export function getOpenOceanLimitOrderLink(chain: 'base' | 'ethereum' | 'bsc' = 'base'): string {
+  return OPENOCEAN_LIMIT_ORDER_URLS[chain] || OPENOCEAN_LIMIT_ORDER_URLS.base;
+}
+
+/**
+ * Shortens a hash (transaction hash, order hash, etc.) for display
+ *
+ * @param hash - Full hash string
+ * @param startChars - Number of characters to show at the start (default: 6)
+ * @param endChars - Number of characters to show at the end (default: 4)
+ * @returns Shortened hash with ellipsis
+ *
+ * @example
+ * ```typescript
+ * shortenHash('0x1234567890abcdef1234567890abcdef');
+ * // Returns: "0x1234...cdef"
+ * ```
+ */
+export function shortenHash(hash: string, startChars: number = 6, endChars: number = 4): string {
+  if (!hash || hash.length <= startChars + endChars) {
+    return hash;
+  }
+  return `${hash.slice(0, startChars)}...${hash.slice(-endChars)}`;
 }

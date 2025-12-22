@@ -410,3 +410,57 @@ export interface DcaOrderInfo {
   /** Maximum price */
   maxPrice: string | null;
 }
+
+/**
+ * Result data returned when creating a limit order
+ */
+export interface LimitOrderResult {
+  /** Order hash (unique identifier for the order) */
+  orderHash: string;
+  /** Creation timestamp (ISO 8601 format) */
+  createdAt: string;
+  /** Expiration timestamp (ISO 8601 format) */
+  expiresAt: string;
+  /** Maker token address */
+  makerTokenAddress: string;
+  /** Taker token address */
+  takerTokenAddress: string;
+  /** Maker amount in human-readable format */
+  makerAmount: string;
+  /** Taker amount in human-readable format */
+  takerAmount: string;
+}
+
+/**
+ * Fee estimation result for limit orders
+ */
+export interface FeeEstimation {
+  /** Estimated gas in wei */
+  gasWei: string;
+  /** Estimated gas in ETH */
+  gasEth: string;
+  /** Estimated gas cost in USD */
+  gasUsd: string;
+  /** Current ETH price in USD */
+  ethPriceUsd: number;
+  /** Gas price used for estimation (in gwei) */
+  gasPriceGwei: string;
+}
+
+/**
+ * Parameters for fee estimation
+ */
+export interface FeeEstimationParams {
+  /** Token address to sell */
+  fromTokenAddress: string;
+  /** Token address to buy */
+  toTokenAddress: string;
+  /** Amount of token to sell (in human-readable format) */
+  fromAmount: number;
+  /** Amount of token to buy (in human-readable format) */
+  toAmount: number;
+  /** Wallet address */
+  walletAddress: string;
+  /** Gas priority */
+  gasPriority: GasPriority;
+}

@@ -357,6 +357,7 @@ limit_order_item_msg =
     • *Objetivo:* { $takerAmount } { $takerSymbol }
     • *Rango:* { $createdDate } → { $expiryDate }
     • *Hash:* `{ $orderHash }`
+    • [Ver en OpenOcean]({ $openOceanLink })
 
 dca_orders_header_msg = 📋 *Órdenes DCA*
 
@@ -400,11 +401,16 @@ no_limit_orders_msg =
 
 
 # Limit Order Messages
-limit_token_msg = Por favor envía la dirección del contrato del token para el cual quieres crear una orden límite:
-limit_custom_amount_msg = Por favor ingresa la cantidad de tokens que quieres comprar:
+limit_token_msg = Por favor envía la dirección del contrato del token que quieres *vender* en tu orden límite:
+limit_custom_amount_msg = Por favor ingresa la cantidad de tokens que quieres vender:
+limit_target_token_msg =
+    Por favor selecciona el token que quieres *recibir* cuando tu orden límite se ejecute:
+
+    Puedes elegir de los tokens populares abajo o ingresar una dirección de token personalizada.
+limit_custom_target_token_msg = Por favor ingresa la dirección del contrato del token que quieres recibir:
 limit_invalid_price_msg = ❌ Precio inválido. Por favor ingresa un número válido mayor que 0.
 limit_invalid_expiry_msg = ⚠️ Tiempo de expiración inválido. Por favor ingresa un tiempo de expiración válido (ej. 2H, 3D, 1W).
-limit_price_msg = Por favor ingresa el precio por token (en ETH) para tu orden límite:
+limit_price_msg = Por favor ingresa el precio por token (en unidades del token objetivo) para tu orden límite:
 limit_expiry_msg = Por favor selecciona el tiempo de expiración para tu orden límite:
 limit_custom_expiry_msg = Por favor ingresa el tiempo de expiración (ej. 2H, 3D, 1W):
 limit_restart_msg = Por favor comienza de nuevo con el comando /limit.
@@ -426,21 +432,28 @@ limit_token_found_msg =
     Precio: *{ $tokenPrice }*
     Cadena: { $tokenChain }
 
-    Por favor selecciona cuántos { $tokenSymbol } quieres comprar en tu orden límite.
+    Por favor selecciona cuántos { $tokenSymbol } quieres *vender* en tu orden límite.
 
     Ve a /settings para ajustar slippage y gas si la transacción falla.
 
 limit_order_created_msg =
-    🎊 ¡Felicitaciones! ¡Tu orden límite ha sido creada exitosamente!
+    🎊 *¡Felicitaciones! ¡Tu orden límite ha sido creada exitosamente!*
 
-    Token: { $tokenSymbol }
-    Cantidad: { $amount } { $tokenSymbol }
-    Precio: { $price } ETH por token
-    Expiración: { $expiry }
+    📊 *Detalles de la orden:*
+    • *Venta:* { $amount } { $tokenSymbol }
+    • *Recepción:* { $targetTokenSymbol }
+    • *Precio:* { $price } { $targetTokenSymbol } por token
+    • *Expiración:* { $expiry }
 
-    Tu orden límite ha sido enviada a la red. Se ejecutará cuando el precio del mercado alcance tu precio objetivo.
+    🔑 *Hash de la orden:*
+    `{ $orderHash }`
 
-    Usa /orders para ver todas tus órdenes.
+    📋 *Próximos pasos:*
+    • Usa /orders para ver y gestionar tus órdenes
+    • Ver en [OpenOcean]({ $openOceanLink })
+    • La orden se ejecutará cuando el precio alcance tu objetivo
+
+    💡 _Tu orden está activa y siendo monitoreada_
     
 limit_order_cancel_success_msg =
     ✅ *Orden Límite Cancelada*
@@ -452,12 +465,20 @@ limit_order_cancel_success_msg =
 limit_confirm_msg =
     🔍 *Confirmar Orden Límite*
 
-    Token: { $tokenSymbol } | { $tokenName }
+    Venta: { $tokenSymbol } | { $tokenName }
     CA: `{ $token }`
+    Recepción: { $targetTokenSymbol } | { $targetTokenName }
     Cantidad: { $amount } { $tokenSymbol }
-    Precio: { $price } ETH por token
-    Valor Total: { $totalValue } ETH
+    Precio: { $price } { $targetTokenSymbol } por token
+    Valor Total: { $totalValue } { $targetTokenSymbol }
     Expiración: { $expiry }
+
+    { $feeEstimationFailed ->
+        [true] ⚠️ *No se pudieron estimar las tarifas*
+        *[other] ⛽ *Tarifa de Gas Estimada:*
+    • { $gasEth } ETH (~${ $gasUsd })
+    • _El costo real puede variar según las condiciones de la red_
+    }
 
     Por favor confirma la creación de tu orden límite:
 

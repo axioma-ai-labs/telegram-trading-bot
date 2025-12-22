@@ -14,10 +14,13 @@ import {
   CancelLimitOrderParams,
   DcaOrderInfo,
   DcaParams,
+  FeeEstimation,
+  FeeEstimationParams,
   GetDcaOrdersParams,
   GetLimitOrdersParams,
   LimitOrderInfo,
   LimitOrderParams,
+  LimitOrderResult,
   NeuroDexResponse,
   SellParams,
   SwapResult,
@@ -689,12 +692,12 @@ export class NeuroDexApi {
    * Create a limit order using OpenOcean SDK
    * @param params - Limit order parameters
    * @param chain - Target blockchain network
-   * @returns Created limit order data
+   * @returns Created limit order data including order hash and metadata
    */
   async createLimitOrder(
     params: LimitOrderParams,
     chain: NeuroDexChain = this.chain
-  ): Promise<NeuroDexResponse<{ code: number }>> {
+  ): Promise<NeuroDexResponse<LimitOrderResult>> {
     try {
       const chainId = NeuroDexChainToOpenOceanChain[chain];
       const web3 = new Web3(config.node.baseMainnetRpc);
@@ -733,9 +736,26 @@ export class NeuroDexApi {
         throw new Error('Failed to create limit order: ' + (result.error || 'Unknown error'));
       }
 
+      // Extract order hash and build result
+      const orderHash = result.data.orderHash || '';
+      const now = new Date();
+
+      // Calculate expiry based on the expire parameter (e.g., "1D", "7D", "1H")
+      const expiryDate = this.calculateExpiryDate(params.expire, now);
+
+      const orderResult: LimitOrderResult = {
+        orderHash,
+        createdAt: now.toISOString(),
+        expiresAt: expiryDate.toISOString(),
+        makerTokenAddress: params.fromTokenAddress,
+        takerTokenAddress: params.toTokenAddress,
+        makerAmount: params.fromAmount.toString(),
+        takerAmount: params.toAmount.toString(),
+      };
+
       return {
         success: true,
-        data: result.data,
+        data: orderResult,
       };
     } catch (error) {
       return {
@@ -743,6 +763,45 @@ export class NeuroDexApi {
         error: error instanceof Error ? error.message : 'Unknown error in createLimitOrder',
       };
     }
+  }
+
+  /**
+   * Calculate expiry date based on expire string format
+   * @param expire - Expire string (e.g., "1D", "7D", "1H", "10M")
+   * @param fromDate - Starting date
+   * @returns Calculated expiry date
+   */
+  private calculateExpiryDate(expire: string, fromDate: Date): Date {
+    const match = expire.match(/^(\d+)([MHDW])$/i);
+    if (!match) {
+      // Default to 1 day if format is invalid
+      const result = new Date(fromDate);
+      result.setDate(result.getDate() + 1);
+      return result;
+    }
+
+    const value = parseInt(match[1], 10);
+    const unit = match[2].toUpperCase();
+    const result = new Date(fromDate);
+
+    switch (unit) {
+      case 'M': // Minutes
+        result.setMinutes(result.getMinutes() + value);
+        break;
+      case 'H': // Hours
+        result.setHours(result.getHours() + value);
+        break;
+      case 'D': // Days
+        result.setDate(result.getDate() + value);
+        break;
+      case 'W': // Weeks
+        result.setDate(result.getDate() + value * 7);
+        break;
+      default:
+        result.setDate(result.getDate() + 1);
+    }
+
+    return result;
   }
 
   /**
@@ -1069,6 +1128,91 @@ export class NeuroDexApi {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error in withdraw',
+      };
+    }
+  }
+
+  /**
+   * Estimates gas fees for creating a limit order.
+   *
+   * Provides an estimate of the gas cost for creating a limit order, including
+   * the cost in ETH and USD. Uses the current gas price and ETH price to calculate.
+   *
+   * @param params - Fee estimation parameters
+   * @param chain - Target blockchain network (default: instance chain)
+   * @returns Promise resolving to NeuroDexResponse with fee estimation or error
+   *
+   * @example
+   * ```typescript
+   * const estimation = await neuroDex.estimateLimitOrderFee({
+   *   fromTokenAddress: '0x123...',
+   *   toTokenAddress: '0x456...',
+   *   fromAmount: 100,
+   *   toAmount: 0.05,
+   *   walletAddress: '0x789...',
+   *   gasPriority: 'standard'
+   * });
+   *
+   * if (estimation.success) {
+   *   console.log('Estimated gas:', estimation.data.gasEth, 'ETH');
+   *   console.log('Estimated cost:', estimation.data.gasUsd, 'USD');
+   * }
+   * ```
+   */
+  async estimateLimitOrderFee(
+    params: FeeEstimationParams,
+    chain: NeuroDexChain = this.chain
+  ): Promise<NeuroDexResponse<FeeEstimation>> {
+    try {
+      // Get current gas price
+      const gasPrice = await this.getGasPrice(chain, params.gasPriority);
+
+      // Estimate gas for limit order creation
+      // OpenOcean limit orders typically use around 150,000-300,000 gas
+      // We use a conservative estimate of 250,000 gas units for limit order creation
+      const estimatedGasUnits = BigInt(250000);
+
+      // Convert gas price to wei (gas price from OpenOcean is in gwei for most chains)
+      const gasPriceWei = BigInt(gasPrice) * BigInt(1e9);
+
+      // Calculate total gas cost in wei
+      const totalGasWei = estimatedGasUnits * gasPriceWei;
+
+      // Convert to ETH (18 decimals)
+      const gasEth = Number(totalGasWei) / 1e18;
+
+      // Fetch current ETH price in USD
+      let ethPriceUsd = 0;
+      try {
+        const nativeTokenAddress = this.nativeTokenAddress[chain];
+        const tokenData = await this.getTokenDataByContractAddress(nativeTokenAddress, chain);
+        if (tokenData.success && tokenData.data?.price) {
+          ethPriceUsd = tokenData.data.price;
+        }
+      } catch (priceError) {
+        logger.warn('Failed to fetch ETH price for fee estimation:', priceError);
+        // Use a fallback price if we can't fetch the current price
+        ethPriceUsd = 3000; // Reasonable fallback
+      }
+
+      // Calculate USD value
+      const gasUsd = gasEth * ethPriceUsd;
+
+      return {
+        success: true,
+        data: {
+          gasWei: totalGasWei.toString(),
+          gasEth: gasEth.toFixed(6),
+          gasUsd: gasUsd.toFixed(2),
+          ethPriceUsd: ethPriceUsd,
+          gasPriceGwei: gasPrice.toString(),
+        },
+      };
+    } catch (error) {
+      logger.error('Error estimating limit order fee:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error in estimateLimitOrderFee',
       };
     }
   }

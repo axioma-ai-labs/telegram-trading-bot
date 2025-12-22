@@ -12,6 +12,7 @@ import {
   GasPriceResponse,
   LimitOrderCancelOnchainParams,
   LimitOrderCreateParams,
+  LimitOrderCreateResponse,
   LimitOrdersResponse,
   OpenOceanResponse,
   QuoteParams,
@@ -297,12 +298,12 @@ export class OpenOceanClient {
    * This is only a wrapper! No logic is implemented here.
    * @param params - Limit order parameters
    * @param chain - Target blockchain network (defaults to config defaultChain)
-   * @returns Created order data
+   * @returns Created order data including orderHash
    */
   async createLimitOrder(
     params: LimitOrderCreateParams,
     chain: NeuroDexChain = this.defaultChain
-  ): Promise<OpenOceanResponse<{ code: number }>> {
+  ): Promise<OpenOceanResponse<LimitOrderCreateResponse>> {
     try {
       if (!this.sdk) {
         throw new Error('SDK not initialized. Call initializeSdk first.');
@@ -355,7 +356,15 @@ export class OpenOceanClient {
         throw new Error(`Create limit order failed with code: ${data.code}.`);
       }
 
-      return { success: true, data };
+      // The API response includes the orderHash from the SDK's orderData
+      // Ensure we include it in the response
+      const responseData: LimitOrderCreateResponse = {
+        code: data.code,
+        orderHash: orderData.orderHash || data.orderHash,
+        data: data.data,
+      };
+
+      return { success: true, data: responseData };
     } catch (error) {
       return {
         success: false,

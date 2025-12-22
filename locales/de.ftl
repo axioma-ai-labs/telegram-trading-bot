@@ -368,6 +368,7 @@ limit_order_item_msg =
     • *Ziel:* { $takerAmount } { $takerSymbol }
     • *Zeitraum:* { $createdDate } → { $expiryDate }
     • *Hash:* `{ $orderHash }`
+    • [Auf OpenOcean anzeigen]({ $openOceanLink })
 
 dca_orders_header_msg = 📋 *DCA-Orders*
 
@@ -411,11 +412,16 @@ no_limit_orders_msg =
 
 
 # Limit Order Messages
-limit_token_msg = Bitte senden Sie die Token-Vertragsadresse, für die Sie eine Limit-Order erstellen möchten:
-limit_custom_amount_msg = Bitte geben Sie die Anzahl der Token ein, die Sie kaufen möchten:
+limit_token_msg = Bitte senden Sie die Token-Vertragsadresse für den Token, den Sie in Ihrer Limit-Order *verkaufen* möchten:
+limit_custom_amount_msg = Bitte geben Sie die Anzahl der Token ein, die Sie verkaufen möchten:
+limit_target_token_msg =
+    Bitte wählen Sie den Token, den Sie *erhalten* möchten, wenn Ihre Limit-Order ausgeführt wird:
+
+    Sie können aus beliebten Token unten wählen oder eine benutzerdefinierte Token-Adresse eingeben.
+limit_custom_target_token_msg = Bitte geben Sie die Vertragsadresse des Tokens ein, den Sie erhalten möchten:
 limit_invalid_price_msg = ❌ Ungültiger Preis. Bitte geben Sie eine gültige Zahl größer als 0 ein.
 limit_invalid_expiry_msg = ⚠️ Ungültige Ablaufzeit. Bitte geben Sie eine gültige Ablaufzeit ein (z.B. 2H, 3D, 1W).
-limit_price_msg = Bitte geben Sie den Preis pro Token (in ETH) für Ihre Limit-Order ein:
+limit_price_msg = Bitte geben Sie den Preis pro Token (in Ziel-Token-Einheiten) für Ihre Limit-Order ein:
 limit_expiry_msg = Bitte wählen Sie die Ablaufzeit für Ihre Limit-Order:
 limit_custom_expiry_msg = Bitte geben Sie die Ablaufzeit ein (z.B. 2H, 3D, 1W):
 limit_restart_msg = Bitte beginnen Sie von vorne mit dem /limit Befehl.
@@ -437,21 +443,28 @@ limit_token_found_msg =
     Preis: *{ $tokenPrice }*
     Chain: { $tokenChain }
 
-    Bitte wählen Sie aus, wie viele { $tokenSymbol } Sie in Ihrer Limit-Order kaufen möchten.
+    Bitte wählen Sie aus, wie viele { $tokenSymbol } Sie in Ihrer Limit-Order *verkaufen* möchten.
 
     Gehen Sie zu /settings, um Slippage und Gas anzupassen, falls die Transaktion fehlschlägt.
 
 limit_order_created_msg =
-    🎊 Herzlichen Glückwunsch! Ihre Limit-Order wurde erfolgreich erstellt!
+    🎊 *Herzlichen Glückwunsch! Ihre Limit-Order wurde erfolgreich erstellt!*
 
-    Token: { $tokenSymbol }
-    Betrag: { $amount } { $tokenSymbol }
-    Preis: { $price } ETH pro Token
-    Ablauf: { $expiry }
+    📊 *Order-Details:*
+    • *Verkauf:* { $amount } { $tokenSymbol }
+    • *Erhalt:* { $targetTokenSymbol }
+    • *Preis:* { $price } { $targetTokenSymbol } pro Token
+    • *Ablauf:* { $expiry }
 
-    Ihre Limit-Order wurde an das Netzwerk übermittelt. Sie wird ausgeführt, wenn der Marktpreis Ihren Zielpreis erreicht.
+    🔑 *Order-Hash:*
+    `{ $orderHash }`
 
-    Verwenden Sie /orders, um alle Ihre Orders anzuzeigen.
+    📋 *Nächste Schritte:*
+    • Verwenden Sie /orders, um Ihre Orders anzuzeigen und zu verwalten
+    • Anzeigen auf [OpenOcean]({ $openOceanLink })
+    • Order wird ausgeführt, wenn der Marktpreis Ihren Zielpreis erreicht
+
+    💡 _Ihre Order ist jetzt live und wird überwacht_
     
 limit_order_cancel_success_msg =
     ✅ *Limit-Order storniert*
@@ -463,12 +476,20 @@ limit_order_cancel_success_msg =
 limit_confirm_msg =
     🔍 *Limit-Order bestätigen*
 
-    Token: { $tokenSymbol } | { $tokenName }
+    Verkauf: { $tokenSymbol } | { $tokenName }
     CA: `{ $token }`
+    Erhalt: { $targetTokenSymbol } | { $targetTokenName }
     Betrag: { $amount } { $tokenSymbol }
-    Preis: { $price } ETH pro Token
-    Gesamtwert: { $totalValue } ETH
+    Preis: { $price } { $targetTokenSymbol } pro Token
+    Gesamtwert: { $totalValue } { $targetTokenSymbol }
     Ablauf: { $expiry }
+
+    { $feeEstimationFailed ->
+        [true] ⚠️ *Gebühren konnten nicht geschätzt werden*
+        *[other] ⛽ *Geschätzte Gasgebühr:*
+    • { $gasEth } ETH (~${ $gasUsd })
+    • _Tatsächliche Kosten können je nach Netzwerkbedingungen variieren_
+    }
 
     Bitte bestätigen Sie die Erstellung Ihrer Limit-Order:
 
