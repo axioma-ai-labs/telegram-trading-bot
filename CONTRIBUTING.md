@@ -9,7 +9,7 @@ The following guidelines are preserved for historical reference and for anyone w
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+This is an archived project. We expect all interactions to be respectful and constructive. Be kind, assume good intentions, and focus on technical discussions.
 
 ## Getting Started
 

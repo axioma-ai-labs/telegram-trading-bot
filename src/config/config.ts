@@ -21,7 +21,10 @@ export const config = {
   },
 
   // Telegram Bot Settings
-  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN!,
+  telegram: {
+    botToken: process.env.TELEGRAM_BOT_TOKEN!,
+    botUsername: process.env.TELEGRAM_BOT_USERNAME!,
+  },
 
   // Referrer Wallet Address
   referrerWalletAddress: process.env.REFERRER_WALLET_ADDRESS!,
@@ -75,6 +78,13 @@ export const config = {
     base: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     ethereum: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
     bsc: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+  },
+
+  // Rate Limiting
+  rateLimit: {
+    perSecond: Number(process.env.RATE_LIMIT_PER_SECOND) || 3,
+    perMinute: Number(process.env.RATE_LIMIT_PER_MINUTE) || 50,
+    per15Minutes: Number(process.env.RATE_LIMIT_PER_15MIN) || 300,
   },
 
   // Constants
