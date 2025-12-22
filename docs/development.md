@@ -13,8 +13,8 @@
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/axioma-ai-labs/neurodex-bot
-cd neurodex-bot
+git clone https://github.com/axioma-ai-labs/telegram-trading-bot
+cd telegram-trading-bot
 ```
 
 2. Install dependencies:
@@ -51,7 +51,7 @@ flowchart TB
         RPC["Blockchain RPC\n(Base/ETH/BSC)"]
     end
 
-    subgraph Bot["Neurodex Bot"]
+    subgraph Bot["Trading Bot"]
         subgraph Core["Core Layer"]
             Grammy["Grammy Bot\n(bot.ts)"]
             MW["Middleware\n• Rate Limiting\n• Sessions\n• i18n"]
@@ -64,7 +64,7 @@ flowchart TB
         end
 
         subgraph Services["Service Layer"]
-            NDX["NeuroDexApi\n(Trading Engine)"]
+            NDX["TradingApi\n(Trading Engine)"]
             VIEM["ViemService\n(Blockchain)"]
             OOC["OpenOceanClient\n(DEX Aggregator)"]
             CS["CoinStatsService\n(Portfolio)"]
@@ -108,7 +108,7 @@ sequenceDiagram
     participant U as User
     participant T as Telegram
     participant B as Bot (Grammy)
-    participant N as NeuroDexApi
+    participant N as TradingApi
     participant O as OpenOcean
     participant R as Blockchain RPC
     participant D as Database
@@ -163,7 +163,7 @@ Telegram Update
                 ▼
 ┌─────────────────────────────────┐
 │           Services              │
-│  - NeuroDexApi (trading)        │
+│  - TradingApi (trading)         │
 │  - ViemService (blockchain)     │
 │  - PrismaService (database)     │
 │  - PrivateStorage (keys)        │
@@ -356,7 +356,7 @@ pnpm run start # Run compiled code
 ### Docker
 
 ```bash
-docker build -t neurodex-bot .
+docker build -t telegram-trading-bot .
 docker-compose up -d
 ```
 

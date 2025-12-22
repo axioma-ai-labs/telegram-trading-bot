@@ -16,7 +16,7 @@ Claude Code is an AI-powered command-line tool that helps with software engineer
 
 ```bash
 # Navigate to the project
-cd neurodex-bot
+cd telegram-trading-bot
 
 # Start Claude Code
 claude
@@ -30,7 +30,7 @@ claude "help me understand the trading engine"
 ### File Hierarchy
 
 ```
-neurodex-bot/
+telegram-trading-bot/
 ├── CLAUDE.md                      # Project instructions (shared)
 ├── CLAUDE.local.md                # Personal preferences (gitignored)
 ├── .claude/
@@ -137,7 +137,7 @@ Investigate the trading issue described: $ARGUMENTS
 
 ## Steps
 
-1. Check the NeuroDexApi service at @src/services/engine/neurodex.ts
+1. Check the TradingApi service at @src/services/engine/neurodex.ts
 2. Review the OpenOcean integration at @src/services/engine/openocean.ts
 3. Check recent transaction logs
 4. Look for error patterns in the callback handlers

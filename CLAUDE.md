@@ -1,4 +1,4 @@
-# Neurodex Bot - Claude Code Reference
+# Telegram Neurotrading Bot - Claude Code Reference
 
 ## Quick Commands
 
@@ -102,7 +102,7 @@ tests/                    # Test files
 
 | Service | Location | Purpose |
 |---------|----------|---------|
-| NeuroDexApi | `services/engine/neurodex.ts` | Trading operations (buy/sell/limit/DCA) |
+| TradingApi | `services/engine/neurodex.ts` | Trading operations (buy/sell/limit/DCA) |
 | ViemService | `services/engine/viem.ts` | Blockchain RPC interactions |
 | CoinStatsService | `services/engine/coinstats.ts` | Token prices and portfolio data |
 | PrivateStorageService | `services/supabase/privateKeys.ts` | Encrypted private key storage |
@@ -141,7 +141,7 @@ pnpm test:load:quick   # Quick load test (10 iterations)
 ## Docker
 
 ```bash
-docker build -t neurodex-bot .
+docker build -t telegram-trading-bot .
 docker-compose up -d
 ```
 
