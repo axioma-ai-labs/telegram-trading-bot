@@ -1,6 +1,6 @@
 # Testing
 
-This document covers testing methods for the Neurodex bot.
+This document covers testing methods for the bot.
 
 ## Unit Tests
 

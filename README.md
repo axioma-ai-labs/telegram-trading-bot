@@ -1,11 +1,10 @@
-# Neurodex Bot
+# Telegram Neurotrading Bot
 
 > [!CAUTION]
-> **ARCHIVED PROJECT** - This repository is no longer maintained. This was part of the first version of [Neurodex](https://neurodex.ai) made by [Neurobro](https://neurobro.ai).
+> This repository is no longer actively maintained.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
-[![Archived](https://img.shields.io/badge/Status-Archived-red.svg)]()
 
 ![neurodex](https://github.com/user-attachments/assets/8a0850ef-02ab-4390-b717-887ea0aae82c)
 
@@ -44,8 +43,8 @@ A scalable Telegram trading bot for cryptocurrency trading on multiple blockchai
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/axioma-ai-labs/neurodex-bot
-   cd neurodex-bot
+   git clone https://github.com/axioma-ai-labs/telegram-trading-bot
+   cd telegram-trading-bot
    ```
 
 2. **Install dependencies**
@@ -154,11 +153,11 @@ pnpm run start
 ## Contributing
 
 > [!NOTE]
-> This project is **archived and no longer maintained**. While contributions are not being accepted, you are welcome to fork the repository and modify it for your own use under the MIT license.
+> This project is **no longer actively maintained**. While contributions are not being accepted, you are welcome to fork the repository and modify it for your own use under the Apache 2.0 license.
 
 ## Wallet Management Model
 
-Neurodex Bot uses a **non-custodial wallet model** - you control your own private keys.
+The bot uses a **non-custodial wallet model** - you control your own private keys.
 
 ### How It Works
 
@@ -187,11 +186,11 @@ Neurodex Bot uses a **non-custodial wallet model** - you control your own privat
 - Never commit `.env` files or expose API keys
 
 > [!WARNING]
-> This project is **archived**. Security vulnerabilities will not be addressed. See [SECURITY.md](SECURITY.md) for details.
+> This project is **no longer actively maintained**. Security vulnerabilities will not be addressed. See [SECURITY.md](SECURITY.md) for details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
@@ -202,8 +201,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.
+Originally built by [Neurobro](https://neurobro.ai).
 
-> “The market is a pendulum that forever swings between unsustainable optimism and unjustified pessimism.”
+> "The market is a pendulum that forever swings between unsustainable optimism and unjustified pessimism."
 >
 > * Benjamin Graham, The Intelligent Investor

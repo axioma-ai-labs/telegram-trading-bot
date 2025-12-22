@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deploying Neurodex Bot to a production environment, including server setup, database configuration, monitoring, and maintenance procedures.
+This guide covers deploying the Telegram Neurotrading Bot to a production environment, including server setup, database configuration, monitoring, and maintenance procedures.
 
 ## Table of Contents
 
@@ -154,17 +154,17 @@ pnpm prisma studio
 ### 1. Build Docker Image
 
 ```bash
-docker build -t neurodex-bot:latest .
+docker build -t telegram-trading-bot:latest .
 ```
 
 ### 2. Push to Registry (Optional)
 
 ```bash
 # Tag for Docker Hub
-docker tag neurodex-bot:latest your-username/neurodex-bot:latest
+docker tag telegram-trading-bot:latest your-username/telegram-trading-bot:latest
 
 # Push to registry
-docker push your-username/neurodex-bot:latest
+docker push your-username/telegram-trading-bot:latest
 ```
 
 ### 3. Run with Docker Compose
@@ -173,10 +173,10 @@ Create or update `docker-compose.yaml`:
 
 ```yaml
 services:
-  neurodex-bot:
-    image: neurodex-bot:latest
-    container_name: neurodex-bot
-    hostname: neurodex-bot
+  telegram-trading-bot:
+    image: telegram-trading-bot:latest
+    container_name: telegram-trading-bot
+    hostname: telegram-trading-bot
     env_file:
       - .env
     restart: unless-stopped
@@ -243,8 +243,8 @@ npm install -g pnpm
 ### 3. Clone and Setup
 
 ```bash
-git clone https://github.com/axioma-ai-labs/neurodex-bot.git
-cd neurodex-bot
+git clone https://github.com/axioma-ai-labs/telegram-trading-bot.git
+cd telegram-trading-bot
 pnpm install --frozen-lockfile
 ```
 
@@ -270,7 +270,7 @@ npm install -g pm2
 cat > ecosystem.config.js << EOF
 module.exports = {
   apps: [{
-    name: 'neurodex-bot',
+    name: 'telegram-trading-bot',
     script: 'node',
     args: '-r tsconfig-paths/register dist/bot.js',
     cwd: '$(pwd)',
@@ -308,13 +308,13 @@ pm2 startup
 pm2 status
 
 # View logs
-pm2 logs neurodex-bot
+pm2 logs telegram-trading-bot
 
 # Restart application
-pm2 restart neurodex-bot
+pm2 restart telegram-trading-bot
 
 # Stop application
-pm2 stop neurodex-bot
+pm2 stop telegram-trading-bot
 
 # Monitor resources
 pm2 monit
@@ -496,7 +496,7 @@ The bot is stateless - all data is in the database. To restore:
 
 ### Getting Help
 
-1. Check existing [GitHub Issues](https://github.com/axioma-ai-labs/neurodex-bot/issues)
+1. Check existing [GitHub Issues](https://github.com/axioma-ai-labs/telegram-trading-bot/issues)
 2. Review logs for specific error messages
 3. Open a new issue with:
    - Error message
@@ -508,6 +508,6 @@ The bot is stateless - all data is in the database. To restore:
 ## Related Documentation
 
 - [Development Guide](./development.md) - Local development setup
-- [API Reference](./api.md) - NeuroDex API documentation
+- [API Reference](./api.md) - API documentation
 - [Database Schema](./database.md) - Database models
 - [Testing Guide](./testing.md) - Running tests

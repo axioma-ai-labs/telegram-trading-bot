@@ -1,7 +1,7 @@
 # Security Policy
 
 > [!CAUTION]
-> **ARCHIVED PROJECT** - This repository is no longer maintained. Security vulnerabilities will not be addressed. If you are using this codebase, you are responsible for your own security audits and fixes.
+> This repository is no longer actively maintained. Security vulnerabilities will not be addressed. If you are using this codebase, you are responsible for your own security audits and fixes.
 
 ---
 
@@ -17,7 +17,7 @@ Since this project is archived, we are no longer accepting security reports. If 
 
 ## Wallet Custody Model
 
-Neurodex Bot implements a **non-custodial wallet model**. Users maintain full control of their private keys at all times.
+The bot implements a **non-custodial wallet model**. Users maintain full control of their private keys at all times.
 
 ### Key Principles
 
@@ -120,4 +120,4 @@ Out of scope:
 
 ---
 
-Originally built by [Neurobro](https://neurobro.ai) as part of [Neurodex](https://neurodex.ai) v1.
+Originally built by [Neurobro](https://neurobro.ai).
