@@ -1,0 +1,11 @@
+---
+# Neurodex Bot Docker Compose Configuration
+# Replace 'your-dockerhub-username' with your actual Docker Hub username
+
+services:
+  neurodex-bot:
+    image: your-dockerhub-username/neurodex-bot:latest
+    container_name: neurodex-bot
+    hostname: neurodex-bot
+    env_file:
+      - .env

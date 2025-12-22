@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+docker-compose.override.yaml
+
+# Build output
+dist/
+build/
+lib/
+docs/auto/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+.eslintcache
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Wallet files and keys
+wallets/
+keys/
+*.pem
+*.key
+
+# Cache
+.npm
+.cache/
+
+# User-specific files
+*.sublime-*
+.history/
+
+# Claude Code local files
+.claude/settings.local.json
+CLAUDE.local.md 

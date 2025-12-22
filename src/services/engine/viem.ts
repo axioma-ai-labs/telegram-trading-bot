@@ -1,0 +1,446 @@
+import {
+  Abi,
+  type Account,
+  type Address,
+  type Chain,
+  type Hash,
+  PublicClient,
+  SendTransactionParameters,
+  type TransactionReceipt,
+  type WalletClient,
+  createPublicClient,
+  createWalletClient,
+  formatEther,
+  http,
+} from 'viem';
+import { base } from 'viem/chains';
+
+import { config } from '@/config/config';
+import logger from '@/config/logger';
+import { TokenInfo } from '@/types/neurodex';
+import { erc20Abi } from '@/utils/abis';
+
+/**
+ * @category Services
+ *
+ * Viem service for executing smart contract transactions and blockchain interactions.
+ *
+ * Provides low-level blockchain interaction capabilities including:
+ * - Smart contract method execution with gas estimation
+ * - Native token transfers (ETH/BNB/etc.)
+ * - ERC20 token transfers and allowance management
+ * - Transaction monitoring and receipt handling
+ * - Token information retrieval (symbol, decimals, balance)
+ *
+ * Built on top of Viem library for type-safe and efficient blockchain operations.
+ * Supports multiple networks through configurable chain and RPC settings.
+ *
+ * @example
+ * ```typescript
+ * const viemService = new ViemService(base, 'https://mainnet.base.org');
+ *
+ * // Execute a transaction
+ * const receipt = await viemService.executeTransaction(account, {
+ *   to: '0x...',
+ *   data: '0x...',
+ *   value: '1000000000000000000',
+ *   gasPrice: '1000000000'
+ * });
+ *
+ * // Get token info
+ * const tokenInfo = await viemService.getTokenInfo('0xA0b86a33E6411A3Ab7e3AC05934AD6a4d923f3e');
+ * ```
+ */
+export class ViemService {
+  private readonly chain: Chain;
+  private readonly rpcUrl: string;
+
+  constructor(chain: Chain = base, rpcUrl: string = config.node.baseMainnetRpc) {
+    this.chain = chain;
+    this.rpcUrl = rpcUrl;
+  }
+
+  /**
+   * Create a wallet client for the given account
+   */
+  createWalletClient(account: Account): WalletClient {
+    return createWalletClient({
+      account,
+      chain: this.chain,
+      transport: http(this.rpcUrl),
+    });
+  }
+
+  /**
+   * Create a public client for the configured chain
+   */
+  createPublicClient(): PublicClient {
+    return createPublicClient({
+      chain: this.chain,
+      transport: http(this.rpcUrl),
+    });
+  }
+
+  /**
+   * Execute a blockchain transaction with automatic gas estimation and receipt monitoring.
+   *
+   * Sends a transaction to the blockchain using the provided account and parameters.
+   * Automatically waits for transaction confirmation and returns the receipt.
+   *
+   * @param account - Account to execute transaction from (must have sufficient balance)
+   * @param params - Transaction parameters including destination, data, value, and gas price
+   * @param params.to - Destination address for the transaction
+   * @param params.data - Transaction data (contract call data or '0x' for simple transfers)
+   * @param params.value - Amount of native token to send (in wei)
+   * @param params.gasPrice - Gas price for the transaction (in wei)
+   * @returns Promise resolving to transaction receipt with status and hash
+   * @throws Error if transaction execution fails or account has insufficient funds
+   *
+   * @example
+   * ```typescript
+   * const account = privateKeyToAccount('0x...');
+   *
+   * const receipt = await viemService.executeTransaction(account, {
+   *   to: '0x742d35Cc6Cb3C0532C94c3e66d7E17B9d3d17B9c',
+   *   data: '0xa9059cbb000000000000000000000000742d35cc6cb3c0532c94c3e66d7e17b9d3d17b9c0000000000000000000000000000000000000000000000000de0b6b3a7640000',
+   *   value: '0',
+   *   gasPrice: '1000000000'
+   * });
+   *
+   * console.log('Transaction hash:', receipt.transactionHash);
+   * console.log('Status:', receipt.status); // 'success' or 'reverted'
+   * ```
+   */
+  async executeTransaction(
+    account: Account,
+    params: {
+      to: Address;
+      data: string;
+      value: string;
+      gasPrice: string;
+    }
+  ): Promise<TransactionReceipt> {
+    try {
+      const walletClient = this.createWalletClient(account);
+      const publicClient = this.createPublicClient();
+
+      // Prepare transaction parameters
+      const txParams = {
+        to: params.to,
+        data: params.data as `0x${string}`,
+        value: BigInt(params.value),
+        gasPrice: BigInt(params.gasPrice),
+      };
+
+      // Send transaction
+      const hash = await walletClient.sendTransaction(txParams as SendTransactionParameters);
+
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('Transaction execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute a contract method
+   * @param account - Account to execute transaction from
+   * @param params - Contract method parameters
+   * @returns Transaction receipt
+   */
+  async executeContractMethod(
+    account: Account,
+    params: {
+      address: Address;
+      abi: Abi;
+      functionName: string;
+      args: string[];
+    }
+  ): Promise<TransactionReceipt> {
+    try {
+      const publicClient = this.createPublicClient();
+      const walletClient = this.createWalletClient(account);
+
+      // Simulate to get the transaction request
+      const { request } = await publicClient.simulateContract({
+        address: params.address,
+        abi: params.abi,
+        functionName: params.functionName,
+        args: params.args,
+        account,
+      });
+
+      // Write transaction
+      const hash = await walletClient.writeContract(request);
+
+      // Wait for receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('Contract method execution failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Estimate gas for a transaction
+   * @param params - Transaction parameters
+   * @returns Estimated gas as string
+   */
+  async estimateGas(params: {
+    to: Address;
+    data: string;
+    value: string;
+    account: Account;
+  }): Promise<string> {
+    try {
+      const publicClient = this.createPublicClient();
+
+      const gasEstimate = await publicClient.estimateGas({
+        account: params.account,
+        to: params.to,
+        data: params.data as `0x${string}`,
+        value: BigInt(params.value),
+      });
+
+      return gasEstimate.toString();
+    } catch (error) {
+      logger.error('Gas estimation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get transaction receipt
+   * @param hash - Transaction hash
+   * @returns Transaction receipt
+   */
+  async getTransactionReceipt(hash: Hash): Promise<TransactionReceipt> {
+    const publicClient = this.createPublicClient();
+    return publicClient.getTransactionReceipt({ hash });
+  }
+
+  /**
+   * Get token allowance for ERC20 tokens
+   * @param tokenAddress Token contract address
+   * @param ownerAddress Owner address
+   * @param spenderAddress Spender address (typically exchange contract)
+   * @returns Allowance amount as string
+   */
+  async getTokenAllowance(
+    tokenAddress: Address,
+    ownerAddress: Address,
+    spenderAddress: Address
+  ): Promise<string> {
+    try {
+      // Native token (ETH) has unlimited allowance by design
+      if (
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase() ||
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.ethereum.toLowerCase() ||
+        tokenAddress.toLowerCase() === config.nativeTokenAddress.bsc.toLowerCase()
+      ) {
+        return config.MAX_UINT256;
+      }
+
+      const publicClient = this.createPublicClient();
+
+      const allowance = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'allowance',
+        args: [ownerAddress, spenderAddress],
+      });
+
+      return allowance.toString();
+    } catch (error) {
+      logger.error('Error getting token allowance:', error);
+      return '0';
+    }
+  }
+
+  /**
+   * Get token information using on-chain RPC calls
+   * @param tokenAddress The token's contract address
+   * @returns TokenInfo object with token details or null if failed
+   */
+  async getTokenInfo(tokenAddress: Address): Promise<TokenInfo | null> {
+    try {
+      // Handle native ETH specially
+      if (tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase()) {
+        return {
+          address: config.nativeTokenAddress.base,
+          symbol: 'ETH',
+          decimals: 18,
+        };
+      }
+
+      const publicClient = this.createPublicClient();
+
+      // Make parallel requests for token data
+      const [symbol, decimals] = await Promise.all([
+        publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: 'symbol',
+        }),
+        publicClient.readContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: 'decimals',
+        }),
+      ]);
+
+      return {
+        address: tokenAddress,
+        symbol: symbol as string,
+        decimals: Number(decimals),
+      };
+    } catch (error) {
+      logger.error('Error fetching token info:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get token balance for a specific address
+   * @param tokenAddress The token's contract address
+   * @param walletAddress The wallet address to check balance for
+   * @returns Token balance as string
+   */
+  async getTokenBalance(tokenAddress: Address, walletAddress: Address): Promise<string> {
+    try {
+      const publicClient = this.createPublicClient();
+
+      // If it's ETH, get native balance
+      if (tokenAddress.toLowerCase() === config.nativeTokenAddress.base.toLowerCase()) {
+        const balance = await publicClient.getBalance({
+          address: walletAddress,
+        });
+        return balance.toString();
+      }
+
+      // For ERC20 tokens
+      const balance = await publicClient.readContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [walletAddress],
+      });
+
+      return balance.toString();
+    } catch (error) {
+      logger.error('Error fetching token balance:', error);
+      return '0';
+    }
+  }
+
+  /**
+   * Get native balance (ETH/BNB/BASE) for a wallet in readable format
+   * @param address Wallet address
+   * @returns Balance in ETH as number (guaranteed to be a valid number >= 0)
+   */
+  async getNativeBalance(address: Address): Promise<number> {
+    try {
+      const publicClient = this.createPublicClient();
+      const balance = await publicClient.getBalance({ address });
+      const ethBalance = Number(formatEther(balance));
+
+      // Handle edge cases like NaN, Infinity, or negative values
+      if (!Number.isFinite(ethBalance) || ethBalance < 0) {
+        return 0;
+      }
+
+      return ethBalance;
+    } catch (error) {
+      logger.error('Error fetching native balance:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Transfer native tokens (ETH/BNB/BASE) from one wallet to another
+   * @param account - Account to send transaction from
+   * @param to - Recipient address
+   * @param amount - Amount of native token to transfer in wei
+   * @param gasPrice - Optional gas price in wei
+   * @returns Transaction receipt
+   */
+  async transferNativeToken(
+    account: Account,
+    to: Address,
+    amount: string,
+    gasPrice?: string
+  ): Promise<TransactionReceipt> {
+    try {
+      const walletClient = this.createWalletClient(account);
+      const publicClient = this.createPublicClient();
+
+      // Prepare transaction parameters
+      const txParams = {
+        account,
+        chain: this.chain,
+        to,
+        value: BigInt(amount),
+        ...(gasPrice && { gasPrice: BigInt(gasPrice) }),
+      };
+
+      // Send transaction
+      const hash = await walletClient.sendTransaction(txParams);
+
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('Native token transfer failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Transfer ERC20 tokens from one wallet to another
+   * @param account - Account to send transaction from
+   * @param tokenAddress - Token address
+   * @param to - Recipient address
+   * @param amount - Amount to transfer in token's base units
+   * @param gasPrice - Optional gas price in wei
+   * @returns Transaction receipt
+   */
+  async transferERC20Token(
+    account: Account,
+    tokenAddress: Address,
+    to: Address,
+    amount: string,
+    gasPrice?: string
+  ): Promise<TransactionReceipt> {
+    try {
+      const walletClient = this.createWalletClient(account);
+      const publicClient = this.createPublicClient();
+
+      // Simulate the transfer first
+      const { request } = await publicClient.simulateContract({
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [to, BigInt(amount)],
+        account,
+        ...(gasPrice && { gasPrice: BigInt(gasPrice) }),
+      });
+
+      // Execute the transfer
+      const hash = await walletClient.writeContract(request);
+
+      // Wait for transaction receipt
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      return receipt;
+    } catch (error) {
+      logger.error('ERC20 token transfer failed:', error);
+      throw error;
+    }
+  }
+}

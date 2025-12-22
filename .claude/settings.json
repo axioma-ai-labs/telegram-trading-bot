@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm run lint:fix:*)",
+      "Bash(pnpm run typecheck:*)",
+      "Bash(pnpm test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr list:*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(keys/**)",
+      "Read(wallets/**)",
+      "Bash(rm -rf:*)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

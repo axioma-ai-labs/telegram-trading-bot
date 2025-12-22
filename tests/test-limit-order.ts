@@ -1,0 +1,175 @@
+import dotenv from 'dotenv';
+
+import { NeuroDexApi } from '../src/services/engine/neurodex';
+
+// Load environment variables
+dotenv.config();
+
+// Test wallet configuration
+const TEST_WALLET = {
+  address: process.env.TEST_WALLET_ADDRESS || '0x...',
+  privateKey: process.env.TEST_WALLET_PRIVATE_KEY || '0x...',
+};
+
+// Test token addresses on Base
+const TEST_TOKENS = {
+  USDC: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // USDC on Base
+  ETH: '0x4200000000000000000000000000000000000006', // ETH on Base
+};
+
+async function testCreateLimitOrder(): Promise<void> {
+  console.log('Testing limit order creation...');
+
+  const neurodex = new NeuroDexApi();
+
+  try {
+    // Create a limit order to sell USDC for WETH
+    // Example: Creating a limit order to sell 1 USDC for 0.00041 WETH
+    const limitOrderResult = await neurodex.createLimitOrder(
+      {
+        fromTokenAddress: TEST_TOKENS.ETH, // Token to sell
+        toTokenAddress: TEST_TOKENS.USDC, // Token to buy
+        fromAmount: 0.001, // 0.001 ETH to sell
+        toAmount: 3, // 3 USDC to buy
+        expire: '1D',
+        slippage: 1,
+        gasPriority: 'standard',
+        walletAddress: TEST_WALLET.address,
+        privateKey: TEST_WALLET.privateKey,
+        referrer: '0x588AE3D9Df7DB26D9e773F34AbB548B0302B7d3B',
+      },
+      'base'
+    );
+
+    if (limitOrderResult.success) {
+      console.log('Limit order created successfully!');
+      console.log('Order data:', JSON.stringify(limitOrderResult.data, null, 2));
+    } else {
+      console.error('Limit order creation failed:', limitOrderResult.error);
+    }
+  } catch (error) {
+    console.error('Error during limit order test:', error);
+  }
+}
+
+async function testGetLimitOrders(): Promise<void> {
+  console.log('Testing get limit orders...');
+
+  const neurodex = new NeuroDexApi();
+
+  try {
+    const limitOrders = await neurodex.getLimitOrders(
+      {
+        address: TEST_WALLET.address,
+        statuses: [1, 2, 3, 4, 5, 6, 7],
+      },
+      'base'
+    );
+
+    if (limitOrders.success) {
+      console.log('Limit orders retrieved successfully!');
+      console.log(`Found ${limitOrders.data?.length || 0} limit orders:`);
+
+      if (limitOrders.data && limitOrders.data.length > 0) {
+        limitOrders.data.forEach((order, index) => {
+          console.log(`\nOrder #${index + 1}:`);
+          console.log(`Hash: ${order.orderHash}`);
+          console.log(`Status: ${order.status}`);
+          console.log(
+            `Maker Asset: ${order.data.makerAssetSymbol} (${order.data.makerAssetAmount})`
+          );
+          console.log(
+            `Taker Asset: ${order.data.takerAssetSymbol} (${order.data.takerAssetAmount})`
+          );
+          console.log(`Created: ${order.data.createDateTime}`);
+          console.log(`Expires: ${order.data.expiry}`);
+        });
+      }
+    } else {
+      console.error('Failed to retrieve limit orders:', limitOrders.error);
+    }
+  } catch (error) {
+    console.error('Error retrieving limit orders:', error);
+  }
+}
+
+async function testCancelLimitOrder(): Promise<void> {
+  try {
+    const neurodex = new NeuroDexApi();
+    // First, get the order details to pass to cancel function
+    const limitOrders = await neurodex.getLimitOrders(
+      {
+        address: TEST_WALLET.address,
+        statuses: [1, 3, 5],
+      },
+      'base'
+    );
+
+    if (!limitOrders.success || !limitOrders.data || limitOrders.data.length === 0) {
+      console.error('Failed to retrieve limit orders or no orders found');
+      return;
+    }
+
+    // Find the order with the provided hash
+    const orderToCancel = limitOrders.data[0];
+
+    if (!orderToCancel) {
+      console.error(`Order with hash ${orderToCancel.orderHash} not found`);
+      return;
+    }
+
+    // Cancel the limit order
+    const cancelResult = await neurodex.cancelLimitOrder(
+      {
+        orderHash: orderToCancel.orderHash,
+        orderData: orderToCancel.data,
+        slippage: 1,
+        gasPriority: 'standard',
+        walletAddress: TEST_WALLET.address,
+        privateKey: TEST_WALLET.privateKey,
+        referrer: '0x588AE3D9Df7DB26D9e773F34AbB548B0302B7d3B',
+      },
+      'base'
+    );
+
+    if (cancelResult.success) {
+      console.log('Limit order cancelled successfully!');
+      console.log('Cancel result:', cancelResult.data);
+    } else {
+      console.error('Failed to cancel limit order:', cancelResult.error);
+    }
+  } catch (error) {
+    console.error('Error cancelling limit order:', error);
+  }
+}
+
+async function main(): Promise<void> {
+  // Check if wallet is configured
+  if (TEST_WALLET.address === '' || TEST_WALLET.privateKey === '') {
+    console.error('Please configure your test wallet address and private key in .env.local');
+    process.exit(1);
+  }
+
+  // Run tests
+  console.log('Starting NeuroDex Limit Order API tests...');
+
+  // Test 1: Create a limit order
+  await testCreateLimitOrder();
+
+  // Wait for 3 seconds
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  // Test 2: Get all limit orders
+  await testGetLimitOrders();
+
+  // Wait for 3 seconds
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  // Test 3: Cancel a limit order
+  await testCancelLimitOrder();
+
+  console.log('Tests completed!');
+}
+
+// Run the tests
+main().catch(console.error);
