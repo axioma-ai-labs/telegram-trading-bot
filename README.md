@@ -1,4 +1,4 @@
-# Telegram Neurotrading Bot
+# Telegram Axiom Bot
 
 > [!CAUTION]
 > This repository is no longer actively maintained.
